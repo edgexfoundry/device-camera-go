@@ -53,7 +53,12 @@ Further detailed information is available on [EdgeX-Go repository](https://githu
 
    - Follow instructions from [Install Docker using repository](https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository)
 
-3. (optional) Install an **IDE** as appropriate. **[JetBrains Go Land](https://www.jetbrains.com/go/)** is a popular choice, alternate options below.
+3. Install **Dep**.
+   ```
+   $ curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+   ```
+
+4. (optional) Install an **IDE** as appropriate. **[JetBrains Go Land](https://www.jetbrains.com/go/)** is a popular choice, alternate options below.
 
    ```
    $ tar -xzf goland-2018.2.1.tar.gz
@@ -114,7 +119,9 @@ Further detailed information is available on [EdgeX-Go repository](https://githu
    $ make build
    ```
 
-   Alternately, invoke these same commands in a terminal from the root folder of the project.
+   Alternately, invoke these same commands in a terminal from the root folder of the project. For subsequent builds, invoke **make update**
+
+   NOTE: make prepare will error if the manifest and lock files already exist (named Gopkg.toml and Gopkg.lock respectively). In this case run **make update** instead.
 
 # Running device-camera-go
 
@@ -182,7 +189,7 @@ $ go run main.go -registry -source onvif -source axis
 
 | Makefile Command | Action Performed                                             |
 | ---------------- | ------------------------------------------------------------ |
-| make prepare     | Initializes the project and dependencies                     |
+| make prepare     | Initializes the project manifest and dependencies            |
 | make update      | Updates components                                           |
 | make build       | Builds camera-device-go binary                               |
 | make run         | Converts run.sh content into ./run launcher                  |

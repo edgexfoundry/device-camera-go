@@ -75,7 +75,7 @@
     "pkg/models",
   ]
   pruneopts = "UT"
-  revision = "338a0779bc765f89c9e7b8d1e209fd6637c38850"
+  revision = "b1d006f27534268e7b2294ae7efd51cb6938406c"
 
 [[projects]]
   branch = "master"
@@ -86,28 +86,20 @@
   revision = "9d61ae07eeaeb54ce2100022b1fd3ea020093d09"
 
 [[projects]]
-  digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
-  name = "github.com/gorilla/context"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
-  version = "v1.1.1"
-
-[[projects]]
-  digest = "1:e73f5b0152105f18bc131fba127d9949305c8693f8a762588a82a48f61756f5f"
+  digest = "1:ca59b1175189b3f0e9f1793d2c350114be36eaabbe5b9f554b35edee1de50aea"
   name = "github.com/gorilla/mux"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
-  version = "v1.6.2"
+  revision = "a7962380ca08b5a188038c69871b8d3fbdf31e89"
+  version = "v1.7.0"
 
 [[projects]]
-  digest = "1:b00bfe637b34af524cb42f3c167863799cedc7bd3e2e03979eb7329c2ceee097"
+  digest = "1:1b9c99915ccf7df1e6085259ebf137a7b11fab87f47c382b3ec7a7ab51fbe2d8"
   name = "github.com/hashicorp/consul"
   packages = ["api"]
   pruneopts = "UT"
-  revision = "65d2c9b51d02e6b14db3da3cb8424ef72e046780"
-  version = "v1.4.1"
+  revision = "c97c712e96e0e53308054d5e1180289fe02dce38"
+  version = "v1.4.2"
 
 [[projects]]
   digest = "1:f47d6109c2034cb16bd62b220e18afd5aa9d5a1630fe5d937ad96a4fb7cbb277"
@@ -158,12 +150,12 @@
   revision = "3b9bafddefee56a2884c49e2da6894bb1fe6d40c"
 
 [[projects]]
-  digest = "1:78bbb1ba5b7c3f2ed0ea1eab57bdd3859aec7e177811563edc41198a760b06af"
+  digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
-  version = "v1.0.0"
+  revision = "af06845cf3004701891bf4fdb884bfe4920b3727"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:53bc4cd4914cd7cd52139990d5170d6dc99067ae31c56530621b18b35fc30318"
@@ -232,7 +224,7 @@
     "ipv4",
   ]
   pruneopts = "UT"
-  revision = "4b62a64f59f73840b9ab79204c94fee61cd1ba2c"
+  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
 
 [[projects]]
   branch = "v2"
