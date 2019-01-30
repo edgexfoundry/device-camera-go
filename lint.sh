@@ -1,0 +1,1 @@
+gometalinter ./... --skip vendor --checkstyle --json --disable gotype --disable gotypex --disable maligned --deadline=200s > LintOutput.json

@@ -1,0 +1,108 @@
+name: "camera-profile-onvif"
+manufacturer:  "www.onvif.org"
+model: "EdgeX_CameraDevice"
+labels:
+    - "camera-onvif"
+description: "EdgeX device profile for ONVIF supports conformant IP cameras."
+deviceResources:
+    -
+        name: "cam_error"
+        description: "command error response"
+        properties:
+            value:
+                { type: "String", readWrite: "RW", defaultValue: "An Error Occurred"}
+            units:
+                { type: "String", readWrite: "R", defaultValue: "CamErrorString" }
+    -
+        name: "tags"
+        description: "camera device tags"
+        properties:
+            value:
+                { type: "String", readWrite: "RW", defaultValue: "key:value,key:value"}
+            units:
+                { type: "String", readWrite: "R", defaultValue: "Tags" }
+    -
+        name: "onvif_profiles"
+        description: "camera device standards-based metadata"
+        properties:
+            value:
+                { type: "String", readWrite: "RW", defaultValue: "key:value,key:value"}
+            units:
+                { type: "String", readWrite: "R", defaultValue: "ONVIFProfiles" }
+resources:
+    -
+        name: "cam_error"
+        get:
+            - { operation: "get", object: "cam_error", property: "value", parameter: "cameradevice_error" }
+        set:
+            - { operation: "set", object: "cam_error", property: "value", parameter: "cameradevice_error" }
+    -
+        name: "tags"
+        get:
+            - { operation: "get", object: "tags", property: "value", parameter: "cameradevice_tags" }
+        set:
+            - { operation: "set", object: "tags", property: "value", parameter: "cameradevice_tags" }
+    -
+        name: "tags"
+        get:
+            - { operation: "get", object: "tags", property: "value", parameter: "cameradevice_tags" }
+        set:
+            - { operation: "set", object: "tags", property: "value", parameter: "cameradevice_tags" }
+    -
+        name: "onvif_profiles"
+        get:
+            - { operation: "get", object: "onvif_profiles", property: "value", parameter: "onvif_camera_metadata" }
+        set:
+            - { operation: "set", object: "onvif_profiles", property: "value", parameter: "onvif_camera_metadata" }
+
+commands:
+  -
+    name: tags
+    get:
+        path: "/api/v1/device/{deviceId}/tags"
+        responses:
+          -
+            code: "200"
+            description: "Get Tags"
+            expectedValues: ["cameradevice_tags"]
+          -
+            code: "503"
+            description: "Get Tags Error"
+            expectedValues: ["cameradevice_error"]
+    put:
+        path: "/api/v1/device/{deviceId}/tags"
+        parameterNames: ["cameradevice_tags"]
+        responses:
+          -
+            code: "200"
+            description: "Set Tags"
+            expectedValues: ["cameradevice_id"]
+          -
+            code: "503"
+            description: "Set Tags Error"
+            expectedValues: ["cameradevice_error"]
+  -
+    name: onvif_profiles
+    get:
+        path: "/api/v1/device/{deviceId}/onvif_profiles"
+        responses:
+          -
+            code: "200"
+            description: "Get ONVIF Profiles"
+            expectedValues: ["onvif_camera_metadata"]
+          -
+            code: "503"
+            description: "Get ONVIF Profiles Error"
+            expectedValues: ["cameradevice_error"]
+    put:
+        path: "/api/v1/device/{deviceId}/onvif_profiles"
+        parameterNames: ["onvif_camera_metadata"]
+        responses:
+          -
+            code: "200"
+            description: "Set ONVIF Profiles"
+            expectedValues: ["onvif_camera_metadata"]
+          -
+            code: "503"
+            description: "Set ONVIF Profiles Error"
+            expectedValues: ["cameradevice_error"]

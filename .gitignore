@@ -1,0 +1,11 @@
+/res/caminfocache-axis.json
+/res/caminfocache.json
+/res/cam-credentials.conf
+/res/archive
+/vendor
+/.idea
+*.xml
+*.log
+LintOutput.json
+device-camera-go
+run
