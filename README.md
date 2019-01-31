@@ -160,10 +160,7 @@ Ready-set-go!
 
 # Device-Camera-Go Configuration
 
-## Camera Discovery
-
-- The released image can be pulled from hub.docker.intel.com/context/saf-video-camera-discovery:v0.1.0
-- Camera discovery has the following flags when running
+Device-Camera-Go accepts the following runtime parameters.
 
 | Parameter          | Default                    | Description                                                  |
 | ------------------ | -------------------------- | ------------------------------------------------------------ |
