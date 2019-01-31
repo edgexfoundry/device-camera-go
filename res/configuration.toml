@@ -1,0 +1,70 @@
+[Service]
+Host = "172.17.0.1"
+Port = 49990
+ConnectRetries = 3
+HealthCheck = "/api/v1/ping"
+Labels = []
+OpenMsg = "Camera Discovery Started"
+ReadMaxLimit = 256
+Timeout = 5000
+
+[Registry]
+Host = "localhost"
+Port = 8500
+CheckInterval = "15s"
+FailLimit = 3
+FailWaitTime = 10
+
+[Clients]
+  [Clients.Data]
+  name = "edgex-core-data"
+  Host = "localhost"
+  Port = 48080
+  Timeout = 50000
+  Protocol = "HTTP"
+
+  [Clients.Metadata]
+  name = "edgex-core-metadata"
+  Host = "localhost"
+  Port = 48081
+  Timeout = 50000
+  Protocol = "HTTP"
+
+[Device]
+  DataTransform = true
+  InitCmd = ""
+  InitCmd2 = "HandleReadCommands"
+  InitCmdArgs = ""
+  MaxCmdOps = 128
+  MaxCmdValueLen = 256
+  RemoveCmd = ""
+  RemoveCmdArgs = ""
+  ProfilesDir = "./res"
+  SendReadingsOnChanged = true
+
+[Logging]
+RemoteURL = ''
+File = "./device-camera-go-service.log"
+
+# Pre-defined Devices - useful for tests or to populate static camera addresses (i.e., known at deployment time) to expedite their discovery
+[[DeviceList]]
+  Name = "MockAxisCamera001"
+  Profile = "camera-profile-axis"
+  Description = "Initial Axis camera configured on service startup"
+  Labels = [ "camera", "axis" ]
+  [DeviceList.Addressable]
+    Path = "/api"
+    Address = "172.17.0.1"
+    Port = 49990
+    Protocol = "HTTP"
+
+[[DeviceList]]
+  Name = "MockAxisCamera002"
+  Profile = "camera-profile-axis"
+  Description = "Initial Axis camera configured on service startup"
+  Labels = [ "camera", "axis" ]
+  [DeviceList.Addressable]
+    Path = "/api"
+    Address = "172.17.0.1"
+    Port = 49990
+    Protocol = "HTTP"

@@ -1,0 +1,71 @@
+{
+	"id": "650ae15e-8dcb-7a67-01d2-4b6b1480357a",
+	"name": "0_EdgeX_CameraDS-Demo",
+	"timestamp": 1548052822070,
+	"requests": [{
+		"collectionId": "650ae15e-8dcb-7a67-01d2-4b6b1480357a",
+		"id": "2268fe7e-4f63-fe1a-2643-2e6b5270a8b0",
+		"name": "Get Value Descriptors from edgex-core-data",
+		"description": "Gets value descriptors for tags, axis info, and onvif profiles.",
+		"url": "http://edgex-core-data:48080/api/v1/valuedescriptor/name/cameradevice_tags",
+		"method": "GET",
+		"headers": "",
+		"data": [],
+		"dataMode": "params",
+		"timestamp": 0,
+		"version": 2,
+		"time": 1548206263764
+	}, {
+		"collectionId": "650ae15e-8dcb-7a67-01d2-4b6b1480357a",
+		"id": "2a32f790-cbd4-44e3-8a91-54a58653004c",
+		"name": "Get ONVIF Camera Devices (by profile)",
+		"description": "Fetches device info for all ONVIF cameras",
+		"url": "http://edgex-core-metadata:48081/api/v1/device/profilename/camera-profile-onvif",
+		"method": "GET",
+		"headers": "",
+		"data": [],
+		"dataMode": "params",
+		"timestamp": 0,
+		"version": 2,
+		"time": 1548206306456
+	}, {
+		"collectionId": "650ae15e-8dcb-7a67-01d2-4b6b1480357a",
+		"id": "5c2d4eea-268e-8780-68e8-523ad4d65a87",
+		"name": "Get Devices",
+		"description": "",
+		"url": "http://edgex-core-metadata:48081/api/v1/device",
+		"method": "GET",
+		"headers": "",
+		"data": "",
+		"dataMode": "raw",
+		"timestamp": 0,
+		"responses": [],
+		"version": 2
+	}, {
+		"collectionId": "650ae15e-8dcb-7a67-01d2-4b6b1480357a",
+		"id": "cc7c1281-d763-1b71-c94c-c6b4fe802bd6",
+		"name": "Get AXIS Camera Devices (by profile)",
+		"description": "Fetches device info for all Axis cameras",
+		"url": "http://edgex-core-metadata:48081/api/v1/device/profilename/camera-profile-axis",
+		"method": "GET",
+		"headers": "",
+		"data": [],
+		"dataMode": "params",
+		"timestamp": 0,
+		"version": 2,
+		"time": 1548206297077
+	}, {
+		"collectionId": "650ae15e-8dcb-7a67-01d2-4b6b1480357a",
+		"id": "edd74b04-4265-0575-9de6-b526d5aced98",
+		"name": "Get Device Services",
+		"description": "",
+		"url": "http://edgex-core-metadata:48081/api/v1/deviceservice",
+		"method": "GET",
+		"headers": "",
+		"data": "",
+		"dataMode": "raw",
+		"timestamp": 0,
+		"responses": [],
+		"version": 2
+	}]
+}
