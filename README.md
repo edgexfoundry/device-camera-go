@@ -123,6 +123,21 @@ Further detailed information is available on [EdgeX-Go repository](https://githu
 
    NOTE: make prepare will error if the manifest and lock files already exist (named Gopkg.toml and Gopkg.lock respectively). In this case run **make update** instead.
 
+3. (Pending) Note that device-camera-go will not build due without device-sdk-go incorporating a dependent code change. This is captured in a (currently) [pending pull request](https://github.com/edgexfoundry/device-sdk-go/pull/163) to add one method to device-camera-go/vendor/github.com/edgexfoundry/device-sdk-go/manageddevices.go:
+
+   ```
+   // GetDeviceByName returns device if it exists in EdgeX registration cache.
+   func (s *Service) GetDeviceByName(name string) (models.Device, error) {
+      device, ok := cache.Devices().ForName(name)
+      if !ok {
+         msg := fmt.Sprintf("Device %s cannot be found in cache", name)
+         common.LoggingClient.Info(msg)
+         return models.Device{}, fmt.Errorf(msg)
+      }
+      return device, nil
+   }
+   ```
+
 # Running device-camera-go
 
 Ready-set-go!

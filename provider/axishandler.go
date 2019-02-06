@@ -29,7 +29,7 @@ func (p *CameraDiscoveryProvider) getAxisCameraDetails(address string, credentia
 	}
 	url := "http://" + address + "/axis-cgi/admin/param.cgi?action=list&group=" + strings.Join(parameters, ",")
 	// Providing credentials will cause Axis API to produce errors in some camera configurations.
-	// Adjustment is needed for cases where cameras a configured for basic authentication.
+	// Adjustment is needed for cases where cameras a configured for basic vs digest authentication.
 	/* cameraUser, cameraPassword, err := readCredentialsFromFile(credentialsPath)
 	if err != nil {
 		return CameraInfo{}, err
