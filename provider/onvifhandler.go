@@ -110,7 +110,6 @@ func (p *CameraDiscoveryProvider) getOnvifCameraDetails(addr string, credentials
 	if err != nil {
 		p.lc.Error(err.Error())
 	} else {
-		var getProfileToken string
 		doc := etree.NewDocument()
 		b, err := ioutil.ReadAll(profilesresponse.Body)
 		if err != nil {
@@ -139,34 +138,31 @@ func (p *CameraDiscoveryProvider) getOnvifCameraDetails(addr string, credentials
 			for _, getresolution := range doc.FindElements("./Envelope/Body/GetProfilesResponse/Profiles[" + strconv.Itoa(i1) + "]/VideoEncoderConfiguration/Resolution/*") {
 				resolutions = append(resolutions, getresolution.Text())
 			}
-			if getProfileResponseElements.Attr[1].Key == profileTokenKey || getProfileResponseElements.Attr[0].Key == profileTokenKey {
-				if getProfileResponseElements.Attr[1].Key == profileTokenKey {
-					getProfileToken = getProfileResponseElements.Attr[1].Value
-				} else {
-					getProfileToken = getProfileResponseElements.Attr[0].Value
-				}
-				// Populate RTSPPath
-				uri := Media.GetStreamUri{
-					StreamSetup: onvif.StreamSetup{
-						Stream:    onvif.StreamType("RTP-Unicast"),
-						Transport: onvif.Transport{Protocol: "RTSP"},
-					},
-					ProfileToken: onvif.ReferenceToken(getProfileToken),
-				}
-				if uriresponse, err := dev.CallMethod(uri); err == nil {
-					rtspPath = p.getRTSPPath(uriresponse)
-				} else {
-					p.lc.Error(err.Error())
-				}
-				// Populate ImagePath
-				uri2 := Media.GetSnapshotUri{
-					ProfileToken: onvif.ReferenceToken(getProfileToken),
-				}
-				if uriresponse2, err2 := dev.CallMethod(uri2); err2 == nil {
-					imgPath = p.getImagePath(uriresponse2)
-				} else {
-					p.lc.Error(err2.Error())
-				}
+			profileToken := getProfileResponseElements.SelectAttr(profileTokenKey)
+			if profileToken == nil || len(profileToken.Value) < 1 {
+				continue
+			}
+			// Populate RTSPPath
+			uri := Media.GetStreamUri{
+				StreamSetup: onvif.StreamSetup{
+					Stream:    onvif.StreamType("RTP-Unicast"),
+					Transport: onvif.Transport{Protocol: "RTSP"},
+				},
+				ProfileToken: onvif.ReferenceToken(profileToken.Value),
+			}
+			if uriresponse, err := dev.CallMethod(uri); err == nil {
+				rtspPath = p.getRTSPPath(uriresponse)
+			} else {
+				p.lc.Error(err.Error())
+			}
+			// Populate ImagePath
+			uri2 := Media.GetSnapshotUri{
+				ProfileToken: onvif.ReferenceToken(profileToken.Value),
+			}
+			if uriresponse2, err2 := dev.CallMethod(uri2); err2 == nil {
+				imgPath = p.getImagePath(uriresponse2)
+			} else {
+				p.lc.Error(err2.Error())
 			}
 			// Perform validity check - ignore any profile not containing video stream URI
 			if rtspPath == "" {
@@ -178,7 +174,7 @@ func (p *CameraDiscoveryProvider) getOnvifCameraDetails(addr string, credentials
 				Resolutions:  resolutions,
 				RTSPPath:     rtspPath,
 				ImagePath:    imgPath,
-				ProfileToken: getProfileToken,
+				ProfileToken: profileToken.Value,
 			}
 			listProfiles = append(listProfiles, profiles)
 		}
@@ -213,7 +209,9 @@ func (p *CameraDiscoveryProvider) getRTSPPath(uriresponse *http.Response) string
 		}
 		if j.Tag == "GetStreamUriResponse" {
 			getURIElement := doc1.FindElement("./Envelope/Body/GetStreamUriResponse/MediaUri/Uri")
-			rtspPath = getURIElement.Text()
+			if getURIElement != nil {
+				rtspPath = getURIElement.Text()
+			}
 		}
 	}
 	return rtspPath
@@ -228,7 +226,7 @@ func (p *CameraDiscoveryProvider) getImagePath(uriresponse2 *http.Response) stri
 	} else {
 		if err = doc2.ReadFromBytes(b); err != nil {
 			// May need to quash some of these
-			p.lc.Error(fmt.Sprintf("Error reading ONVIF RTP URI response: %v", err))
+			p.lc.Error(fmt.Sprintf("Error reading ONVIF Snapshot URI response: %v", err))
 		}
 	}
 	getImageURIResponseElements := doc2.FindElements("./Envelope/Body/*")
@@ -239,7 +237,9 @@ func (p *CameraDiscoveryProvider) getImagePath(uriresponse2 *http.Response) stri
 		}
 		if j.Tag == "GetSnapshotUriResponse" {
 			getURIElement := doc2.FindElement("./Envelope/Body/GetSnapshotUriResponse/MediaUri/Uri")
-			imgPath = getURIElement.Text()
+			if (getURIElement != nil) {
+				imgPath = getURIElement.Text()
+			}
 		}
 	}
 	return imgPath
