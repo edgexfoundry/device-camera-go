@@ -2,7 +2,7 @@
 
 PKGS := $(shell go list ./... | grep -v /vendor)
 
-GO=CGO_ENABLED=0 go
+GO=CGO_ENABLED=0 GO111MODULE=on go
 GOFLAGS=-ldflags
 
 BIN_DIR := $(GOPATH)/bin
@@ -28,10 +28,14 @@ clean:
 	rm -f $(MICROSERVICES)
 
 prepare:
-	dep init
+	go mod init
 
 update:
+<<<<<<< HEAD
 	dep ensure -update
 
 docker:
 	docker build . --build-arg http_proxy=$(HTTP_PROXY) --build-arg https_proxy=$(HTTPS_PROXY) --tag device-camera-go:develop
+=======
+	go mod tidy
+>>>>>>> Upgrade to Edinburgh 1.0

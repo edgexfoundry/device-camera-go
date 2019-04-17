@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/edgexfoundry/device-sdk-go"
 	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
-	"github.com/edgexfoundry-holding/device-camera-go/provider"
+	"github.com/edgexfoundry-holding/device-camera-go/cameradiscoveryprovider"
 	"io"
 	"log"
 	"os"

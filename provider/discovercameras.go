@@ -14,7 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/edgexfoundry/device-sdk-go"
-	e_models "github.com/edgexfoundry/edgex-go/pkg/models"
+	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
 	"log"
 	"strconv"
 	"strings"
@@ -289,7 +289,7 @@ func (p *CameraDiscoveryProvider) addEdgeXCameraDevices(cameras []CameraInfo, de
 		deviceNamePrefix = p.options.SupportedSources[Axis].DeviceNamePrefix
 	}
 	for i := range cameras {
-		var edgexDevice e_models.Device
+		var edgexDevice contract.Device
 		if cameras[i].SerialNumber == "" {
 			p.lc.Error(fmt.Sprintf("ERROR adding EdgeX camera device. Check credentials. No serial number at index: %v", i))
 		} else {
@@ -309,34 +309,30 @@ func (p *CameraDiscoveryProvider) addEdgeXCameraDevices(cameras []CameraInfo, de
 				// In this case expect EdgeX error:
 				// "Device 'edgex-camera-<interface>-<SerialNumber>' cannot be found in cache"
 				p.lc.Info("GetDeviceByName for device " + deviceName + " ErrResponse: " + err.Error())
-				edgexDevice = e_models.Device{
+
+				// TODO: Identify why ProtocolProperties are required, fails to create device if missing
+				edgexDevice = contract.Device{
 					Name:           deviceName,
-					AdminState:     "unlocked",
-					OperatingState: "enabled",
-					Addressable: e_models.Addressable{
-						Name:      deviceName + "-addressable",
-						Protocol:  "HTTP",
-						Address:   "172.17.0.1", //functions equally well using localhost/127.0.0.1, or external ip of host, with Delhi release
-						Port:      49990,
-						Path:      "/cameradiscoveryprovider",
-						Publisher: "none",
-						User:      "none",
-						Password:  "none",
-						Topic:     "none",
-					},
+					AdminState:     contract.Unlocked,
+					OperatingState: contract.Enabled,
+					Protocols:      p.getProtocols(),
 					Labels: labels,
 					//Location: tag.deviceLocation,
-					Profile: e_models.DeviceProfile{
+					Profile: contract.DeviceProfile{
 						Name: deviceVendorProfileName,
 					},
-					Service: e_models.DeviceService{
-						AdminState: "unlocked",
-						Service: e_models.Service{
+					Service: contract.DeviceService{
+						AdminState:     contract.Unlocked,
+						Service: contract.Service{
 							Name:           "device-camera-go",
-							OperatingState: "enabled",
+							OperatingState: contract.Enabled,
 						},
 					},
 				}
+				edgexDevice.Origin = time.Now().UnixNano() / int64(time.Millisecond)
+				edgexDevice.Description = "EdgeX Discovered IP Camera"
+				p.lc.Debug(fmt.Sprintf("Adding Device: %v", edgexDevice))
+
 				p.lc.Debug(fmt.Sprintf("Adding NEW EdgeX device named: %s", deviceName))
 				idstr, err = device.RunningService().AddDevice(edgexDevice)
 				if err != nil {

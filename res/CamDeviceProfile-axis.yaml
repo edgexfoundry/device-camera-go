@@ -29,7 +29,7 @@ deviceResources:
                 { type: "String", readWrite: "RW", defaultValue: "key:value,key:value"}
             units:
                 { type: "String", readWrite: "R", defaultValue: "AxisCameraMetadata" }
-resources:
+deviceCommands:
     -
         name: "cam_error"
         get:
@@ -55,7 +55,7 @@ resources:
         set:
             - { operation: "set", object: "axis_info", property: "value", parameter: "axis_camera_metadata" }
 
-commands:
+coreCommands:
   -
     name: tags
     get:
