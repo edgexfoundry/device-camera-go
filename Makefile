@@ -1,4 +1,4 @@
-.PHONY: build test lint clean prepare update
+.PHONY: build test lint clean prepare update docker
 
 PKGS := $(shell go list ./... | grep -v /vendor)
 
@@ -32,3 +32,6 @@ prepare:
 
 update:
 	dep ensure -update
+
+docker:
+	docker build . --build-arg http_proxy=$(HTTP_PROXY) --build-arg https_proxy=$(HTTPS_PROXY) --tag device-camera-go:develop
