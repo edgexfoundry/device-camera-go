@@ -1,4 +1,4 @@
-FROM golang:1.11.2-alpine3.7 AS builder
+FROM ubuntu:16.04
 
 ARG GIT_COMMIT=unknown
 LABEL Name=edgex-device-camera-go Version=0.5.0 git_commit=$GIT_COMMIT
@@ -6,27 +6,25 @@ LABEL Name=edgex-device-camera-go Version=0.5.0 git_commit=$GIT_COMMIT
 #expose device-camera-go port
 ENV APP_PORT=49990
 
-WORKDIR ~/go/src/github.com/edgexfoundry-holding/device-camera-go
+#TODO: Take $PWD as input?
+WORKDIR /go/src/github.com/edgexfoundry-holding/device-camera-go
 
-# The main mirrors are giving us timeout issues on builds periodically.
-# So we can try these.
-RUN echo http://nl.alpinelinux.org/alpine/v3.7/main > /etc/apk/repositories; \
-    echo http://nl.alpinelinux.org/alpine/v3.7/community >> /etc/apk/repositories
-
-RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
-RUN apk add --update --no-cache nmap nmap-nselibs nmap-scripts make
+RUN apt update && apt install -y software-properties-common
+RUN add-apt-repository ppa:gophers/archive
+RUN apt update && apt install -y nmap make git curl golang-1.11-go
+ENV PATH=$PATH:/usr/lib/go-1.11/bin
+ENV GOPATH=/go
+ENV INSTALL_DIRECTORY=/usr/bin
+RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 COPY . .
-RUN make ./
+RUN make update 
+RUN sed -i '71i // GetDeviceByName returns device if it exists in EdgeX registration cache.\nfunc (s *Service) GetDeviceByName(name string) (models.Device, error) {\n   device, ok := cache.Devices().ForName(name)\n   if !ok {\n      msg := fmt.Sprintf("Device %s cannot be found in cache", name)\n      common.LoggingClient.Info(msg)\n      return models.Device{}, fmt.Errorf(msg)\n   }\n   return device, nil\n}' vendor/github.com/edgexfoundry/device-sdk-go/manageddevices.go
 
-FROM scratch
+RUN sed -i '186i // Avoid bad deref during error\n	if onvifError.Inner == nil {\n		return onvifError.Message\n	}\n' vendor/github.com/atagirov/goonvif/Device.go
 
-LABEL license='SPDX-License-Identifier: Apache-2.0' \
-      copyright='Copyright (c) 2018: TBD'
+RUN make build
 
-EXPOSE $APP_PORT
+RUN make run
 
-COPY --from=builder . /
-
-ENTRYPOINT ["/device-camera-go","-registry","-source onvif","-source axis"]
-
+ENTRYPOINT ["./docker-entrypoint.sh"]
