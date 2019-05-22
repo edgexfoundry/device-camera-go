@@ -112,35 +112,47 @@ Further detailed information is available on [EdgeX-Go repository](https://githu
 
    Note: You may alternately clone to a separate project folder so long as you create a symlink to it from $GOPATH/src/github.com/edgexfoundry-holding folder.
 
-2. In GoLand, load device-camera-go project, execute the following within View/Tools/Terminal:
+2. Build a docker image by executing the following.
+   ```
+   cd ./device-camera-go
+   make docker
+   ```
+
+   Note: If you require a *proxy* to access the Internet, confirm the parameters to the docker build command (found in Makefile).
+
+3. To build within an IDE such as GoLand, load device-camera-go project, execute the following within View/Tools/Terminal:
 
    ```
    $ make prepare
    $ make build
    ```
 
-   Alternately, invoke these same commands in a terminal from the root folder of the project. For subsequent builds, invoke **make update**
+   Alternately, invoke these same commands in a terminal from the root folder of the project.
 
    NOTE: make prepare will error if the manifest and lock files already exist (named Gopkg.toml and Gopkg.lock respectively). In this case run **make update** instead.
 
-3. (Pending) Note that device-camera-go will not build due without device-sdk-go incorporating a dependent code change. This is captured in a (currently) [pending pull request](https://github.com/edgexfoundry/device-sdk-go/pull/163) to add one method to device-camera-go/vendor/github.com/edgexfoundry/device-sdk-go/manageddevices.go:
+4. Run the following instructions:
 
    ```
-   // GetDeviceByName returns device if it exists in EdgeX registration cache.
-   func (s *Service) GetDeviceByName(name string) (models.Device, error) {
-      device, ok := cache.Devices().ForName(name)
-      if !ok {
-         msg := fmt.Sprintf("Device %s cannot be found in cache", name)
-         common.LoggingClient.Info(msg)
-         return models.Device{}, fmt.Errorf(msg)
-      }
-      return device, nil
-   }
+   sed -i '71i // GetDeviceByName returns device if it exists in EdgeX registration cache.\nfunc (s *Service) GetDeviceByName(name string) (models.Device, error) {\n   device, ok := cache.Devices().ForName(name)\n   if !ok {\n      msg := fmt.Sprintf("Device %s cannot be found in cache", name)\n      common.LoggingClient.Info(msg)\n      return models.Device{}, fmt.Errorf(msg)\n   }\n   return device, nil\n}' vendor/github.com/edgexfoundry/device-sdk-go/manageddevices.go
+
+   sed -i '186i // Avoid bad deref during error\n  if onvifError.Inner == nil {\n    return onvifError.Message\n }\n' vendor/github.com/atagirov/goonvif/Device.go
    ```
 
 # Running device-camera-go
 
 Ready-set-go!
+
+0. Add the device-camera-go:develop image to the bottom of your docker-compose.yml file.
+```
+  device-camera-go:
+    image: device-camera-go:develop
+    container_name: device-camera-go
+    hostname: device-camera-go
+    network_mode: host
+    depends_on:
+      - metadata
+```
 
 1. **Launch the EdgeX stack** by instructing Docker to use developer-scripts/compose-files/docker-compose.yml to run the services in detached state. This way control will return to your terminal window. Of course you can leave off the -d parameter and open additional terminals if you prefer watching EdgeX-specific logging activities in real time.
 
