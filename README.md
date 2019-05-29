@@ -101,7 +101,7 @@ Further detailed information is available on [EdgeX-Go repository](https://githu
 
 4. The first time launching EdgeX, Docker will automatically **pull the EdgeX images** to your system. This requires an Internet connection and allowance through proxies/firewall. Detailed information about pulling EdgeX containers is available here: https://docs.edgexfoundry.org/Ch-GettingStartedUsersNexus.html
 
-# Preparing Device-SDK-Go
+# Preparing Device-Camera-Go
 
 1. Get latest device-camera-go source code:
 
