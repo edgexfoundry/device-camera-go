@@ -131,7 +131,7 @@ Further detailed information is available on [EdgeX-Go repository](https://githu
 
    NOTE: make prepare will error if the manifest and lock files already exist (named Gopkg.toml and Gopkg.lock respectively). In this case run **make update** instead.
 
-4. Run the following instructions:
+4. Run the following instructions to patch device-sdk-go (needed for Delhi branch only):
 
    ```
    sed -i '71i // GetDeviceByName returns device if it exists in EdgeX registration cache.\nfunc (s *Service) GetDeviceByName(name string) (models.Device, error) {\n   device, ok := cache.Devices().ForName(name)\n   if !ok {\n      msg := fmt.Sprintf("Device %s cannot be found in cache", name)\n      common.LoggingClient.Info(msg)\n      return models.Device{}, fmt.Errorf(msg)\n   }\n   return device, nil\n}' vendor/github.com/edgexfoundry/device-sdk-go/manageddevices.go
