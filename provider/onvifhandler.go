@@ -86,7 +86,7 @@ func (p *CameraDiscoveryProvider) getOnvifCameraDetails(addr string, credentials
 	p.lc.Trace(fmt.Sprintf("Invoking ONVIF.GetDeviceInformation"))
 	GetDeviceInformationResponse, err := dev.CallMethod(aDeviceInformation)
 	p.lc.Debug(fmt.Sprintf("ONVIF.GetDeviceInformation yielded: %v", GetDeviceInformationResponse))
-	if err != nil || GetDeviceInformationResponse.StatusCode != http.StatusOK && GetDeviceInformationResponse.StatusCode != http.StatusUnauthorized {
+	if err != nil && GetDeviceInformationResponse.StatusCode != http.StatusOK && GetDeviceInformationResponse.StatusCode != http.StatusUnauthorized {
 		p.lc.Error(err.Error())
 	} else {
 		doc := etree.NewDocument()
