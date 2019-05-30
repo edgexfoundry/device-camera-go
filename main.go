@@ -21,7 +21,7 @@ const (
 var (
 	confProfile string
 	confDir     string
-	useRegistry bool
+	registryUrl string
 )
 
 // SourceList represents the parameters instructing to scan for a particular
@@ -56,8 +56,8 @@ func main() {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
 	// Process EdgeX DeviceService parameters
-	flag.BoolVar(&useRegistry, "registry", false, "Indicates the service should use the registry.")
-	flag.BoolVar(&useRegistry, "r", false, "Indicates the service should use registry.")
+	flag.StringVar(&registryUrl, "registry", "", "Deprecated. Override consul registry url using Docker profile commandline parameter.")
+	flag.StringVar(&registryUrl, "r", "", "Deprecated. Override consul registry url using Docker profile commandline parameter.")
 	flag.StringVar(&confProfile, "profile", "", "Specify a profile other than default.")
 	flag.StringVar(&confProfile, "p", "", "Specify a profile other than default.")
 	flag.StringVar(&confDir, "confdir", "", "Specify an alternate configuration directory.")
@@ -135,7 +135,7 @@ func startService(serviceName string, serviceVersion string, driver ds_models.Pr
 	cameradiscoveryprovider := cameradiscoveryprovider.New(options, ac)
 	fmt.Println(fmt.Sprintf("SourceFlags: %v", options.SourceFlags))
 	// Create EdgeX service and pass in the provider "device"
-	deviceService, err := device.NewService(serviceName, serviceVersion, confProfile, confDir, useRegistry, cameradiscoveryprovider)
+	deviceService, err := device.NewService(serviceName, serviceVersion, confProfile, confDir, registryUrl, cameradiscoveryprovider)
 	if err != nil {
 		return err
 	}

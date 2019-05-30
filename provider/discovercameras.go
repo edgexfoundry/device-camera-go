@@ -323,10 +323,8 @@ func (p *CameraDiscoveryProvider) addEdgeXCameraDevices(cameras []CameraInfo, de
 					},
 					Service: contract.DeviceService{
 						AdminState:     contract.Unlocked,
-						Service: contract.Service{
-							Name:           "device-camera-go",
-							OperatingState: contract.Enabled,
-						},
+						Name:           "device-camera-go",
+						OperatingState: contract.Enabled,
 					},
 				}
 				edgexDevice.Origin = time.Now().UnixNano() / int64(time.Millisecond)

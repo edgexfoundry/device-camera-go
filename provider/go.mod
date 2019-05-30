@@ -1,10 +1,10 @@
 module github.com/edgexfoundry-holding/device-camera-go/cameradiscoveryprovider
 
 require (
-	github.com/atagirov/goonvif v0.0.0-20190226061606-e81fab7433da
+	github.com/atagirov/goonvif v0.0.0-20190529194022-47cf81244e3c
 	github.com/beevik/etree v1.1.0
-	github.com/edgexfoundry/device-sdk-go v0.0.0-20190415234449-132c5ec382ca
-	github.com/edgexfoundry/go-mod-core-contracts v0.0.0-20190408185438-838c1e45fef1
+	github.com/edgexfoundry/device-sdk-go v0.0.0-20190529004611-4ec3ceb83e9b
+	github.com/edgexfoundry/go-mod-core-contracts v0.1.0
 	github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/lair-framework/go-nmap v0.0.0-20181105160706-3b9bafddefee

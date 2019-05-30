@@ -261,10 +261,8 @@ func (p *CameraDiscoveryProvider) registerDeviceManagementProvider(deviceName st
 			},
 			Service: contract.DeviceService{
 				AdminState:     contract.Unlocked,
-				Service: contract.Service{
-					Name:           "device-camera-go",
-					OperatingState: contract.Enabled,
-				},
+				Name:           "device-camera-go",
+				OperatingState: contract.Enabled,
 			},
 		})
 		err = err2
@@ -288,25 +286,25 @@ func (p *CameraDiscoveryProvider) HandleReadCommands(deviceName string, protocol
 		err = fmt.Errorf("CameraDiscoveryDriver.HandleReadCommands; too many command requests; only one supported")
 		return res, err
 	}
-	p.lc.Info(fmt.Sprintf("RECEIVED COMMAND REQUEST: %s", reqs[0].RO.Object))
-	if reqs[0].RO.Object == "onvif_profiles" || reqs[0].RO.Object == "axis_info" {
+	p.lc.Info(fmt.Sprintf("RECEIVED COMMAND REQUEST for DeviceResourceName %s  Attributes: [%v]", reqs[0].DeviceResourceName, reqs[0].Attributes))
+	if reqs[0].DeviceResourceName == "onvif_profiles" || reqs[0].DeviceResourceName == "axis_info" {
 		// These EdgeX commands are distinct for each device class.
 		// ONVIF and vendor-specific APIs (e.g., Axis) provide different interfaces, often to the same physical device.
 		var serialNum string
 		var camInfo string
-		if reqs[0].RO.Object == "axis_info" {
+		if reqs[0].DeviceResourceName == "axis_info" {
 			serialNum = strings.TrimPrefix(deviceName, p.options.SupportedSources[Axis].DeviceNamePrefix)
 			camInfo = p.ac.CamInfoCache.TransformCameraInfoToString("axis", serialNum)
 		}
-		if reqs[0].RO.Object == "onvif_profiles" {
+		if reqs[0].DeviceResourceName == "onvif_profiles" {
 			serialNum = strings.TrimPrefix(deviceName, p.options.SupportedSources[ONVIF].DeviceNamePrefix)
 			camInfo = p.ac.CamInfoCache.TransformCameraInfoToString("onvif", serialNum)
 		}
 		res = make([]*ds_models.CommandValue, 1)
 		now := time.Now().UnixNano() / int64(time.Millisecond)
-		cv := ds_models.NewStringValue(&reqs[0].RO, now, camInfo)
+		cv := ds_models.NewStringValue(reqs[0].DeviceResourceName, now, camInfo)
 		res[0] = cv
-	} else if reqs[0].RO.Object == "tags" {
+	} else if reqs[0].DeviceResourceName == "tags" {
 		// This EdgeX Command is common between two device classes (ONVIF and Axis)
 		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleReadCommands: Returning Tags associated with device: %s", deviceName))
 		serialNum := strings.TrimPrefix(deviceName, p.options.SupportedSources[ONVIF].DeviceNamePrefix)
@@ -316,9 +314,9 @@ func (p *CameraDiscoveryProvider) HandleReadCommands(deviceName string, protocol
 		camTags := createKeyValuePairString(p.ac.TagCache.Tags[serialNum])
 		res = make([]*ds_models.CommandValue, 1)
 		now := time.Now().UnixNano() / int64(time.Millisecond)
-		cv := ds_models.NewStringValue(&reqs[0].RO, now, camTags)
+		cv := ds_models.NewStringValue(reqs[0].DeviceResourceName, now, camTags)
 		res[0] = cv
-	} else if reqs[0].RO.Object == "get_user" {
+	} else if reqs[0].DeviceResourceName == "get_user" {
 		// Vendor specific command (Axis user CRUD example)
 		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleReadCommands: TODO: Return EdgeX Video Users associated with device: %s", deviceName))
 	}
@@ -335,11 +333,11 @@ func (p *CameraDiscoveryProvider) HandleWriteCommands(deviceName string, protoco
 		err := fmt.Errorf("CameraDiscoveryDriver.HandleWriteCommands; too many command requests; only one supported")
 		return err
 	}
-	p.lc.Info(fmt.Sprintf("TODO: CameraDiscoveryDriver.HandleWriteCommands: dev: %s op: %v attrs: %v", deviceName, reqs[0].RO.Operation, reqs[0].DeviceResource.Attributes))
+	p.lc.Info(fmt.Sprintf("TODO: CameraDiscoveryDriver.HandleWriteCommands: deviceName: %s protocolMap: [%v] reqs: [%v]", deviceName, protocols, reqs[0]))
 	p.lc.Info(fmt.Sprintf("with params: %v", params))
-	if reqs[0].RO.Object == "tags" {
+	if reqs[0].Attributes["name"] == "tags" {
 		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleWriteCommands: TODO: PUT tags caller wants associated with device: %s", deviceName))
-	} else if reqs[0].RO.Object == "user" {
+	} else if reqs[0].Attributes["name"] == "user" {
 		// TODO: To support CRUD add commands for /add_user, /update_user, /remove_user
 		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleWriteCommands: TODO: PUT user group and credentials for EdgeX Video User that caller wants associated with device: %s", deviceName))
 	}

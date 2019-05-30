@@ -6,6 +6,8 @@ github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmV
 github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/atagirov/goonvif v0.0.0-20190226061606-e81fab7433da h1:YWYTZsgPfccgImswYrAagDYIwWtna+2AYCyASNnYQQA=
 github.com/atagirov/goonvif v0.0.0-20190226061606-e81fab7433da/go.mod h1:D8q93Vs2DCU+wfD9piZSqisjEWnwnvRJom4TN0SzAP0=
+github.com/atagirov/goonvif v0.0.0-20190529194022-47cf81244e3c h1:5WH9tffDacLzqoZ8A1qYs2RWQ8U8y2bW5FZfhTLozAE=
+github.com/atagirov/goonvif v0.0.0-20190529194022-47cf81244e3c/go.mod h1:D8q93Vs2DCU+wfD9piZSqisjEWnwnvRJom4TN0SzAP0=
 github.com/beevik/etree v1.1.0 h1:T0xke/WvNtMoCqgzPhkX2r4rjY3GDZFi+FjpRZY2Jbs=
 github.com/beevik/etree v1.1.0/go.mod h1:r8Aw8JqVegEf0w2fDnATrX9VpkMcyFeM0FhwO62wh+A=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
@@ -16,10 +18,16 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/edgexfoundry/device-sdk-go v0.0.0-20190415234449-132c5ec382ca h1:Tgr9KoDRPphxVnSxbOwS+HldRN0ywg3EMmMlQE1lD4Q=
 github.com/edgexfoundry/device-sdk-go v0.0.0-20190415234449-132c5ec382ca/go.mod h1:Fqi2WSk+1crs5UrEn9MabDNHBc+dG5ekKf2pKTomElA=
+github.com/edgexfoundry/device-sdk-go v0.0.0-20190529004611-4ec3ceb83e9b h1:IZaqqoedwk8BBVtn4HZ6grjK0wR9F+7i2VS5Ulgml5U=
+github.com/edgexfoundry/device-sdk-go v0.0.0-20190529004611-4ec3ceb83e9b/go.mod h1:3+nlqnZF2ZKeqObUZZbF/2ZJVQCAW5uu9qbCbyR2AJ8=
 github.com/edgexfoundry/go-mod-core-contracts v0.0.0-20190408185438-838c1e45fef1 h1:GW2ufd9WnUg94ytlOW1wX4tCQgCQur8y6Nie+dqHMi4=
 github.com/edgexfoundry/go-mod-core-contracts v0.0.0-20190408185438-838c1e45fef1/go.mod h1:yVAVTeH1lbp+3YG2V7sq3iIerZj94lC0rZX1sryGfTY=
+github.com/edgexfoundry/go-mod-core-contracts v0.1.0 h1:GpmIN5RwtD+bQQYiC/1YChDhHFA402rg7muQl/mpIec=
+github.com/edgexfoundry/go-mod-core-contracts v0.1.0/go.mod h1:wUlH4D1HdWNExL6Tel9enMmiWMpVnfPnyVttZ9Ap32M=
 github.com/edgexfoundry/go-mod-registry v0.0.0-20190401195203-552208258719 h1:5ycQ5Hm83LFZOqI+8PpDBGC2tBdq62GQX4YPRPzxS9c=
 github.com/edgexfoundry/go-mod-registry v0.0.0-20190401195203-552208258719/go.mod h1:3w+ZfrsXXTDbKQ0cKClS2ujQXGoJpcvvB1OzgFNSYDg=
+github.com/edgexfoundry/go-mod-registry v0.1.0 h1:FkXAfbJsv97USbKMZo9D4rGzsQww58tyFYsBDkOEHss=
+github.com/edgexfoundry/go-mod-registry v0.1.0/go.mod h1:3w+ZfrsXXTDbKQ0cKClS2ujQXGoJpcvvB1OzgFNSYDg=
 github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae h1:3KvK2DmA7TxQ6PZ2f0rWbdqjgJhRcqgbY70bBeE4clI=
 github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae/go.mod h1:wruC5r2gHdr/JIUs5Rr1V45YtsAzKXZxAnn/5rPC97g=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
@@ -112,6 +120,8 @@ github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/ugorji/go v1.1.2 h1:JON3E2/GPW2iDNGoSAusl1KDf5TRQ8k8q7Tp097pZGs=
 github.com/ugorji/go v1.1.2/go.mod h1:hnLbHMwcvSihnDhEfx2/BzKp2xb0Y+ErdfYcrs9tkJQ=
+github.com/ugorji/go v1.1.4 h1:j4s+tAvLfL3bZyefP2SEWmhBzmuIlH/eqNuPdFPgngw=
+github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go/codec v0.0.0-20190316192920-e2bddce071ad h1:Zu1a3eNI3eJefas3yuL6HAKy6eMhRCQFdtZQLC21l6U=
 github.com/ugorji/go/codec v0.0.0-20190316192920-e2bddce071ad/go.mod h1:iT03XoTwV7xq/+UGwKO3UbC1nNNlopQiY61beSdrtOA=
 github.com/yakovlevdmv/Golang-iso8601-duration v0.0.0-20180403125811-e5db0413b903 h1:W1Y09qPuFslSd+3famnSJpy4c3My7Gp1cgk5x4ZlbfU=
