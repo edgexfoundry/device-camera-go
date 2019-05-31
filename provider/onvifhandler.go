@@ -19,9 +19,7 @@ import (
 	"github.com/beevik/etree"
 	"io/ioutil"
 	"net/http"
-	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 // VendorInfoAxis holds the overloads for Axis support; inheriting base from ONVIF for now
@@ -62,7 +60,7 @@ const (
 
 // getOnvifCameraDetails populates CameraInfo structure for ONVIF compliant cameras
 // nolint: gocyclo
-func (p *CameraDiscoveryProvider) getOnvifCameraDetails(addr string, credentialsPath string) (CameraInfo, error) {
+func (p *CameraDiscoveryProvider) getOnvifCameraDetails(addr string, credentials CredentialsInfo) (CameraInfo, error) {
 	//Getting an camera instance
 	p.lc.Trace(fmt.Sprintf("Invoking ONVIF.NewDevice"))
 	dev, err := goonvif.NewDevice(addr)
@@ -71,13 +69,8 @@ func (p *CameraDiscoveryProvider) getOnvifCameraDetails(addr string, credentials
 		p.lc.Debug(err.Error())
 		return CameraInfo{}, errors.New("Host " + addr + " not responding or does not support ONVIF services")
 	}
-	if cameraUser, cameraPassword, err2 := readCredentialsFromFile(credentialsPath); err2 == nil {
-		//Authorization
-		dev.Authenticate(cameraUser, cameraPassword)
-	} else {
-		p.lc.Error(fmt.Sprintf("Problem reading credentials from file"))
-		return CameraInfo{}, err2
-	}
+	//Authorization
+	dev.Authenticate(credentials.User, credentials.Pass)
 
 	//Populate Device Info
 	var listProfiles []Profile
@@ -85,7 +78,7 @@ func (p *CameraDiscoveryProvider) getOnvifCameraDetails(addr string, credentials
 	aDeviceInformation := Device.GetDeviceInformation{}
 	p.lc.Trace(fmt.Sprintf("Invoking ONVIF.GetDeviceInformation"))
 	GetDeviceInformationResponse, err := dev.CallMethod(aDeviceInformation)
-	p.lc.Debug(fmt.Sprintf("ONVIF.GetDeviceInformation yielded: %v", GetDeviceInformationResponse))
+	p.lc.Info(fmt.Sprintf("ONVIF.GetDeviceInformation yielded: %v", GetDeviceInformationResponse))
 	if err != nil && GetDeviceInformationResponse.StatusCode != http.StatusOK && GetDeviceInformationResponse.StatusCode != http.StatusUnauthorized {
 		p.lc.Error(err.Error())
 	} else {
@@ -243,19 +236,4 @@ func (p *CameraDiscoveryProvider) getImagePath(uriresponse2 *http.Response) stri
 		}
 	}
 	return imgPath
-}
-
-// readCredentialsFromFile returns values for name\tpassword persisted in the named file.
-func readCredentialsFromFile(filePath string) (nodeID string, password string, err error) {
-	// TODO: Resolve how cameraCredentials are to be extracted from protected volume/Vault
-	content, err := ioutil.ReadFile(filepath.Clean(filePath))
-	if err != nil {
-		return "", "", err
-	}
-	credentials := strings.Split(string(content), "\t")
-	if len(credentials) != 2 {
-		return "", "", errors.New("Credentials file content is invalid")
-	}
-	credentials[1] = strings.TrimSpace(credentials[1])
-	return credentials[0], credentials[1], nil
 }

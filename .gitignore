@@ -6,6 +6,7 @@
 /.idea
 *.xml
 *.log
+go.sum
 LintOutput.json
 device-camera-go
 run

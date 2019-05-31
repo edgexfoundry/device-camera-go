@@ -17,7 +17,7 @@ import (
 
 	"github.com/edgexfoundry/device-sdk-go"
 	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
-	logger "github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
 )
 
@@ -46,7 +46,10 @@ type appLogger struct {
 }
 
 func newAppLogger(lc logger.LoggingClient) AppLoggingClient {
-	return &appLogger{lc: lc, count: 0, thresh: 0, msgPrefix: fmt.Sprintf("[%s] - ", device.RunningService().Name())}
+	return &appLogger{lc: lc, count: 0, thresh: 0, msgPrefix: ""}
+	// Prepend any value to this service's logs using msgPrefix.
+	// Example:
+	//return &appLogger{lc: lc, count: 0, thresh: 0, msgPrefix: fmt.Sprintf("[%s] - ", device.RunningService().Name())}
 }
 
 func (l *appLogger) SetLogLevel(level string) error {
@@ -178,6 +181,34 @@ func (p *CameraDiscoveryProvider) Initialize(lc logger.LoggingClient, asyncCh ch
 		// Existence of a tag cache is not mandatory, continue with Initialize
 		err = nil
 	}
+
+	// ==============================
+	// Load Credentials from Vault
+	// ==============================
+	// Perform our equivalent of a configuration registry lookup during service initialization.
+	// This is performed against the res/configuration.toml using logic that currently matches
+	// internal DSDK behavior. It uses values of a couple constants also defined there.
+	credConfig, err := p.LoadCredFromFile(p.options.ConfProfile, p.options.ConfDir, p.options.CredentialsFile)
+	if (err != nil) {
+		p.lc.Error(err.Error())
+	}
+	p.options.Credentials = credConfig.Credentials
+	// NOTE: We are now finished with cameraCredentialsFile.
+
+
+	// ==============================
+	// Report Info to logs for troubleshooting
+	// ==============================
+	p.lc.Info(fmt.Sprintf("Service Initialization:"))
+	p.lc.Info(fmt.Sprintf("SourceFlags: %v", p.options.SourceFlags))
+	p.lc.Info(fmt.Sprintf("IPRange: %v", p.options.IP))
+	p.lc.Info(fmt.Sprintf("NetMask: %v", p.options.NetMask))
+	p.lc.Info(fmt.Sprintf("Interval: %v", p.options.Interval))
+	p.lc.Info(fmt.Sprintf("ScanDuration: %v", p.options.ScanDuration))
+	p.lc.Info(fmt.Sprintf("Credentials (REMOVE): %v", p.options.Credentials))
+	p.lc.Info(fmt.Sprintf("Cached ONVIF Devices: %v", len(p.ac.CamInfoCache.OnvifCameras)))
+	p.lc.Info(fmt.Sprintf("Cached Axis Devices: %v", len(p.ac.CamInfoCache.AxisCameras)))
+
 	// ==============================
 	// Add service as EdgeX Device
 	// ==============================
