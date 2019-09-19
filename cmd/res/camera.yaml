@@ -1,0 +1,306 @@
+name: "camera"
+manufacturer:  "Generic"
+model: "Generic ONVIF"
+labels:
+  - "onvif"
+  - "poe camera"
+description: "EdgeX device profile for ONVIF-compliant IP camera."
+deviceResources:
+  - name: "onvif_device_information"
+    description: "results of ONVIF GetDeviceInformation call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFDeviceInformation" }
+  - name: "onvif_profile_information"
+    description: "results of ONVIF GetProfiles call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFProfileInformation" }
+  - name: "OnvifHostname"
+    description: "results of ONVIF GetHostname call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFHostname" }
+  - name: "OnvifDateTime"
+    description: "results of ONVIF GetSystemDateAndTime call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFDateTime" }
+  - name: "onvif_dns"
+    description: "results of ONVIF GetDNS call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFDNS" }
+  - name: "onvif_network_interfaces"
+    description: "results of ONVIF GetNetworkInterfaces call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFNetworkInterfaces" }
+  - name: "onvif_network_protocols"
+    description: "results of ONVIF GetNetworkProtocols call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFNetworkProtocols" }
+  - name: "onvif_network_default_gateway"
+    description: "results of ONVIF GetNetworkDefaultGateway call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFDefaultGateway" }
+  - name: "onvif_ntp"
+    description: "results of ONVIF GetNTP call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFNTP" }
+  - name: "onvif_users"
+    description: "results of ONVIF GetUsers call"
+    properties:
+      value:
+        { type: "String", readWrite: "RW", defaultValue: "key:value,key:value" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "ONVIFUsers" }
+  - name: "onvif_snapshot"
+    description: "snapshot from first ONVIF MediaProfile"
+    properties:
+      value:
+        { type: "Binary", readWrite: "R" }
+      units:
+        { type: "Binary", readWrite: "R", defaultValue: "ONVIFSnapshot" }
+  - name: "OnvifUser"
+    description: "ONVIF user in escaped JSON format"
+    properties:
+      value:
+        { type: "String", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R" }
+  - name: "OnvifReboot"
+    description: "should reboot ONVIF camera"
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "Bool", readWrite: "R" }
+  - name: "OnvifStreamURI"
+    description: "ONVIF RTSP URI"
+    properties:
+      value:
+        { type: "String", readWrite: "R" }
+      units:
+        { type: "String", readWrite: "R" }
+deviceCommands:
+  - name: "OnvifDeviceInformation"
+    get:
+      - { operation: "get", object: "onvif_device_information", property: "value", parameter: "cameradevice_onvif_deviceinformation" }
+  - name: "OnvifProfileInformation"
+    get:
+      - { operation: "get", object: "onvif_profile_information", property: "value", parameter: "cameradevice_onvif_profileinformation" }
+  - name: "OnvifHostname"
+    get:
+      - { operation: "get", object: "OnvifHostname", property: "value", parameter: "cameradevice_OnvifHostname" }
+    set:
+      - { operation: "set", object: "OnvifHostname", property: "value" }
+  - name: "OnvifDateTime"
+    get:
+      - { operation: "get", object: "OnvifDateTime", property: "value", parameter: "cameradevice_OnvifDateTime" }
+    set:
+      - { operation: "set", object: "OnvifDateTime", property: "value" }
+  - name: "OnvifDNS"
+    get:
+      - { operation: "get", object: "onvif_dns", property: "value", parameter: "cameradevice_onvif_dns" }
+  - name: "OnvifNetworkInterfaces"
+    get:
+      - { operation: "get", object: "onvif_network_interfaces", property: "value", parameter: "cameradevice_onvif_network_interfaces" }
+  - name: "OnvifNetworkProtocols"
+    get:
+      - { operation: "get", object: "onvif_network_protocols", property: "value", parameter: "cameradevice_onvif_network_protocols" }
+  - name: "OnvifNetworkDefaultGateway"
+    get:
+      - { operation: "get", object: "onvif_network_default_gateway", property: "value", parameter: "cameradevice_onvif_network_default_gateway" }
+  - name: "OnvifNTP"
+    get:
+      - { operation: "get", object: "onvif_ntp", property: "value", parameter: "cameradevice_onvif_ntp" }
+  - name: "OnvifUsers"
+    get:
+      - { operation: "get", object: "onvif_users", property: "value", parameter: "cameradevice_onvif_users" }
+    set:
+      - { operation: "set", object: "OnvifUser", property: "value" }
+  - name: "OnvifSnapshot"
+    get:
+      - { operation: "get", object: "onvif_snapshot", property: "value", parameter: "cameradevice_onvif_snapshot" }
+  - name: "OnvifReboot"
+    set:
+      - { operation: "set", object: "OnvifReboot", property: "value"}
+  - name: "OnvifStreamURI"
+    get:
+      - { operation: "get", object: "OnvifStreamURI", property: "value" }
+coreCommands:
+  - name: OnvifDeviceInformation
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifDeviceInformation"
+      responses:
+        - code: "200"
+          description: "Get ONVIF DeviceInformation"
+          expectedValues: ["onvif_device_information"]
+        - code: "503"
+          description: "Get ONVIF DeviceInformation Error"
+          expectedValues: ["cameradevice_error"]
+  - name: OnvifProfileInformation
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifProfileInformation"
+      responses:
+        - code: "200"
+          description: "Get ONVIF Profiles"
+          expectedValues: ["onvif_profile_information"]
+        - code: "503"
+          description: "Get ONVIF Profiles Error"
+          expectedValues: ["cameradevice_error"]
+  - name: OnvifHostname
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifHostname"
+      responses:
+        - code: "200"
+          description: "Get ONVIF Hostname"
+          expectedValues: ["OnvifHostname"]
+        - code: "503"
+          description: "Get ONVIF Hostname Error"
+          expectedValues: ["cameradevice_error"]
+    put:
+      parameterNames: ["OnvifHostname"]
+      path: "/api/v1/device/{deviceId}/OnvifHostname"
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "Set ONVIF Hostname Error"
+  - name: OnvifDateTime
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifDateTime"
+      responses:
+        - code: "200"
+          description: "Get ONVIF DateTime"
+          expectedValues: ["OnvifDateTime"]
+        - code: "503"
+          description: "Get ONVIF DateTime Error"
+          expectedValues: ["cameradevice_error"]
+    put:
+      parameterNames: ["OnvifDateTime"]
+      path: "/api/v1/device/{deviceId}/OnvifDateTime"
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "Set ONVIF DateTime Error"
+  - name: OnvifDNS
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifDNS"
+      responses:
+        - code: "200"
+          description: "Get ONVIF DNS"
+          expectedValues: ["onvif_dns"]
+        - code: "503"
+          description: "Get ONVIF DNS Error"
+          expectedValues: ["cameradevice_error"]
+  - name: OnvifNetworkInterfaces
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifNetworkInterfaces"
+      responses:
+        - code: "200"
+          description: "Get ONVIF NetworkInterfaces"
+          expectedValues: ["onvif_network_interfaces"]
+        - code: "503"
+          description: "Get ONVIF NetworkInterfaces Error"
+          expectedValues: ["cameradevice_error"]
+  - name: OnvifNetworkProtocols
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifNetworkProtocols"
+      responses:
+        - code: "200"
+          description: "Get ONVIF NetworkProtocols"
+          expectedValues: ["onvif_network_protocols"]
+        - code: "503"
+          description: "Get ONVIF NetworkProtocols Error"
+          expectedValues: ["cameradevice_error"]
+  - name: OnvifNetworkDefaultGateway
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifNetworkDefaultGateway"
+      responses:
+        - code: "200"
+          description: "Get ONVIF NetworkDefaultGateway"
+          expectedValues: ["onvif_network_default_gateway"]
+        - code: "503"
+          description: "Get ONVIF NetworkDefaultGateway Error"
+          expectedValues: ["cameradevice_error"]
+  - name: OnvifSnapshot
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifSnapshot"
+      responses:
+        - code: "200"
+          description: "Get camera snapshot"
+          expectedValues: ["onvif_snapshot"]
+        - code: "503"
+          description: "Get camera snapshot error"
+          expectedValues: ["cameradevice_error"]
+  - name: OnvifNTP
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifNTP"
+      responses:
+        - code: "200"
+          description: "Get ONVIF NTP"
+          expectedValues: ["onvif_ntp"]
+        - code: "503"
+          description: "Get ONVIF NTP Error"
+          expectedValues: ["cameradevice_error"]
+  - name: OnvifReboot
+    put:
+      parameterNames: ["OnvifReboot"]
+      path: "/api/v1/device/{deviceId}/OnvifReboot"
+      responses:
+        - code: "200"
+          description: "Reboot camera"
+        - code: "503"
+          description: "Reboot error"
+  - name: OnvifUsers
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifUsers"
+      responses:
+        - code: "200"
+          description: "Get ONVIF Users"
+          expectedValues: ["onvif_users"]
+        - code: "503"
+          description: "Get ONVIF Users Error"
+          expectedValues: ["cameradevice_error"]
+    put:
+      parameterNames: ["OnvifUser"]
+      path: "/api/v1/device/{deviceId}/OnvifUsers"
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "Put ONVIF Users Error"
+  - name: OnvifStreamURI
+    get:
+      path: "/api/v1/device/{deviceId}/OnvifStreamURI"
+      responses:
+        - code: "200"
+          description: "Get ONVIF Stream URI"
+          expectedValues: ["OnvifStreamURI"]
+        - code: "503"
+          description: "Get ONVIF Stream URI Error"
+          expectedValues: ["cameradevice_error"]
