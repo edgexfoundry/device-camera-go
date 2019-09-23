@@ -20,15 +20,17 @@ import (
 	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/digest"
 )
 
-const VAPIX_FMT_URL = "http://%s/axis-cgi/mjpg/video.cgi?fps=1" // hard coded to mjpg video for now
+const vapixFmtURL = "http://%s/axis-cgi/mjpg/video.cgi?fps=1" // hard coded to mjpg video for now
 
-var cancelled = errors.New("cancelled")
+var errCancelled = errors.New("cancelled")
 
 type trigger struct {
 	alarmCode string
 	state     bool
 }
 
+// VapixClient is a client for requesting some basic analytic events from Axis cameras.
+// It uses some deprecated APIs/methods and might not work with all Axis cameras out of the box.
 type VapixClient struct {
 	lc        logger.LoggingClient
 	asyncChan chan<- *ds_models.AsyncValues
@@ -62,8 +64,8 @@ func (c *VapixClient) parseTriggers(bytes []byte) trigger {
 		if bytes[i] == 0xff && bytes[i+1] == 0xfe {
 			length := int(binary.BigEndian.Uint16(bytes[i+2 : i+4]))
 			comment := bytes[i+4 : (i + length - 1)]
-			axis_id := binary.BigEndian.Uint16(comment[0:2])
-			if axis_id == 0x0a03 {
+			axisID := binary.BigEndian.Uint16(comment[0:2])
+			if axisID == 0x0a03 {
 				triggerString := string(comment[2 : length-2])
 				return c.triggersFromString(triggerString)
 			}
@@ -74,7 +76,7 @@ func (c *VapixClient) parseTriggers(bytes []byte) trigger {
 
 func (c *VapixClient) listenForTriggers(edgexDevice e_models.Device, address string, username string, password string) error {
 	dclient := digest.NewDClient(&http.Client{}, username, password)
-	url := fmt.Sprintf(VAPIX_FMT_URL, address)
+	url := fmt.Sprintf(vapixFmtURL, address)
 
 	reader, err := getMultipartReader(dclient, url)
 	if err != nil {
@@ -84,11 +86,11 @@ func (c *VapixClient) listenForTriggers(edgexDevice e_models.Device, address str
 	for {
 		select {
 		case <-c.stop:
-			return cancelled
+			return errCancelled
 		default:
 			part, err := reader.NextPart()
 			if err == io.EOF {
-				return fmt.Errorf("listenForTriggers: found EOF", err.Error())
+				return fmt.Errorf("listenForTriggers found EOF: %v", err.Error())
 			}
 			if err != nil {
 				return fmt.Errorf("listenForTriggers: %v", err.Error())
@@ -113,10 +115,12 @@ func (c *VapixClient) listenForTriggers(edgexDevice e_models.Device, address str
 	}
 }
 
+// NewClient returns a new Vapix Client
 func NewClient(asyncCh chan<- *ds_models.AsyncValues, lc logger.LoggingClient) client.Client {
 	return &VapixClient{asyncChan: asyncCh, lc: lc}
 }
 
+// CameraInit initializes the Vapix listener for the camera
 func (c *VapixClient) CameraInit(edgexDevice e_models.Device, ipAddress string, username string, password string) {
 	if c.alarms == nil {
 		c.alarms = make(map[string]e_models.DeviceResource)
@@ -144,14 +148,17 @@ func (c *VapixClient) CameraInit(edgexDevice e_models.Device, ipAddress string, 
 	}, c.lc)
 }
 
+// HandleReadCommand is not implemented for Vapix--all commands that reach here are unexpected.
 func (c *VapixClient) HandleReadCommand(req ds_models.CommandRequest) (*ds_models.CommandValue, error) {
 	return nil, fmt.Errorf("vapix: unrecognized read command")
 }
 
+// HandleWriteCommand is not implemented for Vapix--all commands that reach here are unexpected.
 func (c *VapixClient) HandleWriteCommand(req ds_models.CommandRequest, param *ds_models.CommandValue) error {
 	return fmt.Errorf("vapix: unrecognized write command")
 }
 
+// CameraRelease shuts down the Vapix listener
 func (c *VapixClient) CameraRelease(force bool) {
 	close(c.stop)
 	if !force {
@@ -163,7 +170,7 @@ func retryLoop(fn func() error, client logger.LoggingClient) {
 	for {
 		err := fn()
 		if err != nil {
-			if err == cancelled {
+			if err == errCancelled {
 				return
 			}
 			client.Error(err.Error())

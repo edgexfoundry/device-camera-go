@@ -12,11 +12,12 @@ import (
 
 // Client is an interface with a single Do() method, allowing functions to accept
 // either an http.Client or a digest.DClient
-
 type Client interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
+// DClient represents an HTTP client used for making requests authenticated
+// with http digest authentication.
 type DClient struct {
 	client     *http.Client
 	username   string
@@ -27,6 +28,7 @@ type DClient struct {
 	nonceCount uint32
 }
 
+// NewDClient returns a DClient that wraps a given standard library http Client with the given username and password
 func NewDClient(stdClient *http.Client, username string, password string) *DClient {
 	return &DClient{
 		client:   stdClient,
@@ -35,11 +37,12 @@ func NewDClient(stdClient *http.Client, username string, password string) *DClie
 	}
 }
 
+// Do performs an http request, wrapping it with digest authentication
 func (dc *DClient) Do(req *http.Request) (*http.Response, error) {
-	return dc.DoDigestAuth(req)
+	return dc.doDigestAuth(req)
 }
 
-func (dc *DClient) DoDigestAuth(req *http.Request) (*http.Response, error) {
+func (dc *DClient) doDigestAuth(req *http.Request) (*http.Response, error) {
 	if dc.snonce != "" {
 		req.Header.Set("Authorization", dc.getDigestAuth(req.Method, req.URL.String()))
 	}

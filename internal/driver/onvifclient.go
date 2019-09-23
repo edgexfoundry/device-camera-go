@@ -15,15 +15,17 @@ import (
 	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/digest"
 )
 
+// OnvifClient manages the state required to issue ONVIF requests to a camera
 type OnvifClient struct {
-	ipAddress   string
-	user        string
-	password    string
-	onvifDevice *onvif4go.OnvifDevice
-	lc          logger.LoggingClient
+	ipAddress    string
+	user         string
+	password     string
+	onvifDevice  *onvif4go.OnvifDevice
+	lc           logger.LoggingClient
 	digestClient digest.Client
 }
 
+// NewOnvifClient returns an OnvifClient for a single camera
 func NewOnvifClient(ipAddress string, user string, password string, lc logger.LoggingClient) *OnvifClient {
 	c := OnvifClient{
 		ipAddress: ipAddress,
@@ -46,6 +48,7 @@ func NewOnvifClient(ipAddress string, user string, password string, lc logger.Lo
 	return &c
 }
 
+// GetDeviceInformation makes an ONVIF GetDeviceInformation request to the camera
 func (c *OnvifClient) GetDeviceInformation() (string, error) {
 	info, err := c.onvifDevice.Device.GetDeviceInformation()
 	if err != nil {
@@ -60,6 +63,7 @@ func (c *OnvifClient) GetDeviceInformation() (string, error) {
 	return string(deviceInfo), nil
 }
 
+// GetProfileInformation makes an ONVIF GetProfiles request to the camera
 func (c *OnvifClient) GetProfileInformation() (string, error) {
 	profiles, err := c.onvifDevice.Media.GetProfiles()
 	if err != nil {
@@ -74,6 +78,7 @@ func (c *OnvifClient) GetProfileInformation() (string, error) {
 	return string(mediaProfiles), nil
 }
 
+// GetStreamURI returns the RTSP URI for the first media profile returned by the camera
 func (c *OnvifClient) GetStreamURI() (string, error) {
 	profilesResp, err := c.onvifDevice.Media.GetProfiles()
 	if err != nil {
@@ -91,14 +96,15 @@ func (c *OnvifClient) GetStreamURI() (string, error) {
 		return "", fmt.Errorf("GetStreamURI failed: %v", err.Error())
 	}
 
-	uriJson, err := json.Marshal(uriResp)
+	uriJSON, err := json.Marshal(uriResp)
 	if err != nil {
 		return "", fmt.Errorf("error marshaling stream URI to json: %v", err.Error())
 	}
 
-	return string(uriJson), nil
+	return string(uriJSON), nil
 }
 
+// GetSnapshot returns a snapshot from the camera as a slice of bytes
 func (c *OnvifClient) GetSnapshot() ([]byte, error) {
 	profilesResp, err := c.onvifDevice.Media.GetProfiles()
 	if err != nil {
@@ -142,39 +148,43 @@ func (c *OnvifClient) GetSnapshot() ([]byte, error) {
 	return buf, nil
 }
 
+// GetSystemDateAndTime returns the current date and time as reported by the ONVIF GetSystemDateAndTime command
 func (c *OnvifClient) GetSystemDateAndTime() (string, error) {
 	datetime, err := c.onvifDevice.Device.GetSystemDateAndTime()
 	if err != nil {
 		return "", err
 	}
 
-	datetimeJson, err := json.Marshal(datetime)
+	datetimeJSON, err := json.Marshal(datetime)
 	if err != nil {
 		return "", err
 	}
 
-	return string(datetimeJson), nil
+	return string(datetimeJSON), nil
 }
 
+// GetHostname returns the hostname reported by the device via the ONVIF GetHostname command
 func (c *OnvifClient) GetHostname() (string, error) {
 	hostname, err := c.onvifDevice.Device.GetHostname()
 	if err != nil {
 		return "", err
 	}
 
-	hostnameJson, err := json.Marshal(hostname)
+	hostnameJSON, err := json.Marshal(hostname)
 	if err != nil {
 		return "", err
 	}
 
-	return string(hostnameJson), nil
+	return string(hostnameJSON), nil
 }
 
-func (c *OnvifClient) SetHostname(name string) (error) {
+// SetHostname requests a change to the camera's hostname via the ONFVIF SetHostname command
+func (c *OnvifClient) SetHostname(name string) error {
 	err := c.onvifDevice.Device.SetHostname(name)
 	return err
 }
 
+// SetSystemDateAndTime changes the camera's system time via the SetSystemDateAndTime ONVIF command
 func (c *OnvifClient) SetSystemDateAndTime(datetime time.Time) error {
 	req, err := device.NewSetSystemDateAndTimeManual(datetime, "", false)
 	if err != nil {
@@ -187,106 +197,114 @@ func (c *OnvifClient) SetSystemDateAndTime(datetime time.Time) error {
 		c.lc.Error(fmt.Sprintf("Error calling SetSystemDateAndTime: %v", err.Error()))
 	}
 	return nil
-
 }
+
+// GetDNS returns the DNS settings as reported by the ONVIF GetDNS command
 func (c *OnvifClient) GetDNS() (string, error) {
 	dns, err := c.onvifDevice.Device.GetDNS()
 	if err != nil {
 		return "", err
 	}
 
-	dnsJson, err := json.Marshal(dns)
+	dnsJSON, err := json.Marshal(dns)
 	if err != nil {
 		return "", err
 	}
 
-	return string(dnsJson), nil
+	return string(dnsJSON), nil
 }
 
+// GetNetworkInterfaces returns the results of the ONVIF GetNetworkInterfaces command
 func (c *OnvifClient) GetNetworkInterfaces() (string, error) {
 	interfaces, err := c.onvifDevice.Device.GetNetworkInterfaces()
 	if err != nil {
 		return "", err
 	}
 
-	interfacesJson, err := json.Marshal(interfaces)
+	interfacesJSON, err := json.Marshal(interfaces)
 	if err != nil {
 		return "", err
 	}
 
-	return string(interfacesJson), nil
+	return string(interfacesJSON), nil
 }
 
+// GetNetworkProtocols returns the resutls of the ONVIF GetNetworkProtocols command
 func (c *OnvifClient) GetNetworkProtocols() (string, error) {
 	protocols, err := c.onvifDevice.Device.GetNetworkProtocols()
 	if err != nil {
 		return "", err
 	}
 
-	protocolsJson, err := json.Marshal(protocols)
+	protocolsJSON, err := json.Marshal(protocols)
 	if err != nil {
 		return "", err
 	}
 
-	return string(protocolsJson), nil
+	return string(protocolsJSON), nil
 }
 
+// GetNetworkDefaultGateway returns the results of the ONVIF GetNetworkDefaultGateway command
 func (c *OnvifClient) GetNetworkDefaultGateway() (string, error) {
 	defaultGateway, err := c.onvifDevice.Device.GetNetworkDefaultGateway()
 	if err != nil {
 		return "", err
 	}
 
-	gatewayJson, err := json.Marshal(defaultGateway)
+	gatewayJSON, err := json.Marshal(defaultGateway)
 	if err != nil {
 		return "", err
 	}
 
-	return string(gatewayJson), nil
+	return string(gatewayJSON), nil
 }
 
+// GetNTP returns the results of the ONVIF GetNTP command
 func (c *OnvifClient) GetNTP() (string, error) {
 	ntp, err := c.onvifDevice.Device.GetNTP()
 	if err != nil {
 		return "", err
 	}
 
-	ntpJson, err := json.Marshal(ntp)
+	ntpJSON, err := json.Marshal(ntp)
 	if err != nil {
 		return "", err
 	}
 
-	return string(ntpJson), nil
+	return string(ntpJSON), nil
 }
 
+// Reboot requests a device system reboot via ONVIF
 func (c *OnvifClient) Reboot() (string, error) {
 	reboot, err := c.onvifDevice.Device.SystemReboot()
 	if err != nil {
 		return "", err
 	}
 
-	rebootJson, err := json.Marshal(reboot)
+	rebootJSON, err := json.Marshal(reboot)
 	if err != nil {
 		return "", err
 	}
 
-	return string(rebootJson), nil
+	return string(rebootJSON), nil
 }
 
+// GetUsers requests the Users associated with the device via ONVIF
 func (c *OnvifClient) GetUsers() (string, error) {
 	users, err := c.onvifDevice.Device.GetUsers()
 	if err != nil {
 		return "", err
 	}
 
-	usersJson, err := json.Marshal(users)
+	usersJSON, err := json.Marshal(users)
 	if err != nil {
 		return "", err
 	}
 
-	return string(usersJson), nil
+	return string(usersJSON), nil
 }
 
+// CreateUser creates a new ONVIF User for the device
 func (c *OnvifClient) CreateUser(user onvif.User) error {
 	err := c.onvifDevice.Device.CreateUser(user)
 	return err

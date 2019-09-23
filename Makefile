@@ -20,9 +20,11 @@ test:
 	go test -coverprofile=coverage.out ./...
 	go vet ./...
 
-lint: # requires the golint tool to be installed and available on your $PATH - (go get -u golang.org/x/lint/golint)
-	go get -u golang.org/x/lint/golint
-	golint ./... || true
+check-lint:
+	which golint || (go get -u golang.org/x/lint/golint)
+
+lint: check-lint
+	golint ./...
 
 coveragehtml:
 	go tool cover -html=coverage.out -o coverage.html

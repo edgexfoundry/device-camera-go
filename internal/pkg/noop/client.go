@@ -9,24 +9,33 @@ import (
 	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/client"
 )
 
-type NoopClient struct {}
+// Client is a camera client for cameras which don't have any other camera or manufacturer
+// specific clients to leverage.  All of this client's methods return an error if information is
+// requested and otherwise comply silently with direction to Initialize or Release.
+type Client struct {}
 
-func (n NoopClient) HandleReadCommand(req models.CommandRequest) (*models.CommandValue, error) {
+// HandleReadCommand triggers a protocol Read operation for the specified device, resulting in
+// an error for an unrecognized read command.
+func (n Client) HandleReadCommand(req models.CommandRequest) (*models.CommandValue, error) {
 	return &models.CommandValue{}, fmt.Errorf("device-camera-go: unrecognized read command")
 }
 
-func (n NoopClient) HandleWriteCommand(req models.CommandRequest, param *models.CommandValue) error {
+// HandleWriteCommand triggers a protocol Write operation; resulting in an error for an unrecognized write command
+func (n Client) HandleWriteCommand(req models.CommandRequest, param *models.CommandValue) error {
 	return fmt.Errorf("device-camera-go: unrecognized write command")
 }
 
-func (n NoopClient) CameraRelease(force bool) {
+// CameraRelease immediately returns control to the caller
+func (n Client) CameraRelease(force bool) {
 	return
 }
 
-func (n NoopClient) CameraInit(edgexDevice e_models.Device, ipAddress string, username string, password string) {
+// CameraInit immediately returns control to the caller
+func (n Client) CameraInit(edgexDevice e_models.Device, ipAddress string, username string, password string) {
 	return
 }
 
+// NewClient returns a new noop Client
 func NewClient() client.Client {
-	return NoopClient{}
+	return Client{}
 }
