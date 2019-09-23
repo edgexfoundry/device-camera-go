@@ -12,7 +12,7 @@ import (
 // Client is a camera client for cameras which don't have any other camera or manufacturer
 // specific clients to leverage.  All of this client's methods return an error if information is
 // requested and otherwise comply silently with direction to Initialize or Release.
-type Client struct {}
+type Client struct{}
 
 // HandleReadCommand triggers a protocol Read operation for the specified device, resulting in
 // an error for an unrecognized read command.
