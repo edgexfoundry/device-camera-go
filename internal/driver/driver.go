@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/faceterteam/onvif4go/onvif"
 	"github.com/edgexfoundry/device-sdk-go"
 	sdkModel "github.com/edgexfoundry/device-sdk-go/pkg/models"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/faceterteam/onvif4go/onvif"
 	"github.com/pkg/errors"
 
 	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/axis"
