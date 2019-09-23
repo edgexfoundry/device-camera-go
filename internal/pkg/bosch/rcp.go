@@ -19,61 +19,62 @@ import (
 	"time"
 	"unicode/utf16"
 
-	e_models "github.com/edgexfoundry/go-mod-core-contracts/models"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
+	e_models "github.com/edgexfoundry/go-mod-core-contracts/models"
 
-	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/digest"
 	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/client"
+	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/digest"
 )
 
 const (
-	CONF_ALARM_OVERVIEW     = "0x0c38"
-	CONF_IVA_COUNTER_VALUES = "0x0b4a"
+	// confAlarmOverview and other constants are from the Bosch RCP documentation
+	confAlarmOverview    = "0x0c38"
+	confIvaCounterValues = "0x0b4a"
 
-	ALARM_TYPE_UNKNOWN                      = 0
-	ALARM_TYPE_VCA                          = 1
-	ALARM_TYPE_RELAIS                       = 2
-	ALARM_TYPE_DIGITAL_INTPUT               = 3
-	ALARM_TYPE_AUDIO                        = 4
-	ALARM_TYPE_VIRTUAL_INPUT                = 5
-	ALARM_TYPE_DEFAULT_TASK                 = 16
-	ALARM_TYPE_GLOBAL_CHANGE                = 17
-	ALARM_TYPE_SIGNAL_TOO_BRIGHT            = 18
-	ALARM_TYPE_SIGNAL_TOO_DARK              = 19
-	ALARM_TYPE_REFERENCE_IMAGE_CHECK_FAILED = 23
-	ALARM_TYPE_INVALID_CONFIGURATION        = 24
-	ALARM_TYPE_FLAME_DETECTED               = 25
-	ALARM_TYPE_SMOKE_DETECTED               = 26
-	ALARM_TYPE_OBJECT_IN_FIELD              = 32
-	ALARM_TYPE_CROSSING_LINE                = 33
-	ALARM_TYPE_LOITERING                    = 34
-	ALARM_TYPE_CONDITION_CHANGE             = 35
-	ALARM_TYPE_FOLLOWING_ROUTE              = 36
-	ALARM_TYPE_TAMPERING                    = 37
-	ALARM_TYPE_REMOVED_OBJECT               = 38
-	ALARM_TYPE_IDLE_OBJECT                  = 39
-	ALARM_TYPE_ENTERING_FIELD               = 40
-	ALARM_TYPE_LEAVING_FIELD                = 41
-	ALARM_TYPE_SIMILARITY_SEARCH            = 42
-	ALARM_TYPE_CROWD_DETECTION              = 43
-	ALARM_TYPE_FLOW_IN_FIELD                = 44
-	ALARM_TYPE_COUNTER_FLOW_IN_FIELD        = 45
-	ALARM_TYPE_MOTION_IN_FIELD              = 46
-	ALARM_TYPE_MAN_OVERBOARD                = 47
-	ALARM_TYPE_COUNTER                      = 48
-	ALARM_TYPE_BEV_PEOPLE_COUNTER           = 49
-	ALARM_TYPE_OCCUPANCY                    = 50
+	alarmTypeUnknown                   = 0
+	alarmTypeVca                       = 1
+	alarmTypeRelais                    = 2
+	alarmTypeDigitalIntput             = 3
+	alarmTypeAudio                     = 4
+	alarmTypeVirtualInput              = 5
+	alarmTypeDefaultTask               = 16
+	alarmTypeGlobalChange              = 17
+	alarmTypeSignalTooBright           = 18
+	alarmTypeSignalTooDark             = 19
+	alarmTypeReferenceImageCheckFailed = 23
+	alarmTypeInvalidConfiguration      = 24
+	alarmTypeFlameDetected             = 25
+	alarmTypeSmokeDetected             = 26
+	alarmTypeObjectInField             = 32
+	alarmTypeCrossingLine              = 33
+	alarmTypeLoitering                 = 34
+	alarmTypeConditionChange           = 35
+	alarmTypeFollowingRoute            = 36
+	alarmTypeTampering                 = 37
+	alarmTypeRemovedObject             = 38
+	alarmTypeIdleObject                = 39
+	alarmTypeEnteringField             = 40
+	alarmTypeLeavingField              = 41
+	alarmTypeSimilaritySearch          = 42
+	alarmTypeCrowdDetection            = 43
+	alarmTypeFlowInField               = 44
+	alarmTypeCounterFlowInField        = 45
+	alarmTypeMotionInField             = 46
+	alarmTypeManOverboard              = 47
+	alarmTypeCounter                   = 48
+	alarmTypeBevPeopleCounter          = 49
+	alarmTypeOccupancy                 = 50
 
-	ALARM_ADD_FLAG       = 0x80
-	ALARM_DELETE_FLAG    = 0x40
-	ALARM_STATE_FLAG     = 0x20
-	ALARM_STATE_SET_FLAG = 0x10
+	alarmAddFlag      = 0x80
+	alarmDeleteFlag   = 0x40
+	alarmStateFlag    = 0x20
+	alarmStateSetFlag = 0x10
 
-	RCP_FMT_URL = "http://%s/rcp.xml?%s=%s"
+	rcpFmtURL = "http://%s/rcp.xml?%s=%s"
 )
 
-type Alarm struct {
+type alarm struct {
 	EntryID      uint16
 	EntryLength  uint16
 	FlagAdd      bool
@@ -85,19 +86,19 @@ type Alarm struct {
 	AlarmName    string
 }
 
-type CounterData struct {
+type counterData struct {
 	ID    uint8
 	Type  uint8
 	Name  string
 	Value uint32
 }
 
-type MsgList struct {
+type msgList struct {
 	XMLName xml.Name `xml:"message_list"`
-	Msgs    []Msg    `xml:"msg"`
+	Msgs    []msg    `xml:"msg"`
 }
 
-type Msg struct {
+type msg struct {
 	Command string `xml:"command"`
 	Num     string `xml:"num"`
 	Cltid   string `xml:"cltid"`
@@ -127,19 +128,19 @@ type packet struct {
 	buffer []byte
 }
 
-func (p *packet) Byte(i int) uint8 {
+func (p *packet) byte(i int) uint8 {
 	return uint8(binary.BigEndian.Uint32([]byte{0, 0, 0, p.buffer[i]}))
 }
 
-func (p *packet) Uint16(i int) uint16 {
+func (p *packet) uint16(i int) uint16 {
 	return binary.BigEndian.Uint16(p.buffer[i : i+2])
 }
 
-func (p *packet) Uint32(i int) uint32 {
+func (p *packet) uint32(i int) uint32 {
 	return binary.BigEndian.Uint32(p.buffer[i : i+4])
 }
 
-func (p *packet) UTF16String(i int, n int) string {
+func (p *packet) utf16string(i int, n int) string {
 	ints := make([]uint16, n/2)
 	if err := binary.Read(bytes.NewReader(p.buffer[i:i+n]), binary.BigEndian, &ints); err != nil {
 		return ""
@@ -147,26 +148,26 @@ func (p *packet) UTF16String(i int, n int) string {
 	return string(utf16.Decode(ints))
 }
 
-func parseAlarms(bytes []byte) (alarms []Alarm) {
+func parseAlarms(bytes []byte) (alarms []alarm) {
 	packet := packet{buffer: bytes}
 
-	readout := (packet.Byte(0) & 0x80) != 0
+	readout := (packet.byte(0) & 0x80) != 0
 
-	// Alarm entries begin 4 bytes into payload
+	// alarm entries begin 4 bytes into payload
 	for i := 4; i < len(packet.buffer); {
-		var alarm Alarm
-		alarm.EntryID = packet.Uint16(i)
-		alarm.EntryLength = packet.Uint16(i + 2)
+		var alarm alarm
+		alarm.EntryID = packet.uint16(i)
+		alarm.EntryLength = packet.uint16(i + 2)
 
-		flags := packet.Byte(i + 4)
-		alarm.FlagAdd = (flags & ALARM_ADD_FLAG) != 0
-		alarm.FlagDelete = (flags & ALARM_DELETE_FLAG) != 0
-		alarm.FlagState = (flags & ALARM_STATE_FLAG) != 0
-		alarm.FlagStateSet = (flags & ALARM_STATE_SET_FLAG) != 0
+		flags := packet.byte(i + 4)
+		alarm.FlagAdd = (flags & alarmAddFlag) != 0
+		alarm.FlagDelete = (flags & alarmDeleteFlag) != 0
+		alarm.FlagState = (flags & alarmStateFlag) != 0
+		alarm.FlagStateSet = (flags & alarmStateSetFlag) != 0
 
-		alarm.AlarmSource = uint16(packet.Byte(i + 6))
-		alarm.AlarmType = uint16(packet.Byte(i + 7))
-		alarm.AlarmName = packet.UTF16String(i+8, int(alarm.EntryLength-8))
+		alarm.AlarmSource = uint16(packet.byte(i + 6))
+		alarm.AlarmType = uint16(packet.byte(i + 7))
+		alarm.AlarmName = packet.utf16string(i+8, int(alarm.EntryLength-8))
 		i = i + int(alarm.EntryLength)
 
 		if !readout || alarm.FlagState {
@@ -176,21 +177,23 @@ func parseAlarms(bytes []byte) (alarms []Alarm) {
 	return
 }
 
-func parseCounters(bytes []byte) (counters []CounterData) {
+func parseCounters(bytes []byte) (counters []counterData) {
 	packet := packet{buffer: bytes[1:]}
 
 	for i := 0; i < len(packet.buffer); {
-		var counter CounterData
-		counter.ID = packet.Byte(i)
-		counter.Type = packet.Byte(i + 1)
-		counter.Name = packet.UTF16String(i+2, 64)
-		counter.Value = packet.Uint32(i + 66)
+		var counter counterData
+		counter.ID = packet.byte(i)
+		counter.Type = packet.byte(i + 1)
+		counter.Name = packet.utf16string(i+2, 64)
+		counter.Value = packet.uint32(i + 66)
 		i = i + 70
 		counters = append(counters, counter)
 	}
 	return
 }
 
+// RcpClient is a client for accessing some analytics information from Bosch cameras via the RCP api.
+// It is assumed that the analytics events are already configured on the device.
 type RcpClient struct {
 	client    digest.Client
 	asyncChan chan<- *ds_models.AsyncValues
@@ -206,10 +209,12 @@ type RcpClient struct {
 	stopped chan bool
 }
 
+// NewClient creates a new RcpClient
 func NewClient(asyncCh chan<- *ds_models.AsyncValues, lc logger.LoggingClient) client.Client {
 	return &RcpClient{asyncChan: asyncCh, lc: lc}
 }
 
+// CameraRelease stops the RCP listener routine
 func (rc *RcpClient) CameraRelease(force bool) {
 	close(rc.stop)
 	if !force {
@@ -217,6 +222,7 @@ func (rc *RcpClient) CameraRelease(force bool) {
 	}
 }
 
+// CameraInit initializes the RCP listener routine
 func (rc *RcpClient) CameraInit(edgexDevice e_models.Device, ipAddress string, username string, password string) {
 	if rc.client == nil {
 		rc.initializeDClient(username, password)
@@ -269,16 +275,16 @@ func (rc *RcpClient) CameraInit(edgexDevice e_models.Device, ipAddress string, u
 	go func() {
 		ticks := time.Tick(time.Second * 5)
 
-		var max_errors = 60
-		for max_errors > 0 {
+		var maxErrors = 60
+		for maxErrors > 0 {
 			select {
 			case <-ticks:
 				err := rc.requestEvents(edgexDevice, ipAddress, stopchan)
 				if err != nil {
 					rc.lc.Error("Error in RCP loop: %s", err.Error())
-					max_errors--
+					maxErrors--
 				} else {
-					max_errors = 60
+					maxErrors = 60
 				}
 			case <-stopchan:
 				// stop
@@ -311,6 +317,7 @@ func (rc *RcpClient) getCounterState(counter string) int {
 	return rc.counterStates[counter]
 }
 
+// HandleReadCommand handles requests to read data from the device via the RCP api
 func (rc *RcpClient) HandleReadCommand(req ds_models.CommandRequest) (*ds_models.CommandValue, error) {
 	var cv *ds_models.CommandValue
 	var err error
@@ -340,11 +347,12 @@ func (rc *RcpClient) HandleReadCommand(req ds_models.CommandRequest) (*ds_models
 	return cv, nil
 }
 
+// HandleWriteCommand is unimplemented--any requests to it are unexpected
 func (rc *RcpClient) HandleWriteCommand(req ds_models.CommandRequest, param *ds_models.CommandValue) error {
 	return fmt.Errorf("rcp: unrecognized write command")
 }
 
-func (rc *RcpClient) commandValuesFromAlarms(alarms []Alarm, edgexDevice e_models.Device) ([]*ds_models.CommandValue, error) {
+func (rc *RcpClient) commandValuesFromAlarms(alarms []alarm, edgexDevice e_models.Device) ([]*ds_models.CommandValue, error) {
 	cvs := make([]*ds_models.CommandValue, 0)
 	var err error
 	for _, alarm := range alarms {
@@ -370,7 +378,7 @@ func (rc *RcpClient) commandValuesFromAlarms(alarms []Alarm, edgexDevice e_model
 	return cvs, nil
 }
 
-func (rc *RcpClient) commandValuesFromCounters(counters []CounterData, edgexDevice e_models.Device) ([]*ds_models.CommandValue, error) {
+func (rc *RcpClient) commandValuesFromCounters(counters []counterData, edgexDevice e_models.Device) ([]*ds_models.CommandValue, error) {
 	cvs := make([]*ds_models.CommandValue, 0)
 	var err error
 	for _, counter := range counters {
@@ -384,7 +392,7 @@ func (rc *RcpClient) commandValuesFromCounters(counters []CounterData, edgexDevi
 		var cv *ds_models.CommandValue
 		cv, err = ds_models.NewUint32Value(dr.Name, time.Now().UnixNano()/int64(time.Millisecond), counter.Value)
 		if err != nil {
-			rc.lc.Error("sendEvent: unable to get new Uint32 value")
+			rc.lc.Error("sendEvent: unable to get new uint32 value")
 			return []*ds_models.CommandValue{}, fmt.Errorf("unable to create CommandValue")
 		}
 		cvs = append(cvs, cv)
@@ -394,19 +402,19 @@ func (rc *RcpClient) commandValuesFromCounters(counters []CounterData, edgexDevi
 }
 
 func (rc *RcpClient) requestEvents(device e_models.Device, ipAddress string, stopchan chan bool) error {
-	url, err := getRcpURL(ipAddress, "message", CONF_ALARM_OVERVIEW+"$"+CONF_IVA_COUNTER_VALUES, map[string]string{"collectms": "5000"})
+	url, err := getRcpURL(ipAddress, "message", confAlarmOverview+"$"+confIvaCounterValues, map[string]string{"collectms": "5000"})
 	if err != nil {
 		rc.lc.Error("Error creating event polling url")
 		return err
 	}
 
-	eventXml, err := getXML(rc.client, url)
+	eventXML, err := getXML(rc.client, url)
 	if err != nil {
 		rc.lc.Error(fmt.Sprintf("error making request: %v", err.Error()))
 		return err
 	}
-	var msgWrapper MsgList
-	err = xml.Unmarshal(eventXml, &msgWrapper)
+	var msgWrapper msgList
+	err = xml.Unmarshal(eventXML, &msgWrapper)
 	if err != nil {
 		rc.lc.Error(fmt.Sprintf("error unmarshaling: %v", err.Error()))
 		return err
@@ -423,10 +431,10 @@ func (rc *RcpClient) requestEvents(device e_models.Device, ipAddress string, sto
 
 		var cvs []*ds_models.CommandValue
 		switch msg.Command {
-		case CONF_ALARM_OVERVIEW:
+		case confAlarmOverview:
 			alarms := parseAlarms(decoded)
 			cvs, err = rc.commandValuesFromAlarms(alarms, device)
-		case CONF_IVA_COUNTER_VALUES:
+		case confIvaCounterValues:
 			counters := parseCounters(decoded)
 			cvs, err = rc.commandValuesFromCounters(counters, device)
 		default:
@@ -446,7 +454,7 @@ func getRcpURL(ip string, action string, command string, params map[string]strin
 		return "", fmt.Errorf("getRcpURL failed: required argument missing")
 	}
 
-	formattedString := fmt.Sprintf(RCP_FMT_URL, ip, action, command)
+	formattedString := fmt.Sprintf(rcpFmtURL, ip, action, command)
 	var formattedArgs []string
 	for k, v := range params {
 		formattedArgs = append(formattedArgs, fmt.Sprintf("%s=%s", k, v))

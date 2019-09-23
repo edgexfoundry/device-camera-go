@@ -27,13 +27,17 @@ var clients map[string]client.Client
 
 var driver *Driver
 
+// Driver implements the sdkModel.ProtocolDriver interface for
+// the device service
 type Driver struct {
 	lc       logger.LoggingClient
 	asynchCh chan<- *sdkModel.AsyncValues
 	config   *configuration
 }
 
-func NewProtocolDriver() sdkModel.ProtocolDriver {
+// NewProtocolDriver initializes the singleton Driver and
+// returns it to the caller
+func NewProtocolDriver() *Driver {
 	once.Do(func() {
 		driver = new(Driver)
 		onvifClients = make(map[string]*OnvifClient)
@@ -370,7 +374,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 	d.lc = lc
 	d.asynchCh = asyncCh
 
-	config, err := LoadConfigFromFile()
+	config, err := loadConfigFromFile()
 	if err != nil {
 		panic(fmt.Errorf("read driver configuration from file failed: %d", err))
 	}
@@ -538,12 +542,14 @@ func (d *Driver) addrFromProtocols(protocols map[string]contract.ProtocolPropert
 		return "", fmt.Errorf("no HTTP address in protocols map")
 	}
 
-	if addr, ok := protocols["HTTP"]["Address"]; !ok {
+	var addr string
+	addr, ok := protocols["HTTP"]["Address"]
+	if !ok {
 		d.lc.Error("No HTTP address found for device. Check configuration file.")
 		return "", fmt.Errorf("no HTTP address in protocols map")
-	} else {
-		return addr, nil
 	}
+	return addr, nil
+
 }
 
 func (d *Driver) clientsFromAddr(addr string, deviceName string) (*OnvifClient, client.Client, error) {

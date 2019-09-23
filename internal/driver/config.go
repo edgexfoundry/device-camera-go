@@ -9,15 +9,16 @@ import (
 )
 
 type configuration struct {
-	Camera CameraInfo
+	Camera cameraInfo
 }
-type CameraInfo struct {
+
+type cameraInfo struct {
 	User     string
 	Password string
 }
 
-// LoadConfigFromFile use to load toml configuration
-func LoadConfigFromFile() (*configuration, error) {
+// loadConfigFromFile use to load toml configuration
+func loadConfigFromFile() (*configuration, error) {
 	config := new(configuration)
 
 	confDir := flag.Lookup("confdir").Value.(flag.Getter).Get().(string)
