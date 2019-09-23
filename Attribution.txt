@@ -78,9 +78,6 @@ https://github.com/go-yaml/yaml/blob/v2/LICENSE
 beevik/etree 1.0.1 (BSD-2-Clause) https://github.com/beevik/etree
 https://github.com/beevik/etree/blob/master/LICENSE
 
-lair-framework/go-nmap (MIT) https://github.com/lair-framework/go-nmap
-https://github.com/lair-framework/go-nmap/blob/master/LICENSE
-
 mitchellh/consulstructure (MIT) https://github.com/mitchellh/consulstructure
 https://github.com/mitchellh/consulstructure/blob/master/LICENSE
 

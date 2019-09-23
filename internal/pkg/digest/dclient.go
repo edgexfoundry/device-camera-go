@@ -79,9 +79,9 @@ func (dc *DClient) DoDigestAuth(req *http.Request) (*http.Response, error) {
 
 func (dc *DClient) getDigestParts(resp *http.Response) {
 	result := map[string]string{}
-	if len(resp.Header["Www-Authenticate"]) > 0 {
+	if len(resp.Header["WWW-Authenticate"]) > 0 {
 		wantedHeaders := []string{"nonce", "realm", "qop"}
-		responseHeaders := strings.Split(resp.Header["Www-Authenticate"][0], ",")
+		responseHeaders := strings.Split(resp.Header["WWW-Authenticate"][0], ",")
 		for _, r := range responseHeaders {
 			for _, w := range wantedHeaders {
 				if strings.Contains(r, w) {
