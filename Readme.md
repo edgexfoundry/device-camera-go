@@ -18,15 +18,41 @@ This device service is built using the [onvif4go](https://github.com/faceterteam
 It provides a developer-friendly ONVIF client to use with ONVIF-compliant cameras.
 
 
-## Build Instruction:
+## Build Instructions:
 
-1. Check out device-camera-go
+1. Clone the device-camera-go repo with the following command:
+
+        git clone https://github.com/edgexfoundry/device-camera-go.git
 
 2. Build a docker image by using the following command:  
-`
-docker build . -t device-camera-go
-`
+
+        docker build . -t device-camera-go
 
 3. Alternatively the device service can be run natively with `make build` and the `./run.sh` script.
 
-By default, the configuration and profile files used by the service are available in __'res'__ folder.
+By default, the configuration and profile files used by the service are available in the __'cmd/res'__ folder.  Notably,
+the configuration.toml file __cmd/res__ should be changed to reflect the correct device profile and
+host/IP address for the camera(s).  The configuration-drive.toml file in the same directory should
+be updated with the camera's access credentials.
+
+### Notes
+
+#### Removing a Device from EdgeX
+
+During the course of testing or deployment you may end up with EdgeX devices in the system that
+you want to remove.  With this device service potentially starting listener goroutines for its
+devices, this becomes more relevant.
+
+To remove devices from EdgeX:
+
+1. Issue a request to the EdgeX core metadata service to get the IDs for all devices.
+
+        GET http://edgex-core-metadata:48081/api/v1/device
+
+2. Issue a request to the EdgeX core metadata service to delete a device by ID.
+
+        DELETE http://edgex-core-metadata:48081/api/v1/device/id/{{device_id_here}}
+
+This will remove the device from EdgeX and, as long as it does not remain in the device list
+inside this device service's configuration.toml file, will prevent this device service
+from attempting to initialize the device at startup. 

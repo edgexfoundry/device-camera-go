@@ -21,6 +21,7 @@ test:
 	go vet ./...
 
 lint: # requires the golint tool to be installed and available on your $PATH - (go get -u golang.org/x/lint/golint)
+	go get -u golang.org/x/lint/golint
 	golint ./... || true
 
 coveragehtml:
