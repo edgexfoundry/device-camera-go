@@ -81,7 +81,7 @@ Further detailed information is available on [EdgeX-Go repository](https://githu
 
    At time of writing, you will see that the latest docker-compose.yml is equivalent to Delhi 0.7.1.
 
-2. The device-camera-go device service does not require other EdgeX device services. To reduce runtime footprint a bit, and possible confusion about new devices, comment out the device-virtual section (using # at beginning of the line) in **./compose-files/docker-compose.yml**. 
+2. The device-camera-go device service does not require other EdgeX device services. To reduce runtime footprint a bit, and possible confusion about new devices, comment out the device-virtual section (using # at beginning of the line) in **./compose-files/docker-compose.yml**.
 
    ```
    # device-virtual:
@@ -164,7 +164,7 @@ Ready-set-go!
 
      [image of green/passing services]
 
-3. **Modify your /etc/hosts file** to override DNS resolution to resolve EdgeX service URLs. Add a single line below your existing localhost entry: 
+3. **Modify your /etc/hosts file** to override DNS resolution to resolve EdgeX service URLs. Add a single line below your existing localhost entry:
 
    > 127.0.0.1	localhost
    > 127.0.0.1	edgex-core-command edgex-core-metadata edgex-core-data
@@ -221,7 +221,7 @@ $ go run main.go -registry -source onvif -source axis
 
 A set of handy Postman links are available in the **./tests** subfolder.
 
-Since name prefixes are prepended to camera serialnumbers to uniquely identify (and namespace) your EdgeX IP camera devices. This constructs an immutable way to access a discovered IP camera; the name will not change across service start/stop or even removing information from the backend database. As a result, you will find it useful to add Postman requests using these device names to verify results. 
+Since name prefixes are prepended to camera serialnumbers to uniquely identify (and namespace) your EdgeX IP camera devices. This constructs an immutable way to access a discovered IP camera; the name will not change across service start/stop or even removing information from the backend database. As a result, you will find it useful to add Postman requests using these device names to verify results.
 
 For example, replace the serial number ACCC8E8439F0 with your camera's serial number on this URI:
 
@@ -421,7 +421,7 @@ Invoking the **onvif_profiles** command will return device readings with a value
 
 ### **ONVIF Device Data Model**
 
-Device response you should expect from querying EdgeX for devices by ONVIF profile. As a concrete example, with EdgeX and device-camera-go service running, invoke a GET request: 
+Device response you should expect from querying EdgeX for devices by ONVIF profile. As a concrete example, with EdgeX and device-camera-go service running, invoke a GET request:
 http://edgex-core-metadata:48081/api/v1/device/profilename/camera-profile-onvif
 
 This will produce a set of known devices, whether produced at startup by modifying configuration.toml and/or discovered on the network actively at your configured interval.
@@ -2115,7 +2115,4 @@ Note that the data model response for **Axis camera metadata** provides similar 
 
 ## Known Issues and Improvement Opportunities
 
-Please add as "issues" in github above ^ 
-
-
-
+Please add as "issues" in github above ^

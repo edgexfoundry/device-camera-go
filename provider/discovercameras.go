@@ -14,8 +14,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/edgexfoundry/device-sdk-go"
-	e_models "github.com/edgexfoundry/edgex-go/pkg/models"
+	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/pelletier/go-toml"
+	"io/ioutil"
 	"log"
+	"os"
+	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -41,6 +46,18 @@ type CameraSource struct {
 	DefaultPort      int
 }
 
+// Credentials is a struct which contains settings to be stored in Vault (though currently in EdgeX Registry!).
+// A valid user must be assigned to IP cameras for device-camera-go to access.
+type CredentialsInfo struct {
+	User string
+	Pass string
+}
+
+// Config is a struct which contains values to be read from .toml configuration settings.
+type CredConfig struct {
+	Credentials CredentialsInfo
+}
+
 // Options contains input parameters and runtime objects to simplify access by device service methods.
 // Since Options is a member of CameraDiscoveryProvider, consider  as appropriate.
 type Options struct {
@@ -49,7 +66,10 @@ type Options struct {
 	IP               string   // IP subnet(s) to use for network scan
 	NetMask          string   // Network mask to use for network scan
 	SourceFlags      []string // Array holding vendor(s) and port(s) for scan
-	Credentials      string   // Credentials to connect to cameras
+	CredentialsFile  string // used for explicit (e.g., in case separate file desired)
+	ConfDir          string // used for credentials default/fallback
+	ConfProfile      string // used for credentials default/fallback
+	Credentials      CredentialsInfo // Credentials for connecting to cameras
 	SupportedSources []CameraSource
 }
 
@@ -289,7 +309,7 @@ func (p *CameraDiscoveryProvider) addEdgeXCameraDevices(cameras []CameraInfo, de
 		deviceNamePrefix = p.options.SupportedSources[Axis].DeviceNamePrefix
 	}
 	for i := range cameras {
-		var edgexDevice e_models.Device
+		var edgexDevice contract.Device
 		if cameras[i].SerialNumber == "" {
 			p.lc.Error(fmt.Sprintf("ERROR adding EdgeX camera device. Check credentials. No serial number at index: %v", i))
 		} else {
@@ -309,34 +329,28 @@ func (p *CameraDiscoveryProvider) addEdgeXCameraDevices(cameras []CameraInfo, de
 				// In this case expect EdgeX error:
 				// "Device 'edgex-camera-<interface>-<SerialNumber>' cannot be found in cache"
 				p.lc.Info("GetDeviceByName for device " + deviceName + " ErrResponse: " + err.Error())
-				edgexDevice = e_models.Device{
+
+				// TODO: Identify why ProtocolProperties are required, fails to create device if missing
+				edgexDevice = contract.Device{
 					Name:           deviceName,
-					AdminState:     "unlocked",
-					OperatingState: "enabled",
-					Addressable: e_models.Addressable{
-						Name:      deviceName + "-addressable",
-						Protocol:  "HTTP",
-						Address:   "172.17.0.1", //functions equally well using localhost/127.0.0.1, or external ip of host, with Delhi release
-						Port:      49990,
-						Path:      "/cameradiscoveryprovider",
-						Publisher: "none",
-						User:      "none",
-						Password:  "none",
-						Topic:     "none",
-					},
+					AdminState:     contract.Unlocked,
+					OperatingState: contract.Enabled,
+					Protocols:      p.getProtocols(),
 					Labels: labels,
 					//Location: tag.deviceLocation,
-					Profile: e_models.DeviceProfile{
+					Profile: contract.DeviceProfile{
 						Name: deviceVendorProfileName,
 					},
-					Service: e_models.DeviceService{
-						AdminState: "unlocked",
-						Service: e_models.Service{
-							Name:           "device-camera-go",
-							OperatingState: "enabled",
-						},
+					Service: contract.DeviceService{
+						AdminState:     contract.Unlocked,
+						Name:           "device-camera-go",
+						OperatingState: contract.Enabled,
 					},
 				}
+				edgexDevice.Origin = time.Now().UnixNano() / int64(time.Millisecond)
+				edgexDevice.Description = "EdgeX Discovered IP Camera"
+				p.lc.Debug(fmt.Sprintf("Adding Device: %v", edgexDevice))
+
 				p.lc.Debug(fmt.Sprintf("Adding NEW EdgeX device named: %s", deviceName))
 				idstr, err = device.RunningService().AddDevice(edgexDevice)
 				if err != nil {
@@ -398,7 +412,7 @@ func (p *CameraDiscoveryProvider) memoizeCamInfoAxis(cameras []CameraInfo, camIn
 // getCameraMetadata loops across requested camera vendors to resolve potential hosts on potential ports.
 // This builds an array of CameraInfo elements containing ONVIF and Axis details from N hosts listening on N ports.
 // --source=axis:554,555,556,80 --source=onvif:80,81,82,555,8000
-func (p *CameraDiscoveryProvider) getCameraMetadata(camVendor string, sourceFlags []string, discoveredHosts map[string][]int, credentialsPath string) []CameraInfo {
+func (p *CameraDiscoveryProvider) getCameraMetadata(camVendor string, sourceFlags []string, discoveredHosts map[string][]int, credentials CredentialsInfo) []CameraInfo {
 	cameras := []CameraInfo{}
 	p.lc.Debug(fmt.Sprintf("CameraDiscovery.GetCameraMetadata scanning discovered hosts for requested camera device signatures"))
 	for host, ports := range discoveredHosts {
@@ -417,7 +431,7 @@ func (p *CameraDiscoveryProvider) getCameraMetadata(camVendor string, sourceFlag
 					}
 					if isRequestedPort(sourcePorts, port) {
 						p.lc.Trace(fmt.Sprintf("RequestingCameraDetails - DiscoveredHost [%s] port [%d] matches requested vendor source [%s] sourcePort[%v] for sourceFlagsVendor [%s]", host, port, camVendor, sourcePorts, source))
-						cameras = p.getRequestedCameraDetails(source, port, host, credentialsPath, cameras)
+						cameras = p.getRequestedCameraDetails(source, port, host, credentials, cameras)
 					}
 				}
 			}
@@ -485,12 +499,12 @@ func (p *CameraDiscoveryProvider) getRequestedSourcePorts(sourceFlagInfo string)
 	return sourcePorts, source, err
 }
 
-func (p *CameraDiscoveryProvider) getRequestedCameraDetails(source string, port int, host string, credentialsPath string, cameras []CameraInfo) []CameraInfo {
+func (p *CameraDiscoveryProvider) getRequestedCameraDetails(source string, port int, host string, credentials CredentialsInfo, cameras []CameraInfo) []CameraInfo {
 	//onvif camera
 	if source == p.options.SupportedSources[ONVIF].Name {
 		deviceAddr := host + ":" + strconv.Itoa(port)
 		p.lc.Trace(fmt.Sprintf("CameraDiscovery.GetCameraMetadata invoking getOnvifCameraDetails(%s)", deviceAddr))
-		cameraInfo, err := p.getOnvifCameraDetails(deviceAddr, credentialsPath)
+		cameraInfo, err := p.getOnvifCameraDetails(deviceAddr, credentials)
 		if err != nil {
 			// Treat error as debug to avoid spamming logs, since many prospective hosts are simply not cameras.
 			p.lc.Debug(err.Error())
@@ -502,7 +516,7 @@ func (p *CameraDiscoveryProvider) getRequestedCameraDetails(source string, port 
 	if source == p.options.SupportedSources[Axis].Name {
 		deviceAddr := host + ":" + strconv.Itoa(port)
 		p.lc.Trace(fmt.Sprintf("CameraDiscovery.GetCameraMetadata invoking getAxisCameraDetails(%s)", deviceAddr))
-		cameraInfo, err := p.getAxisCameraDetails(host, credentialsPath)
+		cameraInfo, err := p.getAxisCameraDetails(host, credentials)
 		if err != nil {
 			// Continue on error - other cameras may return valid response
 			p.lc.Debug(err.Error())
@@ -511,4 +525,42 @@ func (p *CameraDiscoveryProvider) getRequestedCameraDetails(source string, port 
 		}
 	}
 	return cameras
+}
+
+func (p *CameraDiscoveryProvider) LoadCredFromFile(profile string, confDir string, absoluteFile string) (config *CredConfig, err error) {
+	var absPath string
+	ConfigDirectory    := "./res"
+	ConfigFileName     := "configuration.toml"
+	if len(absoluteFile) != 0 {
+		absPath = absoluteFile
+	} else {
+		if len(confDir) == 0 {
+			confDir = ConfigDirectory
+		}
+		if len(profile) > 0 {
+			confDir = confDir + "/" + profile
+		}
+		path := path.Join(confDir, ConfigFileName)
+		absPath, err = filepath.Abs(path)
+		if err != nil {
+			err = fmt.Errorf("Could not create absolute path to load configuration: %s; %v", path, err.Error())
+			return nil, err
+		}
+	}
+	fmt.Fprintln(os.Stdout, fmt.Sprintf("Loading CREDENTIALS from: %s\n", absPath))
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("could not load configuration file; invalid TOML (%s)", absPath)
+		}
+	}()
+	config = &CredConfig{}
+	contents, err := ioutil.ReadFile(absPath)
+	if err != nil {
+		return nil, fmt.Errorf("Could not load configuration file (%s): %v\nBe sure to change to program folder or set working directory.", absPath, err.Error())
+	}
+	err = toml.Unmarshal(contents, config)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse configuration file (%s): %v", absPath, err.Error())
+	}
+	return config, nil
 }

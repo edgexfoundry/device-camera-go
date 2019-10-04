@@ -4,7 +4,7 @@ LogLevel = "INFO"
 [Service]
 Host = "device-camera-go"
 Port = 49990
-ConnectRetries = 3
+ConnectRetries = 20
 Labels = []
 OpenMsg = "Device Camera Go Started"
 ReadMaxLimit = 256
@@ -14,9 +14,9 @@ AsyncBufferSize = 16
 
 [Registry]
 Type = "consul"
-Host = "localhost"
+Host = "edgex-core-consul"
 Port = 8500
-CheckInterval = "15s"
+CheckInterval = "10s"
 FailLimit = 3
 FailWaitTime = 10
 
@@ -24,25 +24,25 @@ FailWaitTime = 10
   [Clients.Data]
   name = "edgex-core-data"
   Protocol = "http"
-  Host = "localhost"
+  Host = "edgex-core-data"
   Port = 48080
-  Timeout = 5000
+  Timeout = 50000
 
   [Clients.Metadata]
   name = "edgex-core-metadata"
   Protocol = "http"
-  Host = "localhost"
+  Host = "edgex-core-metadata"
   Port = 48081
-  Timeout = 5000
+  Timeout = 50000
 
   [Clients.Logging]
   Name = "edgex-support-logging"
   Protocol = "http"
-  Host = "localhost"
+  Host = "edgex-support-logging"
   Port = 48061
 
 [Logging]
-EnableRemote = false
+EnableRemote = true
 File = "./device-camera-go-service.log"
 
 [Credentials]
