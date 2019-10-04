@@ -4,11 +4,10 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/beevik/etree v1.1.0 // indirect
 	github.com/brianolson/cbor_go v1.0.0 // indirect
-	github.com/edgexfoundry/device-sdk-go v0.0.0-20190522161733-b70462a1276d
-	github.com/edgexfoundry/go-mod-core-contracts v0.1.16
+	github.com/edgexfoundry/device-sdk-go v1.0.0
+	github.com/edgexfoundry/go-mod-core-contracts v0.1.0
 	github.com/elgs/gostrgen v0.0.0-20161222160715-9d61ae07eeae // indirect
 	github.com/faceterteam/onvif4go v0.4.0
-	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/satori/go.uuid v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392 // indirect
