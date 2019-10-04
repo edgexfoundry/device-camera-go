@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-func (p *CameraDiscoveryProvider) getAxisCameraDetails(address string, credentialsPath string) (CameraInfo, error) {
+func (p *CameraDiscoveryProvider) getAxisCameraDetails(address string, credentials CredentialsInfo) (CameraInfo, error) {
 	p.lc.Debug(fmt.Sprintf("Querying AXIS details from: %v", address))
 	client := &http.Client{}
 	parameters := []string{
@@ -28,15 +28,12 @@ func (p *CameraDiscoveryProvider) getAxisCameraDetails(address string, credentia
 		"Properties.API.RTSP.RTSPAuth",
 	}
 	url := "http://" + address + "/axis-cgi/admin/param.cgi?action=list&group=" + strings.Join(parameters, ",")
-	// Providing credentials will cause Axis API to produce errors in some camera configurations.
-	// Adjustment is needed for cases where cameras a configured for basic vs digest authentication.
-	/* cameraUser, cameraPassword, err := readCredentialsFromFile(credentialsPath)
-	if err != nil {
-		return CameraInfo{}, err
-	} */
-	// Nullify credentials here
-	cameraUser := ""
-	cameraPassword := ""
+	// TODO: Adjustment is needed for cases where cameras are configured for basic vs digest authentication.
+	//  Adjust to use the credentials here if your camera models and configuration supports it.
+
+	// Intentionally Nullify credentials here
+	cameraUser := "" //credentials.User
+	cameraPassword := "" //credentials.Pass
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return CameraInfo{}, err

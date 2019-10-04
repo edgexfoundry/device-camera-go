@@ -3,14 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/edgexfoundry/device-sdk-go"
-	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
-	"github.com/edgexfoundry-holding/device-camera-go/provider"
 	"io"
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
+
+	"github.com/edgexfoundry-holding/device-camera-go/cameradiscoveryprovider"
+	"github.com/edgexfoundry/device-sdk-go"
+	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
 )
 
 const (
@@ -21,7 +23,7 @@ const (
 var (
 	confProfile string
 	confDir     string
-	useRegistry bool
+	registryUrl string
 )
 
 // SourceList represents the parameters instructing to scan for a particular
@@ -41,38 +43,74 @@ func (list *SourceList) Set(val string) error {
 }
 
 func main() {
-	// Default device-camera-go parameters
-
-	// IP Range default
-	ip := "192.168.0.1-30"
-	netMask := ""
-	scanDuration := "15s"
-	interval := 60
-
-	camInfoFileOnvif := "./res/caminfocache.json"
-	camInfoFileAxis := "./res/caminfocache-axis.json"
-	tagsFile := "./res/tags.json"
-	cameraCredentialsFile := "./res/cam-credentials.conf"
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
-	// Process EdgeX DeviceService parameters
-	flag.BoolVar(&useRegistry, "registry", false, "Indicates the service should use the registry.")
-	flag.BoolVar(&useRegistry, "r", false, "Indicates the service should use registry.")
-	flag.StringVar(&confProfile, "profile", "", "Specify a profile other than default.")
-	flag.StringVar(&confProfile, "p", "", "Specify a profile other than default.")
-	flag.StringVar(&confDir, "confdir", "", "Specify an alternate configuration directory.")
-	flag.StringVar(&confDir, "c", "", "Specify an alternate configuration directory.")
+	// TODO: Populate all configuration from EdgeX registry?
+	//  Currently we get application data for credentials from configuration.toml only.
+	//  Otherwise assigned using environment vars in compose file, overridden by cmdline parameters.
 
-	// Process CameraDiscovery parameters
+	registryUrl = os.Getenv("dsdk_registry")
+	confProfile = os.Getenv("dsdk_profile")
+	confDir = os.Getenv("dsdk_confdir")
+
+	// Process EdgeX DeviceService parameters
+	flag.StringVar(&registryUrl, "registry", "", "Deprecated. Override consul registry url using Docker profile commandline parameter.")
+	flag.StringVar(&registryUrl, "r", "", "Deprecated. Override consul registry url using Docker profile commandline parameter.")
+	flag.StringVar(&confProfile, "profile", confProfile, "Specify a profile other than default. Examples are local and docker.")
+	flag.StringVar(&confProfile, "p", confProfile, "Specify a profile other than default.")
+	flag.StringVar(&confDir, "confdir", confDir, "Specify an alternate configuration directory.")
+	flag.StringVar(&confDir, "c", confDir, "Specify an alternate configuration directory.")
+
+	// Initial flag values are assigned by environment variables
+	// This allows local host to set and also may be set using docker run (-e <variable=xxx>)
+	// and using docker-compuse (add environment section within docker-compose.yml file).
+	ip := os.Getenv("dcg_ip")
+	netMask := os.Getenv("dcg_mask")
+	scanDuration := os.Getenv("dcg_scanduration")
+	intervalStr := os.Getenv("dcg_interval")
+	source1 := os.Getenv("dcg_source1")
+	tagsFile := os.Getenv("dcg_tagsFile")
+	cameraCredentialsFile := os.Getenv("dcg_cameracredentials")
+
+	// Assign default values to be used for certain device-camera-go parameters 
+	// if not specified by commandline / environment
+	if len(ip) == 0 {
+		ip = "192.168.0.1-30"
+	}
+	if len(scanDuration) == 0 {
+		scanDuration = "15s"
+	}
+	// Convert env string to int
+	interval, err := strconv.Atoi(intervalStr)
+	if err != nil {
+		interval = 60
+	}
+	if len(tagsFile) == 0 {
+		tagsFile = "./res/tags.json"
+	}
+	if len(cameraCredentialsFile) == 0 {
+		cameraCredentialsFile = "./res/cam-credentials.conf"
+	}
+	if len(source1) != 0 {
+		// assign a single source (with n ports) using environment
+		// extend as you deem useful by adding environment vars, etc.
+		sourceFlags = append(sourceFlags, source1)
+	} else {
+		flag.Var(&sourceFlags, "source", "source to scan, -source axis:554 -source onvif:80")
+	}
+
+	// Process remaining CameraDiscovery parameters
 	flag.StringVar(&ip, "ip", ip, "IP address for nmap scan")
 	flag.StringVar(&netMask, "mask", netMask, "Network mask for nmap scan")
 	flag.StringVar(&scanDuration, "scanduration", scanDuration, "Duration to permit for each network discovery scan; -scanduration \"10s\"")
 	flag.IntVar(&interval, "interval", interval, "Interval between discovery scans, in seconds. Must be > scanduration; -interval 180")
-	flag.Var(&sourceFlags, "source", "source to scan, -source axis:554 -source onvif:80")
 	flag.StringVar(&tagsFile, "tagsFile", tagsFile, "Location of file where camera tags are cached")
 	flag.StringVar(&cameraCredentialsFile, "cameracredentials", cameraCredentialsFile,
 		"Path to file containing credentials for the camera (user and password, tab-separated)")
 	flag.Parse()
+
+	camInfoFileOnvif := "./res/caminfocache.json"
+	camInfoFileAxis := "./res/caminfocache-axis.json"
 
 	camInfoCache := cameradiscoveryprovider.CamInfo{}
 	tagCache := cameradiscoveryprovider.Tags{}
@@ -100,7 +138,9 @@ func main() {
 		SourceFlags:      sourceFlags,
 		IP:               ip,
 		NetMask:          netMask,
-		Credentials:      cameraCredentialsFile,
+		CredentialsFile:  cameraCredentialsFile, // used for explicit (e.g., in case separate file desired)
+		ConfDir:          confDir, // used for credentials default/fallback
+		ConfProfile:      confProfile, // used for credentials default/fallback
 		SupportedSources: supportedSources,
 	}
 	ac := cameradiscoveryprovider.AppCache{
@@ -134,8 +174,14 @@ func startService(serviceName string, serviceVersion string, driver ds_models.Pr
 	// Instantiate our CameraDiscovery provider "device"
 	cameradiscoveryprovider := cameradiscoveryprovider.New(options, ac)
 	fmt.Println(fmt.Sprintf("SourceFlags: %v", options.SourceFlags))
+	fmt.Println(fmt.Sprintf("IPRange: %v", options.IP))
+	fmt.Println(fmt.Sprintf("NetMask: %v", options.NetMask))
+	fmt.Println(fmt.Sprintf("Interval: %v", options.Interval))
+	fmt.Println(fmt.Sprintf("ScanDuration: %v", options.ScanDuration))
+	fmt.Println(fmt.Sprintf("CredFile: %v", options.Credentials))
+
 	// Create EdgeX service and pass in the provider "device"
-	deviceService, err := device.NewService(serviceName, serviceVersion, confProfile, confDir, useRegistry, cameradiscoveryprovider)
+	deviceService, err := device.NewService(serviceName, serviceVersion, confProfile, confDir, registryUrl, cameradiscoveryprovider)
 	if err != nil {
 		return err
 	}
@@ -162,3 +208,5 @@ func listenForInterrupt(errChan chan error) {
 		errChan <- fmt.Errorf("%s", <-c)
 	}()
 }
+
+

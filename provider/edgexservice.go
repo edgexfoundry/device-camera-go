@@ -12,12 +12,13 @@ package cameradiscoveryprovider
 // Implements EdgeX ProtocolDriver interface
 import (
 	"fmt"
-	"github.com/edgexfoundry/device-sdk-go"
-	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
-	logger "github.com/edgexfoundry/edgex-go/pkg/clients/logging"
-	e_models "github.com/edgexfoundry/edgex-go/pkg/models"
 	"strings"
 	"time"
+
+	"github.com/edgexfoundry/device-sdk-go"
+	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
+	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
 )
 
 const (
@@ -45,45 +46,53 @@ type appLogger struct {
 }
 
 func newAppLogger(lc logger.LoggingClient) AppLoggingClient {
-	return &appLogger{lc: lc, count: 0, thresh: 0, msgPrefix: fmt.Sprintf("[%s] - ", device.RunningService().Name())}
+	return &appLogger{lc: lc, count: 0, thresh: 0, msgPrefix: ""}
+	// Prepend any value to this service's logs using msgPrefix.
+	// Example:
+	//return &appLogger{lc: lc, count: 0, thresh: 0, msgPrefix: fmt.Sprintf("[%s] - ", device.RunningService().Name())}
 }
 
 func (l *appLogger) SetLogLevel(level string) error {
 	return l.lc.SetLogLevel(level)
 }
 func (l *appLogger) Error(msg string, labels ...string) {
-	if err := l.lc.Error(l.msgPrefix+msg, labels...); err != nil {
-		l.count++
-		panic(err)
+	new := make([]interface{}, len(labels))
+	for i, v := range labels {
+		new[i] = v
 	}
+	l.lc.Error(l.msgPrefix+msg, new...)
 }
 
 func (l *appLogger) Warn(msg string, labels ...string) {
-	if err := l.lc.Warn(l.msgPrefix+msg, labels...); err != nil {
-		l.count++
-		panic(err)
+	new := make([]interface{}, len(labels))
+	for i, v := range labels {
+		new[i] = v
 	}
+	l.lc.Warn(l.msgPrefix+msg, new...)
 }
 
 func (l *appLogger) Info(msg string, labels ...string) {
-	if err := l.lc.Info(l.msgPrefix+msg, labels...); err != nil {
-		l.count++
-		panic(err)
+	new := make([]interface{}, len(labels))
+	for i, v := range labels {
+		new[i] = v
 	}
+	l.lc.Info(l.msgPrefix+msg, new...)
 }
 
 func (l *appLogger) Debug(msg string, labels ...string) {
-	if err := l.lc.Debug(l.msgPrefix+msg, labels...); err != nil {
-		l.count++
-		panic(err)
+	new := make([]interface{}, len(labels))
+	for i, v := range labels {
+		new[i] = v
 	}
+	l.lc.Debug(l.msgPrefix+msg, new...)
 }
 
 func (l *appLogger) Trace(msg string, labels ...string) {
-	if err := l.lc.Trace(l.msgPrefix+msg, labels...); err != nil {
-		l.count++
-		panic(err)
+	new := make([]interface{}, len(labels))
+	for i, v := range labels {
+		new[i] = v
 	}
+	l.lc.Trace(l.msgPrefix+msg, new...)
 }
 
 // AppCache holds elements related to application layer's device service caches.
@@ -115,7 +124,7 @@ func New(options *Options, ac *AppCache) *CameraDiscoveryProvider {
 }
 
 // DisconnectDevice is called by the SDK for protocol specific disconnection from device service.
-func (p *CameraDiscoveryProvider) DisconnectDevice(address *e_models.Addressable) error {
+func (p *CameraDiscoveryProvider) DisconnectDevice(deviceName string, protocols map[string]contract.ProtocolProperties) error {
 	p.lc.Warn(fmt.Sprintf("DisconnectDevice CALLED: We can set state of devices, and update CoreMetadata..."))
 	return nil
 }
@@ -172,6 +181,34 @@ func (p *CameraDiscoveryProvider) Initialize(lc logger.LoggingClient, asyncCh ch
 		// Existence of a tag cache is not mandatory, continue with Initialize
 		err = nil
 	}
+
+	// ==============================
+	// Load Credentials from Vault
+	// ==============================
+	// Perform our equivalent of a configuration registry lookup during service initialization.
+	// This is performed against the res/configuration.toml using logic that currently matches
+	// internal DSDK behavior. It uses values of a couple constants also defined there.
+	credConfig, err := p.LoadCredFromFile(p.options.ConfProfile, p.options.ConfDir, p.options.CredentialsFile)
+	if (err != nil) {
+		p.lc.Error(err.Error())
+	}
+	p.options.Credentials = credConfig.Credentials
+	// NOTE: We are now finished with cameraCredentialsFile.
+
+
+	// ==============================
+	// Report Info to logs for troubleshooting
+	// ==============================
+	p.lc.Info(fmt.Sprintf("Service Initialization:"))
+	p.lc.Info(fmt.Sprintf("SourceFlags: %v", p.options.SourceFlags))
+	p.lc.Info(fmt.Sprintf("IPRange: %v", p.options.IP))
+	p.lc.Info(fmt.Sprintf("NetMask: %v", p.options.NetMask))
+	p.lc.Info(fmt.Sprintf("Interval: %v", p.options.Interval))
+	p.lc.Info(fmt.Sprintf("ScanDuration: %v", p.options.ScanDuration))
+	p.lc.Info(fmt.Sprintf("Credentials (REMOVE): %v", p.options.Credentials))
+	p.lc.Info(fmt.Sprintf("Cached ONVIF Devices: %v", len(p.ac.CamInfoCache.OnvifCameras)))
+	p.lc.Info(fmt.Sprintf("Cached Axis Devices: %v", len(p.ac.CamInfoCache.AxisCameras)))
+
 	// ==============================
 	// Add service as EdgeX Device
 	// ==============================
@@ -222,37 +259,41 @@ func (p *CameraDiscoveryProvider) loadCameraInfoCaches() error {
 	return p.ac.CamInfoCache.LoadInfo(p.lc, fileOnvif, fileAxis)
 }
 
+func (p *CameraDiscoveryProvider) getProtocols() map[string]contract.ProtocolProperties {
+	p1 := make(map[string]string)
+	p1["host"] = "localhost"
+	p1["port"] = "all"
+
+	p2 := make(map[string]string)
+	p2["supports"] = "axis, onvif"
+
+	wrap := make(map[string]contract.ProtocolProperties)
+	wrap["connection"] = p1
+	wrap["api_types"] = p2
+
+	return wrap
+}
+
 func (p *CameraDiscoveryProvider) registerDeviceManagementProvider(deviceName string, labels []string) error {
 	p.lc.Info(fmt.Sprintf("Adding CameraDeviceProvider as a proxy/manager EdgeX device"))
 	// device.RunningService().RemoveDeviceByName(deviceName)
 	edgexDevice, err := device.RunningService().GetDeviceByName(deviceName)
 	if err != nil {
-		idstr, err2 := device.RunningService().AddDevice(e_models.Device{
+
+		idstr, err2 := device.RunningService().AddDevice(contract.Device{
 			Name:           deviceName,
-			AdminState:     "unlocked",
-			OperatingState: "enabled",
-			Addressable: e_models.Addressable{
-				Name:      "device-camera-go-management-provider",
-				Protocol:  "HTTP",
-				Address:   "localhost", //10.0.2.15  localhost  172.17.0.1
-				Port:      49990,
-				Path:      "/api/v1/devices/{deviceId}/tags",
-				Publisher: "none",
-				User:      "none",
-				Password:  "none",
-				Topic:     "none",
-			},
+			AdminState:     contract.Unlocked,
+			OperatingState: contract.Enabled,
+			Protocols:      p.getProtocols(),
 			Labels:   labels,
 			Location: "gateway",
-			Profile: e_models.DeviceProfile{
+			Profile: contract.DeviceProfile{
 				Name: CameraManagementProfileName,
 			},
-			Service: e_models.DeviceService{
-				AdminState: "unlocked",
-				Service: e_models.Service{
-					Name:           "device-camera-go",
-					OperatingState: "enabled",
-				},
+			Service: contract.DeviceService{
+				AdminState:     contract.Unlocked,
+				Name:           "device-camera-go",
+				OperatingState: contract.Enabled,
 			},
 		})
 		err = err2
@@ -264,51 +305,51 @@ func (p *CameraDiscoveryProvider) registerDeviceManagementProvider(deviceName st
 		time.Sleep(1 * time.Second)
 		p.lc.Info("CameraDiscoveryProvider assigned EdgeX ID:" + idstr)
 	} else {
-		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider was previously registered and has EdgeX ID: %s", edgexDevice.Id.Hex()))
+		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider was previously registered and has EdgeX ID: %s", edgexDevice.Id))
 	}
 	return err
 }
 
-// HandleReadCommands processes GET commands
-func (p *CameraDiscoveryProvider) HandleReadCommands(addr *e_models.Addressable,
-	reqs []ds_models.CommandRequest) (res []*ds_models.CommandValue, err error) {
+// HandleReadCommands passes a slice of CommandRequest struct each representing
+// a ResourceOperation for a specific device resource.
+func (p *CameraDiscoveryProvider) HandleReadCommands(deviceName string, protocols map[string]contract.ProtocolProperties, reqs []ds_models.CommandRequest) (res []*ds_models.CommandValue, err error) {
 	if len(reqs) != 1 {
-		p.lc.Error(fmt.Sprintf("CameraDiscoveryDriver.HandleReadCommands; too many command requests; only one supported"))
-		return
+		err = fmt.Errorf("CameraDiscoveryDriver.HandleReadCommands; too many command requests; only one supported")
+		return res, err
 	}
-	p.lc.Info(fmt.Sprintf("RECEIVED COMMAND REQUEST: %s", reqs[0].RO.Object))
-	if reqs[0].RO.Object == "onvif_profiles" || reqs[0].RO.Object == "axis_info" {
+	p.lc.Info(fmt.Sprintf("RECEIVED COMMAND REQUEST for DeviceResourceName %s  Attributes: [%v]", reqs[0].DeviceResourceName, reqs[0].Attributes))
+	if reqs[0].DeviceResourceName == "onvif_profiles" || reqs[0].DeviceResourceName == "axis_info" {
 		// These EdgeX commands are distinct for each device class.
 		// ONVIF and vendor-specific APIs (e.g., Axis) provide different interfaces, often to the same physical device.
 		var serialNum string
 		var camInfo string
-		if reqs[0].RO.Object == "axis_info" {
-			serialNum = strings.TrimPrefix(addr.Name, p.options.SupportedSources[Axis].DeviceNamePrefix)
+		if reqs[0].DeviceResourceName == "axis_info" {
+			serialNum = strings.TrimPrefix(deviceName, p.options.SupportedSources[Axis].DeviceNamePrefix)
 			camInfo = p.ac.CamInfoCache.TransformCameraInfoToString("axis", serialNum)
 		}
-		if reqs[0].RO.Object == "onvif_profiles" {
-			serialNum = strings.TrimPrefix(addr.Name, p.options.SupportedSources[ONVIF].DeviceNamePrefix)
+		if reqs[0].DeviceResourceName == "onvif_profiles" {
+			serialNum = strings.TrimPrefix(deviceName, p.options.SupportedSources[ONVIF].DeviceNamePrefix)
 			camInfo = p.ac.CamInfoCache.TransformCameraInfoToString("onvif", serialNum)
 		}
 		res = make([]*ds_models.CommandValue, 1)
 		now := time.Now().UnixNano() / int64(time.Millisecond)
-		cv := ds_models.NewStringValue(&reqs[0].RO, now, camInfo)
+		cv := ds_models.NewStringValue(reqs[0].DeviceResourceName, now, camInfo)
 		res[0] = cv
-	} else if reqs[0].RO.Object == "tags" {
+	} else if reqs[0].DeviceResourceName == "tags" {
 		// This EdgeX Command is common between two device classes (ONVIF and Axis)
-		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleReadCommands: Returning Tags associated with device: %s", addr.Name))
-		serialNum := strings.TrimPrefix(addr.Name, p.options.SupportedSources[ONVIF].DeviceNamePrefix)
-		if len(serialNum) == len(addr.Name) {
-			serialNum = strings.TrimPrefix(addr.Name, p.options.SupportedSources[Axis].DeviceNamePrefix)
+		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleReadCommands: Returning Tags associated with device: %s", deviceName))
+		serialNum := strings.TrimPrefix(deviceName, p.options.SupportedSources[ONVIF].DeviceNamePrefix)
+		if len(serialNum) == len(deviceName) {
+			serialNum = strings.TrimPrefix(deviceName, p.options.SupportedSources[Axis].DeviceNamePrefix)
 		}
 		camTags := createKeyValuePairString(p.ac.TagCache.Tags[serialNum])
 		res = make([]*ds_models.CommandValue, 1)
 		now := time.Now().UnixNano() / int64(time.Millisecond)
-		cv := ds_models.NewStringValue(&reqs[0].RO, now, camTags)
+		cv := ds_models.NewStringValue(reqs[0].DeviceResourceName, now, camTags)
 		res[0] = cv
-	} else if reqs[0].RO.Object == "get_user" {
+	} else if reqs[0].DeviceResourceName == "get_user" {
 		// Vendor specific command (Axis user CRUD example)
-		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleReadCommands: TODO: Return EdgeX Video Users associated with device: %s", addr.Name))
+		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleReadCommands: TODO: Return EdgeX Video Users associated with device: %s", deviceName))
 	}
 	return
 }
@@ -316,19 +357,20 @@ func (p *CameraDiscoveryProvider) HandleReadCommands(addr *e_models.Addressable,
 // HandleWriteCommands processes PUT commands, and is passed a slice of CommandRequest struct
 // each representing a ResourceOperation for a specific device resource (aka DeviceObject).
 // As these are actuation commands, params will provide parameters distinct to the command.
-func (p *CameraDiscoveryProvider) HandleWriteCommands(addr *e_models.Addressable, reqs []ds_models.CommandRequest,
-	params []*ds_models.CommandValue) error {
+/*func (p *CameraDiscoveryProvider) HandleWriteCommands(addr *contract.Addressable, reqs []ds_models.CommandRequest,
+	params []*ds_models.CommandValue) error {*/
+func (p *CameraDiscoveryProvider) HandleWriteCommands(deviceName string, protocols map[string] contract.ProtocolProperties, reqs []ds_models.CommandRequest, params []*ds_models.CommandValue) error {
 	if len(reqs) != 1 {
 		err := fmt.Errorf("CameraDiscoveryDriver.HandleWriteCommands; too many command requests; only one supported")
 		return err
 	}
-	p.lc.Info(fmt.Sprintf("TODO: CameraDiscoveryDriver.HandleWriteCommands: dev: %s op: %v attrs: %v", addr.Name, reqs[0].RO.Operation, reqs[0].DeviceObject.Attributes))
+	p.lc.Info(fmt.Sprintf("TODO: CameraDiscoveryDriver.HandleWriteCommands: deviceName: %s protocolMap: [%v] reqs: [%v]", deviceName, protocols, reqs[0]))
 	p.lc.Info(fmt.Sprintf("with params: %v", params))
-	if reqs[0].RO.Object == "tags" {
-		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleWriteCommands: TODO: PUT tags caller wants associated with device: %s", addr.Name))
-	} else if reqs[0].RO.Object == "user" {
+	if reqs[0].Attributes["name"] == "tags" {
+		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleWriteCommands: TODO: PUT tags caller wants associated with device: %s", deviceName))
+	} else if reqs[0].Attributes["name"] == "user" {
 		// TODO: To support CRUD add commands for /add_user, /update_user, /remove_user
-		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleWriteCommands: TODO: PUT user group and credentials for EdgeX Video User that caller wants associated with device: %s", addr.Name))
+		p.lc.Info(fmt.Sprintf("CameraDiscoveryProvider.HandleWriteCommands: TODO: PUT user group and credentials for EdgeX Video User that caller wants associated with device: %s", deviceName))
 	}
 	return nil
 }
