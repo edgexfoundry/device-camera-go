@@ -281,7 +281,7 @@ func (rc *RcpClient) CameraInit(edgexDevice e_models.Device, ipAddress string, u
 			case <-ticks:
 				err := rc.requestEvents(edgexDevice, ipAddress, stopchan)
 				if err != nil {
-					rc.lc.Error("Error in RCP loop: %s", err.Error())
+					rc.lc.Error(fmt.Sprintf("Error in RCP loop: %s", err.Error()))
 					maxErrors--
 				} else {
 					maxErrors = 60
