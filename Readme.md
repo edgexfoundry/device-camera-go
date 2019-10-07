@@ -35,7 +35,38 @@ the configuration.toml file __cmd/res__ should be changed to reflect the correct
 host/IP address for the camera(s).  The configuration-drive.toml file in the same directory should
 be updated with the camera's access credentials.
 
-### Notes
+## Notes
+
+#### Parameters for PUT commands
+
+EdgeX Put commands (as-of writing) take a single parameter.  For commands like "create
+a user" or "set the device system time", this is problematic.  To workaround this 
+limitation, the device service expects the parameters for several of the PUT commands
+to be a single string value containing string-escaped JSON.  Some examples:
+
+```$xslt
+{"OnvifDateTime": 
+    "{
+        \"Hour\":21,
+        \"Minute\":35,
+        \"Second\":6,
+        \"Year\":2019,
+        \"Month\":10,
+        \"Day\":4
+    }"
+}
+```
+
+```$xslt
+{"OnvifUser":
+    "{
+        \"Username\":\"newadmin2\", 
+        \"Password\":\"newadmin234\", 
+        \"UserLevel\":\"Operator\"
+    }"
+}
+```
+
 
 #### Removing a Device from EdgeX
 
