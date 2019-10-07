@@ -1,3 +1,9 @@
 [Camera]
 User = "service"
 Password = "Password!1"
+# Assign AuthMethod to "digest" | "basic" | "none"
+# AuthMethod specifies the authentication method used when
+# requesting still images from the URL returned by the ONVIF
+# "GetSnapshotURI" command.  All ONVIF requests will be
+# carried out using digest auth.
+AuthMethod = "basic"

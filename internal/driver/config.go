@@ -13,8 +13,9 @@ type configuration struct {
 }
 
 type cameraInfo struct {
-	User     string
-	Password string
+	User       string
+	Password   string
+	AuthMethod string
 }
 
 // loadConfigFromFile use to load toml configuration

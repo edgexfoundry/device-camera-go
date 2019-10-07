@@ -20,18 +20,20 @@ type OnvifClient struct {
 	ipAddress    string
 	user         string
 	password     string
+	cameraAuth   string
 	onvifDevice  *onvif4go.OnvifDevice
 	lc           logger.LoggingClient
 	digestClient digest.Client
 }
 
 // NewOnvifClient returns an OnvifClient for a single camera
-func NewOnvifClient(ipAddress string, user string, password string, lc logger.LoggingClient) *OnvifClient {
+func NewOnvifClient(ipAddress string, user string, password string, cameraAuth string, lc logger.LoggingClient) *OnvifClient {
 	c := OnvifClient{
-		ipAddress: ipAddress,
-		user:      user,
-		password:  password,
-		lc:        lc,
+		ipAddress:  ipAddress,
+		user:       user,
+		password:   password,
+		cameraAuth: cameraAuth,
+		lc:         lc,
 	}
 
 	dev := onvif4go.NewOnvifDevice(c.ipAddress)
@@ -129,7 +131,18 @@ func (c *OnvifClient) GetSnapshot() ([]byte, error) {
 		return nil, err
 	}
 
-	resp, err := c.digestClient.Do(req)
+	var resp *http.Response
+
+	if c.cameraAuth == "digest" {
+		resp, err = c.digestClient.Do(req)
+	} else if c.cameraAuth == "basic" {
+		req.SetBasicAuth(c.user, c.password)
+		httpClient := http.Client{}
+		resp, err = httpClient.Do(req)
+	} else {
+		httpClient := http.Client{}
+		resp, err = httpClient.Do(req)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -181,6 +194,13 @@ func (c *OnvifClient) GetHostname() (string, error) {
 // SetHostname requests a change to the camera's hostname via the ONFVIF SetHostname command
 func (c *OnvifClient) SetHostname(name string) error {
 	err := c.onvifDevice.Device.SetHostname(name)
+	return err
+}
+
+// SetHostnameFromDHCP requests the camera to base its hostname from DHCP
+func (c *OnvifClient) SetHostnameFromDHCP() error {
+	_, err := c.onvifDevice.Device.SetHostnameFromDHCP(true)
+
 	return err
 }
 
