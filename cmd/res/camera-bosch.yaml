@@ -141,6 +141,13 @@ deviceResources:
         { type: "String", readWrite: "R" }
       units:
         { type: "String", readWrite: "R" }
+  - name: "OnvifHostnameFromDHCP"
+    description: "should set Hostname from DHCP"
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "Bool", readWrite: "R" }
 deviceCommands:
   - name: "OnvifDeviceInformation"
     get:
@@ -199,6 +206,9 @@ deviceCommands:
   - name: "OnvifStreamURI"
     get:
       - { operation: "get", object: "OnvifStreamURI", property: "value" }
+  - name: "OnvifHostnameFromDHCP"
+    set:
+      - { operation: "set", object: "OnvifHostnameFromDHCP", property: "value" }
 coreCommands:
   - name: MotionDetected
     get:
@@ -393,3 +403,12 @@ coreCommands:
         - code: "503"
           description: "Get ONVIF Stream URI Error"
           expectedValues: ["cameradevice_error"]
+  - name: OnvifHostnameFromDHCP
+    put:
+      parameterNames: ["OnvifHostnameFromDHCP"]
+      path: "/api/v1/device/{deviceId}/OnvifHostnameFromDHCP"
+      responses:
+        - code: "200"
+          description: "Hostname set"
+        - code: "503"
+          description: "Hostname error"

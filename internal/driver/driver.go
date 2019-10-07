@@ -296,6 +296,13 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]con
 				return err
 			}
 
+		case "OnvifHostnameFromDHCP":
+			err := onvifClient.SetHostnameFromDHCP()
+			if err != nil {
+				d.lc.Error(err.Error())
+				return err
+			}
+
 		case "OnvifDateTime":
 			dateTime := struct {
 				Year   int
@@ -320,7 +327,6 @@ func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]con
 			}
 
 		default:
-			fmt.Println(req.DeviceResourceName)
 			if c == nil {
 				err := errors.New("non-onvif command for camera without secondary client")
 				d.lc.Error(err.Error())
@@ -381,7 +387,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 	d.config = config
 
 	for _, dev := range device.RunningService().Devices() {
-		initializeOnvifClient(dev, config.Camera.User, config.Camera.Password)
+		initializeOnvifClient(dev, config.Camera.User, config.Camera.Password, config.Camera.AuthMethod)
 		newClient(dev, config.Camera.User, config.Camera.Password)
 	}
 
@@ -471,9 +477,9 @@ func getClient(addr string) (client.Client, bool) {
 	return c, ok
 }
 
-func initializeOnvifClient(device contract.Device, user string, password string) *OnvifClient {
+func initializeOnvifClient(device contract.Device, user string, password string, authMethod string) *OnvifClient {
 	addr := device.Protocols["HTTP"]["Address"]
-	c := NewOnvifClient(addr, user, password, driver.lc)
+	c := NewOnvifClient(addr, user, password, authMethod, driver.lc)
 	lock.Lock()
 	onvifClients[addr] = c
 	lock.Unlock()
@@ -564,7 +570,7 @@ func (d *Driver) clientsFromAddr(addr string, deviceName string) (*OnvifClient, 
 			return nil, nil, err
 		}
 
-		onvifClient = initializeOnvifClient(dev, d.config.Camera.User, d.config.Camera.Password)
+		onvifClient = initializeOnvifClient(dev, d.config.Camera.User, d.config.Camera.Password, d.config.Camera.AuthMethod)
 	}
 
 	c, ok := getClient(addr)
