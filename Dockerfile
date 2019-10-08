@@ -1,7 +1,7 @@
 FROM golang:1.11.5-alpine3.7 AS builder
 
 ARG GIT_COMMIT=unknown
-ENV APP_PORT=49990
+ENV APP_PORT=49985
 
 LABEL Name=edgex-device-camera-go Version=0.5.0 git_commit=$GIT_COMMIT
 

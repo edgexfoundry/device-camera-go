@@ -3,7 +3,7 @@ LogLevel = "INFO"
 
 [Service]
 Host = "device-camera-go"
-Port = 49990
+Port = 49985
 ConnectRetries = 3
 Labels = []
 OpenMsg = "Device Camera Go Started"
