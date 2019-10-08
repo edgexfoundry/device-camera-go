@@ -1,4 +1,4 @@
-.PHONY: build test clean prepare update
+.PHONY: build docker test clean prepare update
 
 #GOOS=linux
 
@@ -16,6 +16,12 @@ build: $(MICROSERVICES)
 cmd/device-camera-go:
 	$(GO) build $(GOFLAGS) -o $@ ./cmd
 
+docker:
+	docker build . \
+		--build-arg http_proxy=$(HTTP_PROXY) \
+		--build-arg https_proxy=$(HTTPS_PROXY) \
+		--build-arg no_proxy=$(NO_PROXY) \
+		-t device-camera-go
 test:
 	go test -coverprofile=coverage.out ./...
 	go vet ./...
@@ -38,5 +44,3 @@ update:
 
 clean:
 	rm -f $(MICROSERVICES)
-
-

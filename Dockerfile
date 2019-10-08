@@ -8,9 +8,9 @@ ENV APP_PORT=49990
 
 WORKDIR /go/src/github.com/edgexfoundry-holding/device-camera-go
 
-RUN apt update && apt install -y software-properties-common
+RUN apt-get update && apt-get install -y software-properties-common
 RUN add-apt-repository ppa:gophers/archive
-RUN apt update && apt install -y  make git golang-1.11-go
+RUN apt-get update && apt-get install -y  make git golang-1.11-go
 ENV PATH=$PATH:/usr/lib/go-1.11/bin
 ENV GOPATH=/go
 ENV INSTALL_DIRECTORY=/usr/bin
@@ -22,7 +22,7 @@ COPY Makefile .
 RUN make update
 
 COPY . .
-
+COPY ./cmd/res/docker/configuration.toml ./cmd/res/configuration.toml
 RUN make build
 
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["./run-docker.sh"]
