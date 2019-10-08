@@ -4,7 +4,7 @@ ARG GIT_COMMIT=unknown
 LABEL Name=edgex-device-camera-go Version=0.5.0 git_commit=$GIT_COMMIT
 
 #expose device-camera-go port
-ENV APP_PORT=49990
+ENV APP_PORT=49985
 
 WORKDIR /go/src/github.com/edgexfoundry-holding/device-camera-go
 

@@ -2,7 +2,7 @@
 # If you run the service using registry (Consul),
 # assign Host to the value of your externally available host/ip
 Host = "device-camera-go"
-Port = 49990
+Port = 49985
 ConnectRetries = 3
 HealthCheck = "/api/v1/ping"
 Labels = []
