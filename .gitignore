@@ -1,12 +1,28 @@
-/res/caminfocache-axis.json
-/res/caminfocache.json
-/res/cam-credentials.conf
-/res/archive
-/vendor
-/.idea
-*.xml
+# Binaries for programs and plugins
+cmd/device-camera-go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.DS_STORE
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+LintOutput.json
+
+# GoLand
+.idea/
+.idea
+vcs.xml
+.DS_Store
+
+# Log files
 *.log
-go.sum
 LintOutput.json
 device-camera-go
 run
+

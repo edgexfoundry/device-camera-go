@@ -2,20 +2,33 @@ The following open source projects are referenced by Device Camera Go:
 
 https://golang.org/LICENSE
 
-atagirov/goonvif (MIT) https://github.com/atagirov/goonvif
-yakovlevdmv/goonvif (MIT) https://github.com/yakovlevdmv/goonvif
-https://github.com/yakovlevdmv/goonvif/blob/master/LICENSE
+armon/go-metrics (MIT) https://github.com/armon/go-metrics
+https://github.com/armon/go-metrics/blob/master/LICENSE
 
-Nested goonvif packages are not separately licensed:
-yakovlevdmv/goonvif/Device
-yakovlevdmv/goonvif/Media
-yakovlevdmv/goonvif/xsd/onvif
-yakovlevdmv/gosoap
-yakovlevdmv/WS-Discovery
-yakovlevdmv/Golang-iso8601-duration
+brianolson/cbor_go 1.0.0 (Apache 2.0) https://github.com/brianolson/cbor_go
+https://github.com/brianolson/cbor_go/blob/master/LICENSE
 
 BurntSushi/toml 0.3.1 (MIT) https://github.com/BurntSushi/toml
 https://github.com/BurntSushi/toml/blob/master/COPYING
+
+cenkalti/backoff 2.1.1 (MIT) https://github.com/cenkalti
+https://github.com/cenkalti/backoff/blob/v3/LICENSE
+
+faceterteam/onvif4go (MIT) https://github.com/faceterteam/onvif4go
+https://github.com/faceterteam/onvif4go/blob/master/LICENSE
+
+Nested onvif4go packages are not separately licensed:
+faceterteam/onvif4go/device
+faceterteam/onvif4go/onvif
+
+go-kit/kit 0.8.0 (MIT) https://github.com/go-kit/kit
+https://github.com/go-kit/kit/blob/master/LICENSE
+
+go-logfmt/logfmt 0.4.0 (MIT) https://github.com/go-logfmt/logfmt
+https://github.com/go-logfmt/logfmt/blob/master/LICENSE
+
+google/uuid 1.1.0 (BSD-3) https://github.com/google/uuid
+https://github.com/google/uuid/blob/master/LICENSE
 
 gorilla/mux 1.6.2 (BSD-3) https://github.com/gorilla/mux
 https://github.com/gorilla/mux/blob/master/LICENSE
@@ -29,8 +42,17 @@ https://github.com/hashicorp/consul/blob/master/LICENSE
 hashicorp/go-cleanhttp 0.5.0 (MPL-2.0) https://github.com/hashicorp/go-cleanhttp
 https://github.com/hashicorp/go-cleanhttp/blob/master/LICENSE
 
+hashicorp/go-immutable-radix 1.0.0 (MPL-2.0) https://github.com/hashicorp/go-immutable-radix
+https://github.com/hashicorp/go-immutable-radix/blob/master/LICENSE
+
 hashicorp/go-rootcerts 1.0.0 (MPL-2.0) https://github.com/hashicorp/go-rootcerts
 https://github.com/hashicorp/go-rootcerts/blob/master/LICENSE
+
+hashicorp/golang-lru 0.5.0 (MPL-2.0) https://github.com/hashicorp/golang-lru
+https://github.com/hashicorp/golang-lru/blob/master/LICENSE
+
+kr/logfmt (unspecified) https://github.com/kr/logfmt
+https://github.com/kr/logfmt/blob/master/Readme
 
 mitchellh/go-homedir 1.0.0 (MIT) https://github.com/mitchellh/go-homedir
 https://github.com/mitchellh/go-homedir/blob/master/LICENSE
@@ -56,8 +78,17 @@ https://github.com/go-yaml/yaml/blob/v2/LICENSE
 beevik/etree 1.0.1 (BSD-2-Clause) https://github.com/beevik/etree
 https://github.com/beevik/etree/blob/master/LICENSE
 
-lair-framework/go-nmap (MIT) https://github.com/lair-framework/go-nmap
-https://github.com/lair-framework/go-nmap/blob/master/LICENSE
+mitchellh/consulstructure (MIT) https://github.com/mitchellh/consulstructure
+https://github.com/mitchellh/consulstructure/blob/master/LICENSE
+
+mitchellh/copystructure 1.0.0 (MIT) https://github.com/mitchellh/copystructure
+https://github.com/mitchellh/copystructure/blob/master/LICENSE
+
+mitchellh/reflectwalk 1.0.0 (MIT) https://github.com/mitchellh/reflectwalk
+https://github.com/mitchellh/reflectwalk/blob/master/LICENSE
+
+pelletier/go-toml 1.2.0 (MIT) https://github.com/pelletier/go-toml
+https://github.com/pelletier/go-toml/blob/master/LICENSE
 
 satori/go.uuid 1.2.0 (MIT) https://github.com/satori/go.uuid
 https://github.com/satori/go.uuid/blob/master/LICENSE
@@ -65,9 +96,17 @@ https://github.com/satori/go.uuid/blob/master/LICENSE
 pkg/errors 0.8.1 (BSD-2-Clause) https://github.com/pkg/errors
 https://github.com/pkg/errors/blob/master/LICENSE
 
+ugorji/go 1.1.4 (MIT) https://github.com/ugorji/go
+https://github.com/ugorji/go/blob/master/LICENSE
+
 edgexfoundry/device-sdk-go (Apache 2.0) https://github.com/edgexfoundry/device-sdk-go
 https://github.com/edgexfoundry/device-sdk-go/blob/master/LICENSE
 
 edgexfoundry/edgex-go (Apache 2.0) https://github.com/edgexfoundry/edgex-go
 https://github.com/edgexfoundry/edgex-go/blob/master/LICENSE
 
+edgexfoundry/go-mod-core-contracts (Apache 2.0) https://github.com/edgexfoundry/go-mod-core-contracts
+https://github.com/edgexfoundry/go-mod-core-contracts/blob/master/LICENSE
+
+edgexfoundry/go-mod-registry (Apache 2.0) https://github.com/edgexfoundry/go-mod-registry
+https://github.com/edgexfoundry/go-mod-registry/blob/master/Attribution.txt
