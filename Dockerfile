@@ -1,4 +1,6 @@
-FROM golang:1.12-alpine AS builder
+ARG BASE=golang:1.12-alpine
+FROM ${BASE} AS builder
+
 LABEL Name=edgex-device-camera-go Version=1.0.0
 
 #expose device-camera-go port
