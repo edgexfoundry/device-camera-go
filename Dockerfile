@@ -1,28 +1,33 @@
-FROM ubuntu:16.04
-
-ARG GIT_COMMIT=unknown
-LABEL Name=edgex-device-camera-go Version=0.5.0 git_commit=$GIT_COMMIT
+FROM golang:1.12-alpine AS builder
+LABEL Name=edgex-device-camera-go Version=1.0.0
 
 #expose device-camera-go port
 ENV APP_PORT=49985
 
-WORKDIR /go/src/github.com/edgexfoundry-holding/device-camera-go
+LABEL license='SPDX-License-Identifier: Apache-2.0' \
+  copyright='Copyright (c) 2018, 2019: Intel'
 
-RUN apt-get update && apt-get install -y software-properties-common
-RUN add-apt-repository ppa:gophers/archive
-RUN apt-get update && apt-get install -y  make git golang-1.11-go
-ENV PATH=$PATH:/usr/lib/go-1.11/bin
-ENV GOPATH=/go
-ENV INSTALL_DIRECTORY=/usr/bin
+RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
+RUN apk add --update --no-cache make git
+
+WORKDIR /go/src/github.com/edgexfoundry/device-camera-go
 
 COPY go.mod .
-COPY go.sum .
 COPY Makefile .
 
 RUN make update
 
 COPY . .
-COPY ./cmd/res/docker/configuration.toml ./cmd/res/configuration.toml
 RUN make build
 
-ENTRYPOINT ["./run-docker.sh"]
+FROM alpine
+
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/docker/configuration.toml /cmd/res/configuration.toml
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/camera.yaml /cmd/res/camera.yaml
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/camera-axis.yaml /cmd/res/camera-axis.yaml
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/camera-bosch.yaml /cmd/res/camera-bosch.yaml
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/configuration-driver.toml /cmd/res/configuration-driver.toml
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/device-camera-go /cmd/device-camera-go
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/run-docker.sh /run-docker.sh
+
+ENTRYPOINT ["/run-docker.sh"]
