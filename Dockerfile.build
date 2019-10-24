@@ -1,0 +1,14 @@
+ARG BASE=golang:1.12-alpine
+FROM ${BASE}
+
+LABEL license='SPDX-License-Identifier: Apache-2.0' \
+  copyright='Copyright (c) 2018, 2019: Intel'
+
+RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
+RUN apk add --update --no-cache make git
+
+WORKDIR /device-camera-go
+
+COPY . .
+
+RUN go mod download
