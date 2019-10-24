@@ -7,7 +7,7 @@ GO=CGO_ENABLED=0 GO111MODULE=on go
 MICROSERVICES=cmd/device-camera-go
 .PHONY: $(MICROSERVICES)
 
-VERSION=$(shell cat ./VERSION)
+VERSION=$(shell cat ./VERSION 2>/dev/null || echo 0.0.0)
 
 GOFLAGS=-ldflags "-X github.com/edgexfoundry/device-camera-go.Version=$(VERSION)"
 

@@ -1,7 +1,7 @@
 ARG BASE=golang:1.12-alpine
 FROM ${BASE} AS builder
 
-LABEL Name=edgex-device-camera-go Version=1.0.0
+LABEL Name=edgex-device-camera-go
 
 #expose device-camera-go port
 ENV APP_PORT=49985
