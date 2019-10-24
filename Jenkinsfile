@@ -85,7 +85,7 @@ pipeline {
                                     // BASE image = image from above
                                     image_amd64 = docker.build(
                                         'docker-device-camera-go',
-                                        "--build-arg BASE=image-base-build-amd64 --label 'git_sha=${env.GIT_COMMIT}' ."
+                                        "--build-arg BASE=image-base-build-amd64 --label 'git_sha=${env.GIT_COMMIT}' --label version=${env.VERSION} ."
                                     )
                                 }
                             }
@@ -148,7 +148,7 @@ pipeline {
                                     // BASE image = image from above
                                     image_arm64 = docker.build(
                                         'docker-device-camera-go-arm64',
-                                        "--build-arg BASE=image-base-build-arm64 --label 'git_sha=${env.GIT_COMMIT}' ."
+                                        "--build-arg BASE=image-base-build-arm64 --label 'git_sha=${env.GIT_COMMIT}' --label version=${env.VERSION} ."
                                     )
                                 }
                             }
