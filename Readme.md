@@ -3,7 +3,7 @@
 ## About
 The EdgeX Camera Device Service is developed to control/communicate ONVIF-compliant cameras accessible via http in an EdgeX deployment
 
-## Tested Devices:
+## Tested Devices
 The following devices have been tested in a development environment, but ONVIF-compliant cameras
 should be compatible.
 
@@ -12,13 +12,13 @@ should be compatible.
 * Hikvision DS-2CD2342WD-I
 
 
-## Dependencies:
+## Dependencies
 
 This device service is built using the [onvif4go](https://github.com/faceterteam/onvif4go) library.
 It provides a developer-friendly ONVIF client to use with ONVIF-compliant cameras.
 
 
-## Build Instructions:
+## Build Instructions
 
 1. Clone the device-camera-go repo with the following command:
 
@@ -87,3 +87,72 @@ To remove devices from EdgeX:
 This will remove the device from EdgeX and, as long as it does not remain in the device list
 inside this device service's configuration.toml file, will prevent this device service
 from attempting to initialize the device at startup. 
+
+
+#### Example Usage
+
+There are many ways to interact with this device service. This example shows how to emit a snapshot image from your camera at regular intervals by leveraging EdgeX device service auto events. 
+
+1. For this example we will run this in a docker container, so modify the device service configuration profile for docker found [here](./cmd/res/docker/configuration.toml) to add your IP camera device. Note that at a minimum you must populate the Address value using the correct IP address for your device.
+
+    ```
+    # Pre-defined Camera Device(s)
+    [[DeviceList]]
+    # Unique device name
+    Name = "CasualWatcher001"
+    # Using default ONVIF camera profile
+    Profile = "camera"
+    # Human friendly description
+    Description = "Camera on east wall facing the loading dock."
+    [DeviceList.Protocols]
+        [DeviceList.Protocols.HTTP]
+        Address = "10.22.34.144"
+    # Emit a CBOR-encoded image from this camera, as an EdgeX event, every 30 seconds
+    [[DeviceList.AutoEvents]]
+        Frequency = "30s"
+        OnChange = false
+        Resource = "onvif_snapshot"
+    ```
+
+2. Build docker image named *device-camera-go*.
+    ```
+    make docker
+    ```
+
+3. Save the EdgeX docker-compose template found [here](https://github.com/edgexfoundry/developer-scripts/blob/master/releases/edinburgh/compose-files/) as docker-compose.yml. Then update your docker-compose.yml file to add this device service to the stack.
+    ```
+    #################################################################
+    # Device Services
+    #################################################################
+    docker-device-camera-go:
+        image: device-camera-go:latest
+        ports:
+        - "49985:49985"
+        container_name: edgex-device-camera-go
+        hostname: edgex-device-camera-go
+        networks:
+        edgex-network:
+            aliases:
+            - edgex-device-camera-go
+        volumes:
+        - db-data:/data/db
+        - log-data:/edgex/logs
+        - consul-config:/consul/config
+        - consul-data:/consul/data
+        depends_on:
+        - data
+        - command
+        - metadata
+    ```
+
+4. Launch the service using `docker-compose up docker-device-camera-go`. You should see informational log entries of CBOR events being emitted after 30 seconds, and each 30 seconds thereafter.
+    ``` 
+    edgex-device-camera-go     | level=INFO msg="Device Service device-camera-go exists"
+    edgex-device-camera-go     | level=INFO msg="*Service Start() called, name=device-camera-go, version=1.0.0"
+    edgex-device-camera-go     | level=INFO msg="Listening on port: 49985"
+    edgex-device-camera-go     | level=INFO msg="Service started in: 65.358268ms"
+    edgex-device-camera-go     | level=INFO Content-Type=application/cbor correlation-id=a452e6b5-75b0-46c5-8558-a1c07269bf42 msg="SendEvent: Pushed event to core data"
+    edgex-device-camera-go     | level=INFO Content-Type=application/cbor correlation-id=45e53484-6a7e-41e6-9fd5-794f8a002819 msg="SendEvent: Pushed event to core data"
+    ```
+
+5. Next step: Consume these events in your application using the [App Functions SDK](https://github.com/edgexfoundry/app-functions-sdk-go).
