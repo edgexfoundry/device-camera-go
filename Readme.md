@@ -155,4 +155,10 @@ There are many ways to interact with this device service. This example shows how
     edgex-device-camera-go     | level=INFO Content-Type=application/cbor correlation-id=45e53484-6a7e-41e6-9fd5-794f8a002819 msg="SendEvent: Pushed event to core data"
     ```
 
-5. Next step: Consume these events in your application using the [App Functions SDK](https://github.com/edgexfoundry/app-functions-sdk-go).
+5. Events and readings are described further [here](https://docs.edgexfoundry.org/Ch-WalkthroughReading.html). For example, get a count of all events and list up to 100 of these particular events/readings:
+    ```
+    curl http://localhost:48080/api/v1/event/count 
+    curl http://localhost:48080/api/v1/reading/name/onvif_snapshot/100
+    ```
+
+6. Next step: Consume these events in your application using the [App Functions SDK](https://github.com/edgexfoundry/app-functions-sdk-go).
