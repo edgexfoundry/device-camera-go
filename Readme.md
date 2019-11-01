@@ -155,10 +155,83 @@ There are many ways to interact with this device service. This example shows how
     edgex-device-camera-go     | level=INFO Content-Type=application/cbor correlation-id=45e53484-6a7e-41e6-9fd5-794f8a002819 msg="SendEvent: Pushed event to core data"
     ```
 
-5. Events and readings are described further [here](https://docs.edgexfoundry.org/Ch-WalkthroughReading.html). For example, get a count of all events and list up to 100 of these particular events/readings:
+#### Integrate Into Applications
+
+1. Consume these application/CBOR events in your application by cloning the [App Functions SDK](https://github.com/edgexfoundry/app-functions-sdk-go).
     ```
-    curl http://localhost:48080/api/v1/event/count 
-    curl http://localhost:48080/api/v1/reading/name/onvif_snapshot/100
+    git clone https://github.com/edgexfoundry/app-functions-sdk-go.git
+    cd app-functions-sdk-go
     ```
 
-6. Next step: Consume these events in your application using the [App Functions SDK](https://github.com/edgexfoundry/app-functions-sdk-go).
+2. Update line 38 of app-functions-sdk Makefile so it will build a docker image that runs 'example/simple-cbor-filter' when launched.
+    ```
+    ...
+        -f examples/simple-cbor-filter/Dockerfile \
+    ...
+    ```
+
+3. Build the application example:
+    ```
+    make docker
+    ```
+
+4. Update your docker-compose.yml to include your application container:
+    ```
+    #################################################################
+    # Device Services
+    #################################################################
+    docker-simple-cbor-filter:
+        image: edgexfoundry/docker-app-functions-sdk-go-simple:0.0.0-dev
+        ports:
+        - "48095:48095"
+        container_name: simple-cbor-filter
+        hostname: simple-cbor-filter
+        networks:
+        edgex-network:
+            aliases:
+            - simple-cbor-filter
+        volumes:
+        - db-data:/data/db
+        - log-data:/edgex/logs
+        - consul-config:/consul/config
+        - consul-data:/consul/data
+        depends_on:
+        - data
+        - command
+        - metadata
+        - docker-device-camera-go
+
+    ...
+    docker-device-camera-go:
+        image: device-camera-go:latest
+    ...
+    ```
+
+5. Launch your application service:
+    ```
+    docker-compose-up docker-simple-cbor-filter
+    ```
+
+6. This will show the snapshot image events being received and processed by your application. It shows log entries for the resolution of the image and the color of the pixel at the center of your camera.
+    ```
+    Starting edgex-device-camera-go ... done
+    Creating simple-cbor-filter     ... done
+    Attaching to simple-cbor-filter
+    simple-cbor-filter           | Configuration pushed to registry with service key: sampleCborFilter
+    simple-cbor-filter           | Configuration & Registry initializedlevel=INFO ts=2019-11-01T22:15:05.429607466Z app=sampleCborFilter source=sdk.go:357 msg="Logger successfully initialized"
+    simple-cbor-filter           | level=INFO version=0.0.0 msg="Skipping core service version compatibility check for SDK Beta version or running in debugger"
+    simple-cbor-filter           | level=INFO msg="Clients initialized"
+    simple-cbor-filter           | level=INFO msg="Registering standard routes..."
+    simple-cbor-filter           | level=INFO msg="Filtering for [onvif_snapshot] value descriptors..."
+    simple-cbor-filter           | level=INFO msg="MessageBus trigger selected"
+    simple-cbor-filter           | level=INFO msg="Initializing Message Bus Trigger. Subscribing to topic: events on port 5563 , Publish Topic: somewhere on port 5564"
+    simple-cbor-filter           | level=INFO msg="Listening for changes from registry"
+    simple-cbor-filter           | level=INFO msg="StoreAndForward disabled. Not running retry loop."
+    simple-cbor-filter           | level=INFO msg="Simple CBOR Filter Application Service started"
+    simple-cbor-filter           | level=INFO msg="Starting CPU Usage Average loop"
+    simple-cbor-filter           | level=INFO msg="Starting HTTP Server on port :48095"
+    simple-cbor-filter           | level=INFO msg="Writable configuration has been updated from Registry"
+    simple-cbor-filter           | Received Image from Device: CasualWatcher001, ReadingName: onvif_snapshot, Image Type: jpeg, Image Size: (1280,720), Color in middle: {112 125 128}
+    simple-cbor-filter           | Received Image from Device: CasualWatcher001, ReadingName: onvif_snapshot, Image Type: jpeg, Image Size: (1280,720), Color in middle: {114 125 128}
+    ```
+    
