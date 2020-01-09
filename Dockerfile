@@ -7,7 +7,7 @@ LABEL Name=edgex-device-camera-go
 ENV APP_PORT=49985
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
-  copyright='Copyright (c) 2018, 2019: Intel'
+  copyright='Copyright (c) 2018-2020: Intel'
 
 RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
 RUN apk add --update --no-cache make git
