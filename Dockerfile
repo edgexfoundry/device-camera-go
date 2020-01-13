@@ -1,6 +1,10 @@
 ARG BASE=golang:1.12-alpine
 FROM ${BASE} AS builder
 
+ARG MAKE="make build"
+ARG ALPINE_PKG_BASE="make git"
+ARG ALPINE_PKG_EXTRA=""
+
 LABEL Name=edgex-device-camera-go
 
 #expose device-camera-go port
@@ -10,7 +14,7 @@ LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2018-2020: Intel'
 
 RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
-RUN apk add --update --no-cache make git
+RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 
 WORKDIR /go/src/github.com/edgexfoundry/device-camera-go
 
@@ -20,7 +24,7 @@ COPY Makefile .
 RUN make update
 
 COPY . .
-RUN make build
+RUN ${MAKE}
 
 FROM alpine
 
