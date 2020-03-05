@@ -1,4 +1,4 @@
-ARG BASE=golang:1.12-alpine
+ARG BASE=golang:1.13-alpine
 FROM ${BASE} AS builder
 
 ARG MAKE="make build"
@@ -16,7 +16,7 @@ LABEL license='SPDX-License-Identifier: Apache-2.0' \
 RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
 RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 
-WORKDIR /go/src/github.com/edgexfoundry/device-camera-go
+WORKDIR $GOPATH/src/github.com/edgexfoundry/device-camera-go
 
 COPY go.mod .
 COPY Makefile .
