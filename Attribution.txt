@@ -110,3 +110,9 @@ https://github.com/edgexfoundry/go-mod-core-contracts/blob/master/LICENSE
 
 edgexfoundry/go-mod-registry (Apache 2.0) https://github.com/edgexfoundry/go-mod-registry
 https://github.com/edgexfoundry/go-mod-registry/blob/master/Attribution.txt
+
+jessevdk/go-flags (BSD-3) https://github.com/jessevdk/go-flags
+https://github.com/jessevdk/go-flags/blob/master/LICENSE
+
+OneOfOne/xxhash (Apache 2.0) https://github.com/OneOfOne/xxhash
+https://github.com/OneOfOne/xxhash/blob/master/LICENSE
