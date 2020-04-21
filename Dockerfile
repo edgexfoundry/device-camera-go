@@ -28,12 +28,8 @@ RUN ${MAKE}
 
 FROM alpine
 
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/docker/configuration.toml /cmd/res/configuration.toml
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/camera.yaml /cmd/res/camera.yaml
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/camera-axis.yaml /cmd/res/camera-axis.yaml
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/camera-bosch.yaml /cmd/res/camera-bosch.yaml
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/res/configuration-driver.toml /cmd/res/configuration-driver.toml
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd/device-camera-go /cmd/device-camera-go
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/run-docker.sh /run-docker.sh
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd /
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/LICENSE /
+COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/Attribution.txt /
 
-ENTRYPOINT ["/run-docker.sh"]
+ENTRYPOINT ["/device-camera-go","--cp=consul://edgex-core-consul:8500","--registry","--confdir=/res"]

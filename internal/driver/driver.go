@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/edgexfoundry/device-sdk-go"
 	sdkModel "github.com/edgexfoundry/device-sdk-go/pkg/models"
+	sdk "github.com/edgexfoundry/device-sdk-go/pkg/service"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
 	"github.com/faceterteam/onvif4go/onvif"
@@ -376,17 +376,17 @@ func (d *Driver) DisconnectDevice(deviceName string, protocols map[string]contra
 
 // Initialize performs protocol-specific initialization for the device
 // service.
-func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.AsyncValues) error {
+func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.AsyncValues, deviceCh chan<- []sdkModel.DiscoveredDevice) error {
 	d.lc = lc
 	d.asynchCh = asyncCh
 
-	config, err := loadConfigFromFile()
+	config, err := loadCameraConfig()
 	if err != nil {
-		panic(fmt.Errorf("read driver configuration from file failed: %d", err))
+		panic(fmt.Errorf("load camera configuration failed: %d", err))
 	}
 	d.config = config
 
-	for _, dev := range device.RunningService().Devices() {
+	for _, dev := range sdk.RunningService().Devices() {
 		initializeOnvifClient(dev, config.Camera.User, config.Camera.Password, config.Camera.AuthMethod)
 		newClient(dev, config.Camera.User, config.Camera.Password)
 	}
@@ -562,7 +562,7 @@ func (d *Driver) clientsFromAddr(addr string, deviceName string) (*OnvifClient, 
 	onvifClient, ok := getOnvifClient(addr)
 
 	if !ok {
-		dev, err := device.RunningService().GetDeviceByName(deviceName)
+		dev, err := sdk.RunningService().GetDeviceByName(deviceName)
 		if err != nil {
 			err = fmt.Errorf("device not found: %s", deviceName)
 			d.lc.Error(err.Error())
@@ -576,7 +576,7 @@ func (d *Driver) clientsFromAddr(addr string, deviceName string) (*OnvifClient, 
 	c, ok := getClient(addr)
 
 	if !ok {
-		dev, err := device.RunningService().GetDeviceByName(deviceName)
+		dev, err := sdk.RunningService().GetDeviceByName(deviceName)
 		if err != nil {
 			err = fmt.Errorf("device not found: %s", deviceName)
 			d.lc.Error(err.Error())

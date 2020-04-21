@@ -1,9 +1,8 @@
 module github.com/edgexfoundry-holding/device-camera-go
 
 require (
-	github.com/BurntSushi/toml v0.3.1
-	github.com/edgexfoundry/device-sdk-go v1.1.2
-	github.com/edgexfoundry/go-mod-core-contracts v0.1.36
+	github.com/edgexfoundry/device-sdk-go v1.2.1
+	github.com/edgexfoundry/go-mod-core-contracts v0.1.58
 	github.com/faceterteam/onvif4go v0.4.0
 	github.com/pkg/errors v0.8.1
 	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392 // indirect
