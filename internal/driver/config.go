@@ -1,11 +1,8 @@
 package driver
 
 import (
-	"flag"
 	"fmt"
-	"io/ioutil"
-
-	"github.com/BurntSushi/toml"
+	sdk "github.com/edgexfoundry/device-sdk-go/pkg/service"
 )
 
 type configuration struct {
@@ -18,29 +15,30 @@ type cameraInfo struct {
 	AuthMethod string
 }
 
-// loadConfigFromFile use to load toml configuration
-func loadConfigFromFile() (*configuration, error) {
+const (
+	USER        = "User"
+	PASSWORD    = "Password"
+	AUTH_METHOD = "AuthMethod"
+)
+
+// loadCameraConfig loads the camera configuration
+func loadCameraConfig() (*configuration, error) {
 	config := new(configuration)
-
-	confDir := flag.Lookup("confdir").Value.(flag.Getter).Get().(string)
-	if len(confDir) == 0 {
-		confDir = flag.Lookup("c").Value.(flag.Getter).Get().(string)
+	if val, ok := sdk.DriverConfigs()[USER]; ok {
+		config.Camera.User = val
+	} else {
+		return config, fmt.Errorf("driver config undefined: %s", USER)
+	}
+	if val, ok := sdk.DriverConfigs()[PASSWORD]; ok {
+		config.Camera.Password = val
+	} else {
+		return config, fmt.Errorf("driver config undefined: %s", PASSWORD)
+	}
+	if val, ok := sdk.DriverConfigs()[AUTH_METHOD]; ok {
+		config.Camera.AuthMethod = val
+	} else {
+		return config, fmt.Errorf("driver config undefined: %s", AUTH_METHOD)
 	}
 
-	if len(confDir) == 0 {
-		confDir = "./res"
-	}
-
-	filePath := fmt.Sprintf("%v/configuration-driver.toml", confDir)
-
-	file, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return config, fmt.Errorf("could not load configuration file (%s): %v", filePath, err.Error())
-	}
-
-	err = toml.Unmarshal(file, config)
-	if err != nil {
-		return config, fmt.Errorf("unable to parse configuration file (%s): %v", filePath, err.Error())
-	}
-	return config, err
+	return config, nil
 }
