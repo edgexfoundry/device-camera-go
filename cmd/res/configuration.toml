@@ -4,13 +4,15 @@ LogLevel = 'INFO'
 [Service]
 # NOTE: To allow the EdgeX Registry (Consul) to invoke health checks on your device service 
 # from a different network, you must assign Host to your externally available hostname/ip address.
-Host = '127.0.0.1'
-ServerBindAddr = ''  # blank value defaults to Service.Host value
+Host = 'localhost'
 Port = 49985
 ConnectRetries = 3
-HealthCheck = '/api/v1/ping'
+BootTimeout = 30000
+ClientMonitor = 15000
+Protocol = 'http'
+CheckInterval = '10s'
 Labels = []
-OpenMsg = 'Camera device service started'
+StartupMsg = 'Camera device service started'
 ReadMaxLimit = 256
 Timeout = 5000
 EnableAsyncReadings = true
