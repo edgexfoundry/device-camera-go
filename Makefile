@@ -25,6 +25,8 @@ docker:
 test:
 	go test -coverprofile=coverage.out ./...
 	go vet ./...
+	./bin/test-attribution.sh
+	./bin/test-go-mod-tidy.sh
 
 check-lint:
 	which golint || (go get -u golang.org/x/lint/golint)

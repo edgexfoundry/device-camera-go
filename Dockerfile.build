@@ -1,11 +1,14 @@
-ARG BASE=golang:1.12-alpine
+ARG BASE=golang:1.13-alpine
 FROM ${BASE}
 
+ARG ALPINE_PKG_BASE="make git"
+ARG ALPINE_PKG_EXTRA=""
+
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
-  copyright='Copyright (c) 2018, 2019: Intel'
+  copyright='Copyright (c) 2018-2020: Intel'
 
 RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
-RUN apk add --update --no-cache make git
+RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 
 WORKDIR /device-camera-go
 

@@ -1,68 +1,82 @@
+[Writable]
+LogLevel = 'INFO'
+
 [Service]
 # NOTE: To allow the EdgeX Registry (Consul) to invoke health checks on your device service 
 # from a different network, you must assign Host to your externally available hostname/ip address.
-Host = "127.0.0.1"
+Host = '127.0.0.1'
 Port = 49985
 ConnectRetries = 3
-HealthCheck = "/api/v1/ping"
+HealthCheck = '/api/v1/ping'
 Labels = []
-OpenMsg = "Camera device service started"
+OpenMsg = 'Camera device service started'
 ReadMaxLimit = 256
 Timeout = 5000
 EnableAsyncReadings = true
 AsyncBufferSize = 16
 
 [Registry]
-Host = "localhost"
+Host = 'localhost'
 Port = 8500
-CheckInterval = "15s"
+CheckInterval = '15s'
 FailLimit = 3
 FailWaitTime = 10
-Type = "consul"
+Type = 'consul'
 
 [Clients]
   [Clients.Data]
-  Name = "edgex-core-data"
-  Host = "localhost"
+  Name = 'edgex-core-data'
+  Host = 'localhost'
   Port = 48080
   Timeout = 50000
-  Protocol = "HTTP"
+  Protocol = 'HTTP'
 
   [Clients.Metadata]
-  Name = "edgex-core-metadata"
-  Host = "localhost"
+  Name = 'edgex-core-metadata'
+  Host = 'localhost'
   Port = 48081
   Timeout = 50000
-  Protocol = "HTTP"
+  Protocol = 'HTTP'
 
 [Device]
   DataTransform = true
-  InitCmd = ""
-  InitCmdArgs = ""
+  InitCmd = ''
+  InitCmdArgs = ''
   MaxCmdOps = 128
   MaxCmdValueLen = 256
-  RemoveCmd = ""
-  RemoveCmdArgs = ""
-  ProfilesDir = "./res"
+  RemoveCmd = ''
+  RemoveCmdArgs = ''
+  ProfilesDir = './res'
   SendReadingsOnChanged = true
 
 [Logging]
 RemoteURL = ''
-File = "./device-camera-go-service.log"
+File = './device-camera-go-service.log'
 
 # Pre-defined Devices
 [[DeviceList]]
-  Name = "Camera001"
-  Profile = "camera-bosch"
-  Description = "My test Bosch camera"
-  Location = "foo"
+  Name = 'Camera001'
+  Profile = 'camera-bosch'
+  Description = 'My test Bosch camera'
+  Location = 'foo'
   [DeviceList.Protocols]
     [DeviceList.Protocols.HTTP]
-      Address = "192.168.2.105"
-#  Name = "Camera001"
-#  Profile = "camera-axis"
-#  Description = "My test Axis camera"
-#  Location = "foo"
+      Address = '192.168.2.105'
+#  Name = 'Camera001'
+#  Profile = 'camera-axis'
+#  Description = 'My test Axis camera'
+#  Location = 'foo'
 #  [DeviceList.Protocols]
 #    [DeviceList.Protocols.HTTP]
-#      Address = "192.168.2.163"
+#      Address = '192.168.2.163'
+
+# Driver configs
+[Driver]
+User = 'service'
+Password = 'Password!1'
+# Assign AuthMethod to 'digest' | 'basic' | 'none'
+# AuthMethod specifies the authentication method used when
+# requesting still images from the URL returned by the ONVIF
+# "GetSnapshotURI" command.  All ONVIF requests will be
+# carried out using digest auth.
+AuthMethod = 'basic'
