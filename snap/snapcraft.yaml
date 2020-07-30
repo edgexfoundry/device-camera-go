@@ -1,0 +1,101 @@
+name: edgex-device-camera
+base: core18
+version: "0.0.0"
+version-script: |
+  VERSION=$(shell cat ./VERSION 2>/dev/null || echo 0.0.0)
+  echo $VERSION-$(date +%Y%m%d)+$(git rev-parse --short HEAD)
+license: Apache-2.0
+summary: Control/communicate with ONVIF-compliant cameras using Camera Device Service
+title: EdgeX Camera Device Service
+description: |
+  The EdgeX Camera Device Service is developed to control/communicate ONVIF-compliant
+  cameras accessible via http in an EdgeX deployment.
+  Initially the daemon in the snap is disabled - a device profile must be
+  provisioned externally with core-metadata or provided to device-camera-go inside
+  "$SNAP_DATA/config/device-camera-go/res" before starting.
+
+# TODO: add armhf when the project supports this
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+grade: stable
+confinement: strict
+
+# delhi: 0, edinburgh: 1, fuji: 2, geneva: 3
+epoch: 3
+
+apps:
+  device-camera-go:
+    adapter: none
+    command: bin/device-camera-go $CONFIG_PRO_ARG $CONF_ARG $REGISTRY_ARG
+    environment:
+      CONFIG_PRO_ARG: "--cp=consul://localhost:8500"
+      CONF_ARG: "--confdir=$SNAP_DATA/config/device-camera-go/res"
+      REGISTRY_ARG: "--registry"
+      DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-camera-go/res"
+    daemon: simple
+    plugs: [network, network-bind]
+
+parts:
+  go:
+    plugin: nil
+    source: snap/local
+    build-packages: [curl]
+    override-build: |
+      # use dpkg architecture to figure out our target arch
+      # note - we specifically don't use arch
+      case "$(dpkg --print-architecture)" in
+        amd64)
+          FILE_NAME=go1.13.5.linux-amd64.tar.gz
+          FILE_HASH=512103d7ad296467814a6e3f635631bd35574cab3369a97a323c9a585ccaa569
+          ;;
+        arm64)
+          FILE_NAME=go1.13.5.linux-arm64.tar.gz
+          FILE_HASH=227b718923e20c846460bbecddde9cb86bad73acc5fb6f8e1a96b81b5c84668b
+          ;;
+        armhf)
+          FILE_NAME=go1.13.5.linux-armv6l.tar.gz
+          FILE_HASH=26259f61d52ee2297b1e8feef3a0fc82144b666a2b95512402c31cc49713c133
+          ;;
+        i386)
+          FILE_NAME=go1.13.5.linux-386.tar.gz
+          FILE_HASH=3b830fa25f79ab08b476f02c84ea4125f41296b074017b492ac1ff748cf1c7c9
+          ;;
+      esac
+      # download the archive, failing on ssl cert problems
+      curl https://dl.google.com/go/$FILE_NAME -O
+      echo "$FILE_HASH $FILE_NAME" > sha256
+      sha256sum -c sha256 | grep OK
+      tar -C $SNAPCRAFT_STAGE -xf go*.tar.gz --strip-components=1
+    prime:
+      - "-*"
+
+  device-camera-go:
+    source: .
+    plugin: make
+    build-packages: [git]
+    after: [go]
+    override-build: |
+      cd $SNAPCRAFT_PART_SRC
+      make build
+
+      install -DT "./cmd/device-camera-go" "$SNAPCRAFT_PART_INSTALL/bin/device-camera-go"
+
+      install -d "$SNAPCRAFT_PART_INSTALL/config/device-camera-go/res/"
+
+      cat "./cmd/res/configuration.toml" | \
+        sed -e s:\"./device-camera-go.log\":\'\$SNAP_COMMON/device-camera-go.log\': \
+          -e s:'ProfilesDir = \"./res\"':'ProfilesDir = \"\$SNAP_DATA/config/device-camera-go/res\"': > \
+        "$SNAPCRAFT_PART_INSTALL/config/device-camera-go/res/configuration.toml"
+
+      for fpath in ./cmd/res/*.yaml; do
+          fname=$(basename "$fpath")
+          install -DT "./cmd/res/${fname}" \
+            "$SNAPCRAFT_PART_INSTALL/config/device-camera-go/res/${fname}"
+      done
+      
+      install -DT "./Attribution.txt" \
+         "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera-go/Attribution.txt"
+      install -DT "./LICENSE" \
+         "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera-go/LICENSE"
