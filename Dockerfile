@@ -32,4 +32,5 @@ COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd /
 COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/LICENSE /
 COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/Attribution.txt /
 
-ENTRYPOINT ["/device-camera-go","--cp=consul://edgex-core-consul:8500","--registry","--confdir=/res"]
+ENTRYPOINT ["/device-camera-go"]
+CMD ["--cp=consul://edgex-core-consul:8500", "--registry", "--confdir=/res"]
