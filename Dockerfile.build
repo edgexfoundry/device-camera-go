@@ -1,4 +1,4 @@
-ARG BASE=golang:1.13-alpine
+ARG BASE=golang:1.15-alpine
 FROM ${BASE}
 
 ARG ALPINE_PKG_BASE="make git"

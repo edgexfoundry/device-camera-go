@@ -15,6 +15,5 @@
 //
 
 edgeXBuildGoApp (
-    project: 'device-camera-go',
-    goVersion: '1.13'
+    project: 'device-camera-go'
 )

@@ -6,6 +6,7 @@ cmd/device-camera-go
 *.so
 *.dylib
 *.DS_STORE
+go.sum
 
 # Test binary, build with `go test -c`
 *.test
