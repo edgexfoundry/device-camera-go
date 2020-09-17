@@ -104,3 +104,15 @@ https://github.com/fxamacker/cbor/blob/master/LICENSE
 
 x448/float16 (MIT) https://github.com/x448/float16
 https://github.com/x448/float16/blob/master/LICENSE
+
+satori/go.uuid 1.2.0 (MIT) https://github.com/satori/go.uuid
+https://github.com/satori/go.uuid/blob/master/LICENSE
+
+golang.org/x/crypto (BSD-3) https://github.com/golang/crypto
+https://github.com/golang/crypto/blob/master/LICENSE
+
+golang.org/x/net (BSD-3) https://github.com/golang/net
+https://github.com/golang/net/blob/master/LICENSE
+
+golang.org/x/sync (BSD-3) https://github.com/golang/sync
+https://github.com/golang/sync/blob/master/LICENSE
