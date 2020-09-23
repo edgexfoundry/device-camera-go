@@ -480,9 +480,12 @@ func getClient(addr string) (client.Client, bool) {
 func initializeOnvifClient(device contract.Device, user string, password string, authMethod string) *OnvifClient {
 	addr := device.Protocols["HTTP"]["Address"]
 	c := NewOnvifClient(addr, user, password, authMethod, driver.lc)
-	lock.Lock()
-	onvifClients[addr] = c
-	lock.Unlock()
+	if c != nil {
+		// Only add the ONVIF client if it could be initialized. if it's offline then we might try again in an autoevent
+		lock.Lock()
+		onvifClients[addr] = c
+		lock.Unlock()
+	}
 	return c
 }
 
@@ -571,6 +574,13 @@ func (d *Driver) clientsFromAddr(addr string, deviceName string) (*OnvifClient, 
 		}
 
 		onvifClient = initializeOnvifClient(dev, d.config.Camera.User, d.config.Camera.Password, d.config.Camera.AuthMethod)
+
+		if onvifClient == nil {
+			err := fmt.Errorf("ONVIF client could not be initialized: %s", deviceName)
+			d.lc.Error(err.Error())
+			return nil, nil, err
+		}
+
 	}
 
 	c, ok := getClient(addr)
