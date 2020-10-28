@@ -105,9 +105,6 @@ https://github.com/fxamacker/cbor/blob/master/LICENSE
 x448/float16 (MIT) https://github.com/x448/float16
 https://github.com/x448/float16/blob/master/LICENSE
 
-satori/go.uuid 1.2.0 (MIT) https://github.com/satori/go.uuid
-https://github.com/satori/go.uuid/blob/master/LICENSE
-
 golang.org/x/crypto (BSD-3) https://github.com/golang/crypto
 https://github.com/golang/crypto/blob/master/LICENSE
 
@@ -116,3 +113,18 @@ https://github.com/golang/net/blob/master/LICENSE
 
 golang.org/x/sync (BSD-3) https://github.com/golang/sync
 https://github.com/golang/sync/blob/master/LICENSE
+
+bertimus9/systemstat (MIT) https://bitbucket.org/bertimus9/systemstat
+https://bitbucket.org/bertimus9/systemstat/src/master/LICENSE
+
+go-playground/locales (MIT) https://github.com/go-playground/locales
+https://github.com/go-playground/locales/blob/master/LICENSE
+
+go-playground/universal-translator (MIT) https://github.com/go-playground/universal-translator
+https://github.com/go-playground/universal-translator/blob/master/LICENSE
+
+github.com/go-playground/validator/v10 (MIT) https://github.com/go-playground/validator
+https://github.com/go-playground/validator/blob/master/LICENSE
+
+leodido/go-urn (MIT) https://github.com/leodido/go-urn
+https://github.com/leodido/go-urn
