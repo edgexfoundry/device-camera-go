@@ -7,8 +7,8 @@
 package main
 
 import (
-	"github.com/edgexfoundry-holding/device-camera-go"
-	"github.com/edgexfoundry-holding/device-camera-go/internal/driver"
+	"github.com/edgexfoundry/device-camera-go"
+	"github.com/edgexfoundry/device-camera-go/internal/driver"
 	"github.com/edgexfoundry/device-sdk-go/pkg/startup"
 )
 
