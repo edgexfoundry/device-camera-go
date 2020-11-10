@@ -1,9 +1,6 @@
 name: edgex-device-camera
 base: core18
-version: "0.0.0"
-version-script: |
-  VERSION=$(shell cat ./VERSION 2>/dev/null || echo 0.0.0)
-  echo $VERSION-$(date +%Y%m%d)+$(git rev-parse --short HEAD)
+adopt-info: version
 license: Apache-2.0
 summary: Control/communicate with ONVIF-compliant cameras using Camera Device Service
 title: EdgeX Camera Device Service
@@ -38,6 +35,17 @@ apps:
     plugs: [network, network-bind]
 
 parts:
+  version:
+    plugin: nil
+    source: snap/local
+    override-pull: |
+      cd $SNAPCRAFT_PROJECT_DIR
+      if [ -f VERSION ]; then
+        PROJECT_VERSION=$(cat VERSION)
+      else
+        PROJECT_VERSION="0.0.0"
+      fi
+      snapcraftctl set-version ${PROJECT_VERSION}
   go:
     plugin: nil
     source: snap/local
