@@ -23,8 +23,8 @@ import (
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 	e_models "github.com/edgexfoundry/go-mod-core-contracts/models"
 
-	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/client"
-	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/digest"
+	"github.com/edgexfoundry/device-camera-go/internal/pkg/client"
+	"github.com/edgexfoundry/device-camera-go/internal/pkg/digest"
 )
 
 const (

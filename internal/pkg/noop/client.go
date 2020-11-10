@@ -6,7 +6,7 @@ import (
 	"github.com/edgexfoundry/device-sdk-go/pkg/models"
 	e_models "github.com/edgexfoundry/go-mod-core-contracts/models"
 
-	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/client"
+	"github.com/edgexfoundry/device-camera-go/internal/pkg/client"
 )
 
 // Client is a camera client for cameras which don't have any other camera or manufacturer

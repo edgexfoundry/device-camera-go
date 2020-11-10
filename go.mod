@@ -1,4 +1,4 @@
-module github.com/edgexfoundry-holding/device-camera-go
+module github.com/edgexfoundry/device-camera-go
 
 require (
 	github.com/edgexfoundry/device-sdk-go v1.2.4-dev.34

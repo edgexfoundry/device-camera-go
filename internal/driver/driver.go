@@ -13,10 +13,10 @@ import (
 	"github.com/faceterteam/onvif4go/onvif"
 	"github.com/pkg/errors"
 
-	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/axis"
-	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/bosch"
-	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/client"
-	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/noop"
+	"github.com/edgexfoundry/device-camera-go/internal/pkg/axis"
+	"github.com/edgexfoundry/device-camera-go/internal/pkg/bosch"
+	"github.com/edgexfoundry/device-camera-go/internal/pkg/client"
+	"github.com/edgexfoundry/device-camera-go/internal/pkg/noop"
 )
 
 var once sync.Once

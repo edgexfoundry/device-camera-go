@@ -12,7 +12,7 @@ import (
 	"github.com/faceterteam/onvif4go/device"
 	"github.com/faceterteam/onvif4go/onvif"
 
-	"github.com/edgexfoundry-holding/device-camera-go/internal/pkg/digest"
+	"github.com/edgexfoundry/device-camera-go/internal/pkg/digest"
 )
 
 // OnvifClient manages the state required to issue ONVIF requests to a camera
