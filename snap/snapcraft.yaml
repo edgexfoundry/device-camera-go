@@ -26,6 +26,8 @@ apps:
   device-camera-go:
     adapter: none
     command: bin/device-camera-go $CONFIG_PRO_ARG $CONF_ARG $REGISTRY_ARG
+    command-chain:
+      - bin/startup-env-var.sh
     environment:
       CONFIG_PRO_ARG: "--cp=consul://localhost:8500"
       CONF_ARG: "--confdir=$SNAP_DATA/config/device-camera-go/res"
@@ -107,3 +109,7 @@ parts:
          "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera-go/Attribution.txt"
       install -DT "./LICENSE" \
          "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera-go/LICENSE"
+
+  config-common:
+    plugin: dump
+    source: snap/local/runtime-helpers
