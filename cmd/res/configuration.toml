@@ -53,8 +53,8 @@ Type = 'consul'
   SendReadingsOnChanged = true
 
 [Logging]
-RemoteURL = ''
-File = './device-camera-go-service.log'
+EnableRemote = false
+File = ""
 
 # Pre-defined Devices
 [[DeviceList]]
