@@ -52,10 +52,6 @@ Type = 'consul'
   ProfilesDir = './res'
   SendReadingsOnChanged = true
 
-[Logging]
-EnableRemote = false
-File = ''
-
 # Pre-defined Devices
 [[DeviceList]]
   Name = 'Camera001'
