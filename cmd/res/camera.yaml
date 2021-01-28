@@ -80,7 +80,7 @@ deviceResources:
     description: "snapshot from first ONVIF MediaProfile"
     properties:
       value:
-        { type: "Binary", readWrite: "R" }
+        { type: "Binary", readWrite: "R", mediaType : "image/jpeg" }
       units:
         { type: "Binary", readWrite: "R", defaultValue: "ONVIFSnapshot" }
   - name: "OnvifUser"
