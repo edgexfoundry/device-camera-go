@@ -9,6 +9,7 @@ MICROSERVICES=cmd/device-camera-go
 
 VERSION=$(shell cat ./VERSION 2>/dev/null || echo 0.0.0)
 
+GIT_SHA=$(shell git rev-parse HEAD)
 GOFLAGS=-ldflags "-X github.com/edgexfoundry/device-camera-go.Version=$(VERSION)"
 
 build: $(MICROSERVICES)
@@ -21,7 +22,9 @@ docker:
 		--build-arg http_proxy=$(HTTP_PROXY) \
 		--build-arg https_proxy=$(HTTPS_PROXY) \
 		--build-arg no_proxy=$(NO_PROXY) \
-		-t device-camera-go
+		-t edgexfoundry/device-camera:$(GIT_SHA) \
+		-t edgexfoundry/device-camera:$(VERSION)-dev
+
 test:
 	go test -coverprofile=coverage.out ./...
 	go vet ./...
