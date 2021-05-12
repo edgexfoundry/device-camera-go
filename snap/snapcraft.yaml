@@ -57,6 +57,7 @@ parts:
       - go/1.16/stable
     override-build: |
       cd $SNAPCRAFT_PART_SRC
+      go mod tidy
       make build
 
       install -DT "./cmd/device-camera-go" "$SNAPCRAFT_PART_INSTALL/bin/device-camera-go"
