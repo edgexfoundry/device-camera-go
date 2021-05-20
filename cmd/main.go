@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	serviceName string = "device-camera-go"
+	serviceName string = "device-camera"
 )
 
 func main() {

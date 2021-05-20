@@ -24,7 +24,7 @@ vcs.xml
 # Log files
 *.log
 LintOutput.json
-device-camera-go
+device-camera
 run
 
 VERSION

@@ -80,11 +80,11 @@ To remove devices from EdgeX:
 
 1. Issue a request to the EdgeX core metadata service to get the IDs for all devices.
 
-        GET http://edgex-core-metadata:48081/api/v1/device
+        GET http://edgex-core-metadata:59881/api/v1/device
 
 2. Issue a request to the EdgeX core metadata service to delete a device by ID.
 
-        DELETE http://edgex-core-metadata:48081/api/v1/device/id/{{device_id_here}}
+        DELETE http://edgex-core-metadata:59881/api/v1/device/id/{{device_id_here}}
 
 This will remove the device from EdgeX and, as long as it does not remain in the device list
 inside this device service's configuration.toml file, will prevent this device service
@@ -129,7 +129,7 @@ There are many ways to interact with this device service. This example shows how
     docker-device-camera-go:
         image: device-camera-go:latest
         ports:
-        - "49985:49985"
+        - "59985:59985"
         container_name: edgex-device-camera-go
         hostname: edgex-device-camera-go
         networks:
@@ -151,7 +151,7 @@ There are many ways to interact with this device service. This example shows how
     ``` 
     edgex-device-camera-go     | level=INFO msg="Device Service device-camera-go exists"
     edgex-device-camera-go     | level=INFO msg="*Service Start() called, name=device-camera-go, version=1.0.0"
-    edgex-device-camera-go     | level=INFO msg="Listening on port: 49985"
+    edgex-device-camera-go     | level=INFO msg="Listening on port: 59985"
     edgex-device-camera-go     | level=INFO msg="Service started in: 65.358268ms"
     edgex-device-camera-go     | level=INFO Content-Type=application/cbor correlation-id=a452e6b5-75b0-46c5-8558-a1c07269bf42 msg="SendEvent: Pushed event to core data"
     edgex-device-camera-go     | level=INFO Content-Type=application/cbor correlation-id=45e53484-6a7e-41e6-9fd5-794f8a002819 msg="SendEvent: Pushed event to core data"
@@ -185,7 +185,7 @@ There are many ways to interact with this device service. This example shows how
     docker-simple-cbor-filter:
         image: edgexfoundry/docker-app-functions-sdk-go-simple:0.0.0-dev
         ports:
-        - "48095:48095"
+        - "59795:59795"
         container_name: simple-cbor-filter
         hostname: simple-cbor-filter
         networks:
@@ -231,7 +231,7 @@ There are many ways to interact with this device service. This example shows how
     simple-cbor-filter           | level=INFO msg="StoreAndForward disabled. Not running retry loop."
     simple-cbor-filter           | level=INFO msg="Simple CBOR Filter Application Service started"
     simple-cbor-filter           | level=INFO msg="Starting CPU Usage Average loop"
-    simple-cbor-filter           | level=INFO msg="Starting HTTP Server on port :48095"
+    simple-cbor-filter           | level=INFO msg="Starting HTTP Server on port :59795"
     simple-cbor-filter           | level=INFO msg="Writable configuration has been updated from Registry"
     simple-cbor-filter           | Received Image from Device: CasualWatcher001, ReadingName: onvif_snapshot, Image Type: jpeg, Image Size: (1280,720), Color in middle: {112 125 128}
     simple-cbor-filter           | Received Image from Device: CasualWatcher001, ReadingName: onvif_snapshot, Image Type: jpeg, Image Size: (1280,720), Color in middle: {114 125 128}
