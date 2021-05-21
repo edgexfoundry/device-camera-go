@@ -5,7 +5,7 @@ LogLevel = 'INFO'
 # NOTE: To allow the EdgeX Registry (Consul) to invoke health checks on your device service 
 # from a different network, you must assign Host to your externally available hostname/ip address.
 Host = 'localhost'
-Port = 49985
+Port = 59985
 ConnectRetries = 3
 BootTimeout = 30000
 ClientMonitor = 15000
@@ -30,14 +30,14 @@ Type = 'consul'
   [Clients.Data]
   Name = 'edgex-core-data'
   Host = 'localhost'
-  Port = 48080
+  Port = 59880
   Timeout = 50000
   Protocol = 'HTTP'
 
   [Clients.Metadata]
   Name = 'edgex-core-metadata'
   Host = 'localhost'
-  Port = 48081
+  Port = 59881
   Timeout = 50000
   Protocol = 'HTTP'
 

@@ -4,7 +4,7 @@
 
 GO=CGO_ENABLED=0 GO111MODULE=on go
 
-MICROSERVICES=cmd/device-camera-go
+MICROSERVICES=cmd/device-camera
 .PHONY: $(MICROSERVICES)
 
 VERSION=$(shell cat ./VERSION 2>/dev/null || echo 0.0.0)
@@ -14,7 +14,8 @@ GOFLAGS=-ldflags "-X github.com/edgexfoundry/device-camera-go.Version=$(VERSION)
 
 build: $(MICROSERVICES)
 
-cmd/device-camera-go:
+cmd/device-camera:
+	go mod tidy
 	$(GO) build $(GOFLAGS) -o $@ ./cmd
 
 docker:
@@ -26,10 +27,10 @@ docker:
 		-t edgexfoundry/device-camera:$(VERSION)-dev
 
 test:
+	go mod tidy
 	go test -coverprofile=coverage.out ./...
 	go vet ./...
 	./bin/test-attribution.sh
-	./bin/test-go-mod-tidy.sh
 
 check-lint:
 	which golint || (go get -u golang.org/x/lint/golint)

@@ -24,7 +24,7 @@ ARG ALPINE_PKG_EXTRA=""
 LABEL Name=edgex-device-camera-go
 
 #expose device-camera-go port
-ENV APP_PORT=49985
+ENV APP_PORT=59985
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2018-2020: Intel'
@@ -32,11 +32,12 @@ LABEL license='SPDX-License-Identifier: Apache-2.0' \
 RUN sed -e 's/dl-cdn[.]alpinelinux.org/nl.alpinelinux.org/g' -i~ /etc/apk/repositories
 RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 
-WORKDIR $GOPATH/src/github.com/edgexfoundry/device-camera-go
+WORKDIR /device-camera-go
 
 COPY go.mod .
 COPY Makefile .
 
+RUN go mod tidy
 RUN make update
 
 COPY . .
@@ -44,9 +45,9 @@ RUN ${MAKE}
 
 FROM alpine:3.12
 
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/cmd /
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/LICENSE /
-COPY --from=builder /go/src/github.com/edgexfoundry/device-camera-go/Attribution.txt /
+COPY --from=builder /device-camera-go/cmd /
+COPY --from=builder /device-camera-go/LICENSE /
+COPY --from=builder /device-camera-go/Attribution.txt /
 
-ENTRYPOINT ["/device-camera-go"]
+ENTRYPOINT ["/device-camera"]
 CMD ["--cp=consul://edgex-core-consul:8500", "--registry", "--confdir=/res"]
