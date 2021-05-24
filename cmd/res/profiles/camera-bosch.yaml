@@ -1,0 +1,124 @@
+name: "camera-bosch"
+manufacturer:  "Bosch"
+model: "IP Starlight 7000HD"
+labels:
+  - "camera-onvif"
+  - "poe camera"
+  - "bosch"
+description: "EdgeX device profile for Bosch IP Starlight 7000HD camera."
+
+deviceResources:
+  - name: "onvif_device_information"
+    description: "results of ONVIF GetDeviceInformation call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_profile_information"
+    description: "results of ONVIF GetProfiles call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "OnvifHostname"
+    description: "results of ONVIF GetHostname call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "OnvifDateTime"
+    description: "results of ONVIF GetSystemDateAndTime call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_dns"
+    description: "results of ONVIF GetDNS call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_network_interfaces"
+    description: "results of ONVIF GetNetworkInterfaces call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_network_protocols"
+    description: "results of ONVIF GetNetworkProtocols call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_network_default_gateway"
+    description: "results of ONVIF GetNetworkDefaultGateway call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_ntp"
+    description: "results of ONVIF GetNTP call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_users"
+    description: "results of ONVIF GetUsers call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_snapshot"
+    description: "snapshot from first ONVIF MediaProfile"
+    properties:
+      valueType: "Binary"
+      readWrite: "R"
+      mediaType: "image/jpeg"
+  - name: "motion_detected"
+    description: "camera device detected motion"
+    attributes:
+      { alarm_type: "16" }
+    properties:
+      valueType: "Bool"
+      readWrite: "R"
+  - name: "tamper_detected"
+    description: "camera device detected tampering"
+    attributes:
+      { alarm_type: "37" }
+    properties:
+      valueType: "Bool"
+      readWrite: "R"
+  - name: "occupancy"
+    description: "number of people in frame"
+    attributes:
+      { counter_name: "occupancy" }
+    properties:
+      valueType: "Uint32"
+      readWrite: "R"
+  - name: "counter"
+    description: "number of people crossing line"
+    attributes:
+      { counter_name: "counter" }
+    properties:
+      valueType: "Uint32"
+      readWrite: "R"
+  - name: "OnvifUser"
+    description: "ONVIF user in escaped JSON format"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+  - name: "OnvifReboot"
+    description: "should reboot ONVIF camera"
+    properties:
+      valueType: "Bool"
+      readWrite: "RW"
+  - name: "OnvifStreamURI"
+    description: "ONVIF RTSP URI"
+    properties:
+      valueType: "String"
+      readWrite: "R"
+  - name: "OnvifHostnameFromDHCP"
+    description: "should set Hostname from DHCP"
+    properties:
+      valueType: "Bool"
+      readWrite: "RW"

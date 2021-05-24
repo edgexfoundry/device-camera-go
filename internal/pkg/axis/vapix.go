@@ -12,9 +12,10 @@ import (
 	"strings"
 	"time"
 
-	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
-	e_models "github.com/edgexfoundry/go-mod-core-contracts/models"
+	ds_models "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2"
+	e_models "github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
 
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/client"
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/digest"
@@ -121,7 +122,7 @@ func NewClient(asyncCh chan<- *ds_models.AsyncValues, lc logger.LoggingClient) c
 }
 
 // CameraInit initializes the Vapix listener for the camera
-func (c *VapixClient) CameraInit(edgexDevice e_models.Device, ipAddress string, username string, password string) {
+func (c *VapixClient) CameraInit(edgexDevice e_models.Device, edgexProfile e_models.DeviceProfile, ipAddress string, username string, password string) {
 	if c.alarms == nil {
 		c.alarms = make(map[string]e_models.DeviceResource)
 	}
@@ -131,10 +132,10 @@ func (c *VapixClient) CameraInit(edgexDevice e_models.Device, ipAddress string, 
 	}
 
 	// interrogate device profile for alarms to listen for
-	deviceResources := edgexDevice.Profile.DeviceResources
+	deviceResources := edgexProfile.DeviceResources
 
 	for _, e := range deviceResources {
-		alarmCode, ok := e.Attributes["alarm_code"]
+		alarmCode, ok := e.Attributes["alarm_code"].(string)
 		if ok {
 			c.alarms[alarmCode] = e
 			c.alarmStates[alarmCode] = false
@@ -180,11 +181,12 @@ func retryLoop(fn func() error, client logger.LoggingClient) {
 }
 
 func (c *VapixClient) getCommandValue(edgexDevice e_models.Device, trigger string, val bool) ([]*ds_models.CommandValue, error) {
-	cv, err := ds_models.NewBoolValue(trigger, time.Now().UnixNano()/int64(time.Millisecond), val)
+	cv, err := ds_models.NewCommandValue(trigger, v2.ValueTypeBool, val)
 	if err != nil {
 		c.lc.Error("failed getting new bool CommandValue")
 		return []*ds_models.CommandValue{}, fmt.Errorf("failed getting new bool CommandValue")
 	}
+	cv.Origin = time.Now().UnixNano()/int64(time.Millisecond)
 	cvs := []*ds_models.CommandValue{cv}
 	return cvs, nil
 }

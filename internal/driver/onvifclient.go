@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
 	"github.com/faceterteam/onvif4go"
 	"github.com/faceterteam/onvif4go/device"
 	"github.com/faceterteam/onvif4go/onvif"

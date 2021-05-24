@@ -3,8 +3,8 @@ package noop
 import (
 	"fmt"
 
-	"github.com/edgexfoundry/device-sdk-go/pkg/models"
-	e_models "github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
+	e_models "github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
 
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/client"
 )
@@ -31,7 +31,7 @@ func (n Client) CameraRelease(force bool) {
 }
 
 // CameraInit immediately returns control to the caller
-func (n Client) CameraInit(edgexDevice e_models.Device, ipAddress string, username string, password string) {
+func (n Client) CameraInit(edgexDevice e_models.Device, edgexProfile e_models.DeviceProfile, ipAddress string, username string, password string) {
 	return
 }
 

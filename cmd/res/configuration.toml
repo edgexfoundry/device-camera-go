@@ -1,73 +1,93 @@
 [Writable]
 LogLevel = 'INFO'
+  # Example InsecureSecrets configuration that simulates SecretStore for when EDGEX_SECURITY_SECRET_STORE=false
+  # InsecureSecrets are required for when Redis is used for message bus
+  [Writable.InsecureSecrets]
+    [Writable.InsecureSecrets.DB]
+    path = "redisdb"
+      [Writable.InsecureSecrets.DB.Secrets]
+      username = ""
+      password = ""
 
 [Service]
-# NOTE: To allow the EdgeX Registry (Consul) to invoke health checks on your device service 
-# from a different network, you must assign Host to your externally available hostname/ip address.
+HealthCheckInterval = '10s'
 Host = 'localhost'
 Port = 59985
-ConnectRetries = 3
-BootTimeout = 30000
-ClientMonitor = 15000
-Protocol = 'http'
-CheckInterval = '10s'
-Labels = []
+ServerBindAddr = ''  # blank value defaults to Service.Host value
 StartupMsg = 'Camera device service started'
-ReadMaxLimit = 256
-Timeout = 5000
-EnableAsyncReadings = true
-AsyncBufferSize = 16
+# MaxRequestSize limit the request body size in byte of put command
+MaxRequestSize = 0 # value 0 unlimit the request size.
+RequestTimeOut = '5s'
 
 [Registry]
+Type = 'consul'
 Host = 'localhost'
 Port = 8500
-CheckInterval = '15s'
-FailLimit = 3
-FailWaitTime = 10
-Type = 'consul'
 
 [Clients]
-  [Clients.Data]
-  Name = 'edgex-core-data'
+  [Clients.core-data]
+  Protocol = 'http'
   Host = 'localhost'
   Port = 59880
-  Timeout = 50000
-  Protocol = 'HTTP'
 
-  [Clients.Metadata]
-  Name = 'edgex-core-metadata'
+  [Clients.core-metadata]
+  Protocol = 'http'
   Host = 'localhost'
   Port = 59881
-  Timeout = 50000
-  Protocol = 'HTTP'
+
+[MessageQueue]
+Protocol = 'redis'
+Host = 'localhost'
+Port = 6379
+Type = 'redis'
+AuthMode = 'usernamepassword'  # required for redis messagebus (secure or insecure).
+SecretName = "redisdb"
+PublishTopicPrefix = 'edgex/events' # /<device-profile-name>/<device-name>/<source-name> will be added to this Publish Topic prefix
+  [MessageQueue.Optional]
+  # Default MQTT Specific options that need to be here to enable environment variable overrides of them
+  # Client Identifiers
+  ClientId = "device-camera"
+  # Connection information
+  Qos = "0" # Quality of Sevice values are 0 (At most once), 1 (At least once) or 2 (Exactly once)
+  KeepAlive = "10" # Seconds (must be 2 or greater)
+  Retained = "false"
+  AutoReconnect = "true"
+  ConnectTimeout = "5" # Seconds
+  SkipCertVerify = "false" # Only used if Cert/Key file or Cert/Key PEMblock are specified
+
+# Only used when EDGEX_SECURITY_SECRET_STORE=true which is now required for secure consul
+[SecretStore]
+Type = 'vault'
+Host = 'localhost'
+Port = 8200
+Path = '/v1/secret/edgex/device-camera/'
+Protocol = 'http'
+RootCaCertPath = ''
+ServerName = ''
+TokenFile = '/tmp/edgex/secrets/device-camera/secrets-token.json'
+AdditionalRetryAttempts = 10
+RetryWaitPeriod = "1s"
+  [SecretStore.Authentication]
+  AuthType = 'X-Vault-Token'
 
 [Device]
-  DataTransform = true
-  InitCmd = ''
-  InitCmdArgs = ''
-  MaxCmdOps = 128
-  MaxCmdValueLen = 256
-  RemoveCmd = ''
-  RemoveCmdArgs = ''
-  ProfilesDir = './res'
-  SendReadingsOnChanged = true
-
-# Pre-defined Devices
-[[DeviceList]]
-  Name = 'Camera001'
-  Profile = 'camera-bosch'
-  Description = 'My test Bosch camera'
-  Location = 'foo'
-  [DeviceList.Protocols]
-    [DeviceList.Protocols.HTTP]
-      Address = '192.168.2.105'
-#  Name = 'Camera001'
-#  Profile = 'camera-axis'
-#  Description = 'My test Axis camera'
-#  Location = 'foo'
-#  [DeviceList.Protocols]
-#    [DeviceList.Protocols.HTTP]
-#      Address = '192.168.2.163'
+DataTransform = true
+InitCmd = ''
+InitCmdArgs = ''
+MaxCmdOps = 128
+MaxCmdValueLen = 256
+RemoveCmd = ''
+RemoveCmdArgs = ''
+ProfilesDir = './res/profiles'
+DevicesDir = './res/devices'
+UpdateLastConnected = false
+EnableAsyncReadings = true
+AsyncBufferSize = 16
+Labels = []
+UseMessageBus = false
+  [Device.Discovery]
+  Enabled = false
+  Interval = '30s'
 
 # Driver configs
 [Driver]
