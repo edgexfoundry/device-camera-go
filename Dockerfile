@@ -18,13 +18,10 @@ ARG BASE=golang:1.16-alpine3.12
 FROM ${BASE} AS builder
 
 ARG MAKE="make build"
-ARG ALPINE_PKG_BASE="make git"
+ARG ALPINE_PKG_BASE="make git gcc libc-dev zeromq-dev libsodium-dev"
 ARG ALPINE_PKG_EXTRA=""
 
 LABEL Name=edgex-device-camera-go
-
-#expose device-camera-go port
-ENV APP_PORT=59985
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \
   copyright='Copyright (c) 2018-2020: Intel'
@@ -45,9 +42,14 @@ RUN ${MAKE}
 
 FROM alpine:3.12
 
+RUN apk add --update --no-cache zeromq
+
+WORKDIR /
 COPY --from=builder /device-camera-go/cmd /
 COPY --from=builder /device-camera-go/LICENSE /
 COPY --from=builder /device-camera-go/Attribution.txt /
 
+EXPOSE 59985
+
 ENTRYPOINT ["/device-camera"]
-CMD ["--cp=consul://edgex-core-consul:8500", "--registry", "--confdir=/res"]
+CMD ["--cp=consul.http://edgex-core-consul:8500", "--registry", "--confdir=/res"]
