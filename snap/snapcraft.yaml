@@ -8,8 +8,8 @@ description: |
   The EdgeX Camera Device Service is developed to control/communicate ONVIF-compliant
   cameras accessible via http in an EdgeX deployment.
   Initially the daemon in the snap is disabled - a device profile must be
-  provisioned externally with core-metadata or provided to device-camera-go inside
-  "$SNAP_DATA/config/device-camera-go/res" before starting.
+  provisioned externally with core-metadata or provided to device-camera inside
+  "$SNAP_DATA/config/device-camera/res" before starting.
 
 # TODO: add armhf when the project supports this
 architectures:
@@ -23,16 +23,16 @@ confinement: strict
 epoch: 3
 
 apps:
-  device-camera-go:
+  device-camera:
     adapter: none
-    command: bin/device-camera-go $CONFIG_PRO_ARG $CONF_ARG $REGISTRY_ARG
+    command: bin/device-camera $CONFIG_PRO_ARG $CONF_ARG $REGISTRY_ARG
     command-chain:
       - bin/startup-env-var.sh
     environment:
       CONFIG_PRO_ARG: "--cp=consul://localhost:8500"
-      CONF_ARG: "--confdir=$SNAP_DATA/config/device-camera-go/res"
+      CONF_ARG: "--confdir=$SNAP_DATA/config/device-camera/res"
       REGISTRY_ARG: "--registry"
-      DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-camera-go/res"
+      DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-camera/res"
     daemon: simple
     plugs: [network, network-bind]
 
@@ -49,7 +49,7 @@ parts:
       fi
       snapcraftctl set-version ${PROJECT_VERSION}
 
-  device-camera-go:
+  device-camera:
     source: .
     plugin: make
     build-packages: [git]
@@ -60,25 +60,25 @@ parts:
       go mod tidy
       make build
 
-      install -DT "./cmd/device-camera-go" "$SNAPCRAFT_PART_INSTALL/bin/device-camera-go"
+      install -DT "./cmd/device-camera" "$SNAPCRAFT_PART_INSTALL/bin/device-camera"
 
-      install -d "$SNAPCRAFT_PART_INSTALL/config/device-camera-go/res/"
+      install -d "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/"
 
       cat "./cmd/res/configuration.toml" | \
-        sed -e s:\"./device-camera-go.log\":\'\$SNAP_COMMON/device-camera-go.log\': \
-          -e s:'ProfilesDir = \"./res\"':'ProfilesDir = \"\$SNAP_DATA/config/device-camera-go/res\"': > \
-        "$SNAPCRAFT_PART_INSTALL/config/device-camera-go/res/configuration.toml"
+        sed -e s:\"./device-camera.log\":\'\$SNAP_COMMON/device-camera.log\': \
+          -e s:'ProfilesDir = \"./res\"':'ProfilesDir = \"\$SNAP_DATA/config/device-camera/res\"': > \
+        "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/configuration.toml"
 
       for fpath in ./cmd/res/*.yaml; do
           fname=$(basename "$fpath")
           install -DT "./cmd/res/${fname}" \
-            "$SNAPCRAFT_PART_INSTALL/config/device-camera-go/res/${fname}"
+            "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/${fname}"
       done
       
       install -DT "./Attribution.txt" \
-         "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera-go/Attribution.txt"
+         "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera/Attribution.txt"
       install -DT "./LICENSE" \
-         "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera-go/LICENSE"
+         "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera/LICENSE"
 
   config-common:
     plugin: dump

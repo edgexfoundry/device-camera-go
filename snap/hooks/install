@@ -9,26 +9,26 @@ SNAP_CURRENT=${SNAP/%$SNAP_REVISION/current}
 # install all the config files from $SNAP/config/SERVICE/res/configuration.toml 
 # into $SNAP_DATA/config
 mkdir -p "$SNAP_DATA/config"
-if [ ! -f "$SNAP_DATA/config/device-camera-go/res/configuration.toml" ]; then
-    mkdir -p "$SNAP_DATA/config/device-camera-go/res"
-    cp "$SNAP/config/device-camera-go/res/configuration.toml" "$SNAP_DATA/config/device-camera-go/res/configuration.toml"
+if [ ! -f "$SNAP_DATA/config/device-camera/res/configuration.toml" ]; then
+    mkdir -p "$SNAP_DATA/config/device-camera/res"
+    cp "$SNAP/config/device-camera/res/configuration.toml" "$SNAP_DATA/config/device-camera/res/configuration.toml"
     # do replacement of the $SNAP, $SNAP_DATA, $SNAP_COMMON environment variables in the config files
     sed -i -e "s@\$SNAP_COMMON@$SNAP_COMMON@g" \
         -e "s@\$SNAP_DATA@$SNAP_DATA_CURRENT@g" \
         -e "s@\$SNAP@$SNAP_CURRENT@g" \
-        "$SNAP_DATA/config/device-camera-go/res/configuration.toml"
+        "$SNAP_DATA/config/device-camera/res/configuration.toml"
 fi
 
 # also copy the device profile into $SNAP_DATA
-find "$SNAP/config/device-camera-go/res/" -type f -print | grep .yaml | \
+find "$SNAP/config/device-camera/res/" -type f -print | grep .yaml | \
     while read line; do
         fname=$(basename "$line")
-        if [ ! -f "$SNAP_DATA/config/device-camera-go/res/${fname}" ]; then
-            cp "$SNAP/config/device-camera-go/res/${fname}" \
-                "$SNAP_DATA/config/device-camera-go/res/${fname}"
+        if [ ! -f "$SNAP_DATA/config/device-camera/res/${fname}" ]; then
+            cp "$SNAP/config/device-camera/res/${fname}" \
+                "$SNAP_DATA/config/device-camera/res/${fname}"
         fi
     done
 
-# disable device-camera-go initially because it specific requires configuration 
+# disable device-camera initially because it specific requires configuration 
 # with a device profile that will be specific to each installation
-snapctl stop --disable "$SNAP_NAME.device-camera-go"
+snapctl stop --disable "$SNAP_NAME.device-camera"
