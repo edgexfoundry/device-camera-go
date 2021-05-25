@@ -19,8 +19,8 @@ architectures:
 grade: stable
 confinement: strict
 
-# delhi: 0, edinburgh: 1, fuji: 2, geneva: 3
-epoch: 3
+# delhi: 0, edinburgh: 1, fuji: 2, geneva/hanoi: 3, ireland: 4
+epoch: 4
 
 apps:
   device-camera:
