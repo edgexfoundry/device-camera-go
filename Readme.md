@@ -78,13 +78,13 @@ devices, this becomes more relevant.
 
 To remove devices from EdgeX:
 
-1. Issue a request to the EdgeX core metadata service to get the IDs for all devices.
+1. Issue a request to the EdgeX core metadata service to get the Names for all devices.
 
-        GET http://edgex-core-metadata:59881/api/v1/device
+        GET http://edgex-core-metadata:59881/api/v2/device/all
 
 2. Issue a request to the EdgeX core metadata service to delete a device by ID.
 
-        DELETE http://edgex-core-metadata:59881/api/v1/device/id/{{device_id_here}}
+        DELETE http://edgex-core-metadata:59881/api/v2/device/name/{{device_name_here}}
 
 This will remove the device from EdgeX and, as long as it does not remain in the device list
 inside this device service's configuration.toml file, will prevent this device service
@@ -95,7 +95,7 @@ from attempting to initialize the device at startup.
 
 There are many ways to interact with this device service. This example shows how to emit a snapshot image from your camera at regular intervals by leveraging EdgeX device service auto events. 
 
-1. For this example we will run this in a docker container, so modify the device service configuration profile for docker found [here](./cmd/res/docker/configuration.toml) to add your IP camera device. Note that at a minimum you must populate the Address value using the correct IP address for your device.
+1. For this example we will run this in a docker container, so modify the pre-defined devices found [here](./cmd/res/devices/device.toml) to add your IP camera device. Note that at a minimum you must populate the Address value using the correct IP address for your device.
 
     ```
     # Pre-defined Camera Device(s)
@@ -111,129 +111,38 @@ There are many ways to interact with this device service. This example shows how
         Address = "10.22.34.144"
     # Emit a CBOR-encoded image from this camera, as an EdgeX event, every 30 seconds
     [[DeviceList.AutoEvents]]
-        Frequency = "30s"
-        OnChange = false
-        Resource = "onvif_snapshot"
+        Interval   = "30s"
+        OnChange   = false
+        SourceName = "onvif_snapshot"
     ```
 
-2. Build docker image named *device-camera-go*.
+2. Build docker image named *edgexfoundry/device-camera-go:0.0.0-dev*.
     ```
     make docker
     ```
 
-3. Save the EdgeX docker-compose template found [here](https://github.com/edgexfoundry/developer-scripts/blob/master/releases/edinburgh/compose-files/) as docker-compose.yml. Then update your docker-compose.yml file to add this device service to the stack.
-    ```
-    #################################################################
-    # Device Services
-    #################################################################
-    docker-device-camera-go:
-        image: device-camera-go:latest
-        ports:
-        - "59985:59985"
-        container_name: edgex-device-camera-go
-        hostname: edgex-device-camera-go
-        networks:
-        edgex-network:
-            aliases:
-            - edgex-device-camera-go
-        volumes:
-        - db-data:/data/db
-        - log-data:/edgex/logs
-        - consul-config:/consul/config
-        - consul-data:/consul/data
-        depends_on:
-        - data
-        - command
-        - metadata
-    ```
+3. Generate compose file with device-camera added by running following commands:
+   ```
+   git clone https://github.com/edgexfoundry/edgex-compose.git
+   git checkout <release-branch> # i.e. hanoi
+   cd compose-builder/
+   make gen no-secty ds-camera
+   ```
 
-4. Launch the service using `docker-compose up docker-device-camera-go`. You should see informational log entries of CBOR events being emitted after 30 seconds, and each 30 seconds thereafter.
+4. Launch the service using `docker-compose up device-camera`. You should see informational log entries of CBOR events being emitted after 30 seconds, and each 30 seconds thereafter.
     ``` 
-    edgex-device-camera-go     | level=INFO msg="Device Service device-camera-go exists"
-    edgex-device-camera-go     | level=INFO msg="*Service Start() called, name=device-camera-go, version=1.0.0"
-    edgex-device-camera-go     | level=INFO msg="Listening on port: 59985"
-    edgex-device-camera-go     | level=INFO msg="Service started in: 65.358268ms"
-    edgex-device-camera-go     | level=INFO Content-Type=application/cbor correlation-id=a452e6b5-75b0-46c5-8558-a1c07269bf42 msg="SendEvent: Pushed event to core data"
-    edgex-device-camera-go     | level=INFO Content-Type=application/cbor correlation-id=45e53484-6a7e-41e6-9fd5-794f8a002819 msg="SendEvent: Pushed event to core data"
+    device-camera     | level=INFO msg="Device Service device-camera-go exists"
+    device-camera     | level=INFO msg="*Service Start() called, name=device-camera-go, version=1.0.0"
+    device-camera     | level=INFO msg="Listening on port: 59985"
+    device-camera     | level=INFO msg="Service started in: 65.358268ms"
+    device-camera     | level=INFO Content-Type=application/cbor correlation-id=a452e6b5-75b0-46c5-8558-a1c07269bf42 msg="SendEvent: Pushed event to core data"
+    device-camera     | level=INFO Content-Type=application/cbor correlation-id=45e53484-6a7e-41e6-9fd5-794f8a002819 msg="SendEvent: Pushed event to core data"
     ```
 
 #### Integrate Into Applications
-
-1. Consume these application/CBOR events in your application by cloning the [App Functions SDK](https://github.com/edgexfoundry/app-functions-sdk-go).
-    ```
-    git clone https://github.com/edgexfoundry/app-functions-sdk-go.git
-    cd app-functions-sdk-go
-    ```
-
-2. Update line 38 of app-functions-sdk Makefile so it will build a docker image that runs 'example/simple-cbor-filter' when launched.
-    ```
-    ...
-        -f examples/simple-cbor-filter/Dockerfile \
-    ...
-    ```
-
-3. Build the application example:
-    ```
-    make docker
-    ```
-
-4. Update your docker-compose.yml to include your application container:
-    ```
-    #################################################################
-    # Device Services
-    #################################################################
-    docker-simple-cbor-filter:
-        image: edgexfoundry/docker-app-functions-sdk-go-simple:0.0.0-dev
-        ports:
-        - "59795:59795"
-        container_name: simple-cbor-filter
-        hostname: simple-cbor-filter
-        networks:
-        edgex-network:
-            aliases:
-            - simple-cbor-filter
-        volumes:
-        - db-data:/data/db
-        - log-data:/edgex/logs
-        - consul-config:/consul/config
-        - consul-data:/consul/data
-        depends_on:
-        - data
-        - command
-        - metadata
-        - docker-device-camera-go
-
-    ...
-    docker-device-camera-go:
-        image: device-camera-go:latest
-    ...
-    ```
-
-5. Launch your application service:
-    ```
-    docker-compose-up docker-simple-cbor-filter
-    ```
-
-6. This will show the snapshot image events being received and processed by your application. It shows log entries for the resolution of the image and the color of the pixel at the center of your camera.
-    ```
-    Starting edgex-device-camera-go ... done
-    Creating simple-cbor-filter     ... done
-    Attaching to simple-cbor-filter
-    simple-cbor-filter           | Configuration pushed to registry with service key: sampleCborFilter
-    simple-cbor-filter           | Configuration & Registry initializedlevel=INFO ts=2019-11-01T22:15:05.429607466Z app=sampleCborFilter source=sdk.go:357 msg="Logger successfully initialized"
-    simple-cbor-filter           | level=INFO version=0.0.0 msg="Skipping core service version compatibility check for SDK Beta version or running in debugger"
-    simple-cbor-filter           | level=INFO msg="Clients initialized"
-    simple-cbor-filter           | level=INFO msg="Registering standard routes..."
-    simple-cbor-filter           | level=INFO msg="Filtering for [onvif_snapshot] value descriptors..."
-    simple-cbor-filter           | level=INFO msg="MessageBus trigger selected"
-    simple-cbor-filter           | level=INFO msg="Initializing Message Bus Trigger. Subscribing to topic: events on port 5563 , Publish Topic: somewhere on port 5564"
-    simple-cbor-filter           | level=INFO msg="Listening for changes from registry"
-    simple-cbor-filter           | level=INFO msg="StoreAndForward disabled. Not running retry loop."
-    simple-cbor-filter           | level=INFO msg="Simple CBOR Filter Application Service started"
-    simple-cbor-filter           | level=INFO msg="Starting CPU Usage Average loop"
-    simple-cbor-filter           | level=INFO msg="Starting HTTP Server on port :59795"
-    simple-cbor-filter           | level=INFO msg="Writable configuration has been updated from Registry"
-    simple-cbor-filter           | Received Image from Device: CasualWatcher001, ReadingName: onvif_snapshot, Image Type: jpeg, Image Size: (1280,720), Color in middle: {112 125 128}
-    simple-cbor-filter           | Received Image from Device: CasualWatcher001, ReadingName: onvif_snapshot, Image Type: jpeg, Image Size: (1280,720), Color in middle: {114 125 128}
-    ```
-    
+Refer to [simple-cbor-filter](https://github.com/edgexfoundry/edgex-examples/tree/master/application-services/custom/simple-cbor-filter),
+update the `ValueDescriptors` in `res/configuration.toml` and run the example:
+```
+[ApplicationSettings]
+ValueDescriptors = "onvif_snapshot"
+```
