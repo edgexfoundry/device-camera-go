@@ -19,9 +19,10 @@ import (
 	"time"
 	"unicode/utf16"
 
-	ds_models "github.com/edgexfoundry/device-sdk-go/pkg/models"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
-	e_models "github.com/edgexfoundry/go-mod-core-contracts/models"
+	ds_models "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2"
+	e_models "github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
 
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/client"
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/digest"
@@ -223,7 +224,7 @@ func (rc *RcpClient) CameraRelease(force bool) {
 }
 
 // CameraInit initializes the RCP listener routine
-func (rc *RcpClient) CameraInit(edgexDevice e_models.Device, ipAddress string, username string, password string) {
+func (rc *RcpClient) CameraInit(edgexDevice e_models.Device, edgexProfile e_models.DeviceProfile, ipAddress string, username string, password string) {
 	if rc.client == nil {
 		rc.initializeDClient(username, password)
 	}
@@ -252,10 +253,10 @@ func (rc *RcpClient) CameraInit(edgexDevice e_models.Device, ipAddress string, u
 	defer close(stoppedchan)
 
 	// interrogate device profile for alarms/counters to listen for
-	deviceResources := edgexDevice.Profile.DeviceResources
+	deviceResources := edgexProfile.DeviceResources
 
 	for _, e := range deviceResources {
-		alarmType, ok := e.Attributes["alarm_type"]
+		alarmType, ok := e.Attributes["alarm_type"].(string)
 		if ok {
 			val, err := strconv.Atoi(alarmType)
 			if err == nil {
@@ -265,7 +266,7 @@ func (rc *RcpClient) CameraInit(edgexDevice e_models.Device, ipAddress string, u
 			continue
 		}
 
-		counterName := e.Attributes["counter_name"]
+		counterName := e.Attributes["counter_name"].(string)
 		if counterName != "" {
 			rc.counters[counterName] = e
 		}
@@ -322,21 +323,21 @@ func (rc *RcpClient) HandleReadCommand(req ds_models.CommandRequest) (*ds_models
 	var cv *ds_models.CommandValue
 	var err error
 
-	if alarmType, ok := req.Attributes["alarm_type"]; ok {
+	if alarmType, ok := req.Attributes["alarm_type"].(string); ok {
 		alarmType, err := strconv.Atoi(alarmType)
 		if err != nil {
 			return nil, err
 		}
 		data := rc.getAlarmState(alarmType)
 
-		cv, err = ds_models.NewBoolValue(req.DeviceResourceName, 0, data)
+		cv, err = ds_models.NewCommandValue(req.DeviceResourceName, v2.ValueTypeBool, data)
 		if err != nil {
 			return nil, err
 		}
-	} else if counterType, ok := req.Attributes["counter_name"]; ok {
+	} else if counterType, ok := req.Attributes["counter_name"].(string); ok {
 		data := rc.getCounterState(counterType)
 
-		cv, err = ds_models.NewUint32Value(req.DeviceResourceName, 0, uint32(data))
+		cv, err = ds_models.NewCommandValue(req.DeviceResourceName, v2.ValueTypeUint32, uint32(data))
 		if err != nil {
 			return nil, err
 		}
@@ -367,11 +368,12 @@ func (rc *RcpClient) commandValuesFromAlarms(alarms []alarm, edgexDevice e_model
 		rc.setAlarmState(int(alarm.AlarmType), alarmValue)
 
 		var cv *ds_models.CommandValue
-		cv, err = ds_models.NewBoolValue(deviceResource.Name, time.Now().UnixNano()/int64(time.Millisecond), alarmValue)
+		cv, err = ds_models.NewCommandValue(deviceResource.Name, v2.ValueTypeBool, alarm)
 		if err != nil {
 			rc.lc.Error("sendEvent: unable to get new bool value")
 			return []*ds_models.CommandValue{}, fmt.Errorf("unable to create CommandValue")
 		}
+		cv.Origin = time.Now().UnixNano()/int64(time.Millisecond)
 		cvs = append(cvs, cv)
 	}
 
@@ -390,11 +392,12 @@ func (rc *RcpClient) commandValuesFromCounters(counters []counterData, edgexDevi
 		rc.setCounterState(dr.Name, int(counter.Value))
 
 		var cv *ds_models.CommandValue
-		cv, err = ds_models.NewUint32Value(dr.Name, time.Now().UnixNano()/int64(time.Millisecond), counter.Value)
+		cv, err = ds_models.NewCommandValue(dr.Name, v2.ValueTypeUint32, counter.Value)
 		if err != nil {
 			rc.lc.Error("sendEvent: unable to get new uint32 value")
 			return []*ds_models.CommandValue{}, fmt.Errorf("unable to create CommandValue")
 		}
+		cv.Origin = time.Now().UnixNano()/int64(time.Millisecond)
 		cvs = append(cvs, cv)
 	}
 

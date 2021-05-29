@@ -1,0 +1,36 @@
+name: "camera-axis"
+manufacturer:  "Axis"
+model: "M3104-L"
+labels:
+  - "camera-onvif"
+  - "poe camera"
+  - "axis"
+description: "EdgeX device profile for AXIS M3104-L Network Camera."
+
+deviceResources:
+  - name: "onvif_device_information"
+    description: "results of ONVIF GetDeviceInformation call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_profile_information"
+    description: "results of ONVIF GetProfiles call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "motion_detected"
+    description: "camera device detected motion"
+    attributes:
+      { alarm_code: "M0" }
+    properties:
+      valueType: "Bool"
+      readWrite: "R"
+  - name: "tamper_detected"
+    description: "camera device detected tampering"
+    attributes:
+      { alarm_code: "T0" }
+    properties:
+      valueType: "Bool"
+      readWrite: "R"

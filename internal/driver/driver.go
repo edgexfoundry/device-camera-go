@@ -6,10 +6,11 @@ import (
 	"sync"
 	"time"
 
-	sdkModel "github.com/edgexfoundry/device-sdk-go/pkg/models"
-	sdk "github.com/edgexfoundry/device-sdk-go/pkg/service"
-	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
-	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
+	sdkModel "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
+	sdk "github.com/edgexfoundry/device-sdk-go/v2/pkg/service"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2"
+	contract "github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
 	"github.com/faceterteam/onvif4go/onvif"
 	"github.com/pkg/errors"
 
@@ -49,6 +50,7 @@ func NewProtocolDriver() *Driver {
 
 // HandleReadCommands triggers a protocol Read operation for the specified device.
 func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]contract.ProtocolProperties, reqs []sdkModel.CommandRequest) ([]*sdkModel.CommandValue, error) {
+	var err error
 	var responses = make([]*sdkModel.CommandValue, len(reqs))
 
 	addr, err := d.addrFromProtocols(protocols)
@@ -62,145 +64,116 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 		return responses, errors.Errorf("handleReadCommands: %v", err.Error())
 	}
 
+	var data string
+	var cv *sdkModel.CommandValue
 	for i, req := range reqs {
 		switch req.DeviceResourceName {
 		// ONVIF cases
 		case "onvif_device_information":
-			data, err := onvifClient.GetDeviceInformation()
-
+			data, err = onvifClient.GetDeviceInformation()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "onvif_profile_information":
-			data, err := onvifClient.GetProfileInformation()
-
+			data, err = onvifClient.GetProfileInformation()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "OnvifDateTime":
-			data, err := onvifClient.GetSystemDateAndTime()
-
+			data, err = onvifClient.GetSystemDateAndTime()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "OnvifHostname":
-			data, err := onvifClient.GetHostname()
-
+			data, err = onvifClient.GetHostname()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "onvif_dns":
-			data, err := onvifClient.GetDNS()
-
+			data, err = onvifClient.GetDNS()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "onvif_network_interfaces":
-			data, err := onvifClient.GetNetworkInterfaces()
-
+			data, err = onvifClient.GetNetworkInterfaces()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "onvif_network_protocols":
-			data, err := onvifClient.GetNetworkProtocols()
-
+			data, err = onvifClient.GetNetworkProtocols()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "onvif_network_default_gateway":
-			data, err := onvifClient.GetNetworkDefaultGateway()
-
+			data, err = onvifClient.GetNetworkDefaultGateway()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "onvif_ntp":
-			data, err := onvifClient.GetNTP()
-
+			data, err = onvifClient.GetNTP()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "onvif_system_reboot":
-			data, err := onvifClient.Reboot()
-
+			data, err = onvifClient.Reboot()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "onvif_users":
-			data, err := onvifClient.GetUsers()
-
+			data, err = onvifClient.GetUsers()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		case "onvif_snapshot":
-			data, err := onvifClient.GetSnapshot()
-
+			var bytes []byte
+			bytes, err = onvifClient.GetSnapshot()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv, err := sdkModel.NewBinaryValue(reqs[i].DeviceResourceName, 0, data)
-			if err != nil {
-				err = errors.Wrap(err, "error creating binary CommandValue")
-				d.lc.Error(err.Error())
-				return responses, err
-			}
-			responses[i] = cv
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeBinary, bytes)
 		case "OnvifStreamURI":
-			data, err := onvifClient.GetStreamURI()
-
+			data, err = onvifClient.GetStreamURI()
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
 
-			cv := sdkModel.NewStringValue(reqs[i].DeviceResourceName, 0, string(data))
-			responses[i] = cv
-
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
 		// camera specific cases
 		default:
 			if c == nil {
@@ -209,13 +182,17 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err := c.HandleReadCommand(req)
+			cv, err = c.HandleReadCommand(req)
 			if err != nil {
 				d.lc.Error(err.Error())
 				return responses, err
 			}
-			responses[i] = cv
 		}
+		if err != nil {
+			d.lc.Errorf("Error creating CommandValue: %s", err.Error())
+			return responses, err
+		}
+		responses[i] = cv
 	}
 
 	return responses, nil
@@ -447,15 +424,16 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]contract.P
 }
 
 func newClient(device contract.Device, user string, password string) client.Client {
-	labels := device.Profile.Labels
+	profile, _ := sdk.RunningService().GetProfileByName(device.ProfileName)
+	labels := profile.Labels
 	var c client.Client
 
 	if in("bosch", labels) {
-		c = initializeClient(device, user, password)
+		c = initializeClient(device, profile, user, password)
 	} else if in("hanwha", labels) {
 		// c = initializeHanwhaClient(device, user, password)
 	} else if in("axis", labels) {
-		c = initializeAxisClient(device, user, password)
+		c = initializeAxisClient(device, profile, user, password)
 	} else {
 		c = initializeNoopClient()
 	}
@@ -489,11 +467,11 @@ func initializeOnvifClient(device contract.Device, user string, password string,
 	return c
 }
 
-func initializeClient(device contract.Device, user string, password string) client.Client {
+func initializeClient(device contract.Device, profile contract.DeviceProfile, user string, password string) client.Client {
 	addr := device.Protocols["HTTP"]["Address"]
 
 	c := bosch.NewClient(driver.asynchCh, driver.lc)
-	c.CameraInit(device, addr, user, password)
+	c.CameraInit(device, profile, addr, user, password)
 
 	lock.Lock()
 	clients[addr] = c
@@ -502,11 +480,11 @@ func initializeClient(device contract.Device, user string, password string) clie
 	return c
 }
 
-func initializeAxisClient(device contract.Device, user string, password string) client.Client {
+func initializeAxisClient(device contract.Device, profile contract.DeviceProfile, user string, password string) client.Client {
 	addr := device.Protocols["HTTP"]["Address"]
 
 	c := axis.NewClient(driver.asynchCh, driver.lc)
-	c.CameraInit(device, addr, user, password)
+	c.CameraInit(device, profile, addr, user, password)
 
 	lock.Lock()
 	clients[addr] = c

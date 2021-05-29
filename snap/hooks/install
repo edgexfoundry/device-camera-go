@@ -20,14 +20,17 @@ if [ ! -f "$SNAP_DATA/config/device-camera/res/configuration.toml" ]; then
 fi
 
 # also copy the device profile into $SNAP_DATA
-find "$SNAP/config/device-camera/res/" -type f -print | grep .yaml | \
-    while read line; do
-        fname=$(basename "$line")
-        if [ ! -f "$SNAP_DATA/config/device-camera/res/${fname}" ]; then
-            cp "$SNAP/config/device-camera/res/${fname}" \
-                "$SNAP_DATA/config/device-camera/res/${fname}"
-        fi
-    done
+if [ ! -d "$SNAP_DATA/config/device-camera/res/profiles" ]; then
+    mkdir -p "$SNAP_DATA/config/device-camera/res/profiles"
+    cp -r "$SNAP/config/device-camera/res/profiles" \
+        "$SNAP_DATA/config/device-camera/res"
+fi
+
+if [ ! -d "$SNAP_DATA/config/device-camera/res/devices" ]; then
+    mkdir -p "$SNAP_DATA/config/device-camera/res/devices"
+    cp -r "$SNAP/config/device-camera/res/devices" \
+        "$SNAP_DATA/config/device-camera/res"
+fi
 
 # disable device-camera initially because it specific requires configuration 
 # with a device profile that will be specific to each installation

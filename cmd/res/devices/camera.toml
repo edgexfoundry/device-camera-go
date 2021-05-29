@@ -1,0 +1,9 @@
+# Pre-defined Devices
+[[DeviceList]]
+Name = 'Camera001'
+ProfileName = 'camera-bosch'
+Description = 'My test Bosch camera'
+Location = 'foo'
+  [DeviceList.Protocols]
+    [DeviceList.Protocols.HTTP]
+    Address = '192.168.2.105'

@@ -29,10 +29,11 @@ apps:
     command-chain:
       - bin/startup-env-var.sh
     environment:
-      CONFIG_PRO_ARG: "--cp=consul://localhost:8500"
+      CONFIG_PRO_ARG: "--cp=consul.http://localhost:8500"
       CONF_ARG: "--confdir=$SNAP_DATA/config/device-camera/res"
       REGISTRY_ARG: "--registry"
-      DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-camera/res"
+      DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-camera/res/profiles"
+      DEVICE_DEVICESDIR: "$SNAP_DATA/config/device-camera/res/devices"
     daemon: simple
     plugs: [network, network-bind]
 
@@ -52,7 +53,8 @@ parts:
   device-camera:
     source: .
     plugin: make
-    build-packages: [git]
+    build-packages: [git, libzmq3-dev, pkg-config]
+    stage-packages: [libzmq5]
     build-snaps:
       - go/1.16/stable
     override-build: |
@@ -63,18 +65,23 @@ parts:
       install -DT "./cmd/device-camera" "$SNAPCRAFT_PART_INSTALL/bin/device-camera"
 
       install -d "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/"
-
-      cat "./cmd/res/configuration.toml" | \
-        sed -e s:\"./device-camera.log\":\'\$SNAP_COMMON/device-camera.log\': \
-          -e s:'ProfilesDir = \"./res\"':'ProfilesDir = \"\$SNAP_DATA/config/device-camera/res\"': > \
+      install -DT "./cmd/res/configuration.toml" \
         "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/configuration.toml"
 
-      for fpath in ./cmd/res/*.yaml; do
+      install -d "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/profiles/"
+      for fpath in ./cmd/res/profiles/*.yaml; do
           fname=$(basename "$fpath")
-          install -DT "./cmd/res/${fname}" \
-            "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/${fname}"
+          install -DT "./cmd/res/profiles/${fname}" \
+            "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/profiles/${fname}"
       done
-      
+
+      install -d "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/devices/"
+      for fpath in ./cmd/res/devices/*.toml; do
+          fname=$(basename "$fpath")
+          install -DT "./cmd/res/devices/${fname}" \
+            "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/devices/${fname}"
+      done
+
       install -DT "./Attribution.txt" \
          "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera/Attribution.txt"
       install -DT "./LICENSE" \

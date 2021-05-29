@@ -1,0 +1,95 @@
+name: "camera"
+manufacturer:  "Generic"
+model: "Generic ONVIF"
+labels:
+  - "onvif"
+  - "poe camera"
+description: "EdgeX device profile for ONVIF-compliant IP camera."
+
+deviceResources:
+  - name: "onvif_device_information"
+    description: "results of ONVIF GetDeviceInformation call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_profile_information"
+    description: "results of ONVIF GetProfiles call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "OnvifHostname"
+    description: "results of ONVIF GetHostname call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "OnvifDateTime"
+    description: "results of ONVIF GetSystemDateAndTime call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_dns"
+    description: "results of ONVIF GetDNS call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_network_interfaces"
+    description: "results of ONVIF GetNetworkInterfaces call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_network_protocols"
+    description: "results of ONVIF GetNetworkProtocols call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_network_default_gateway"
+    description: "results of ONVIF GetNetworkDefaultGateway call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_ntp"
+    description: "results of ONVIF GetNTP call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_users"
+    description: "results of ONVIF GetUsers call"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+      defaultValue: "key:value,key:value"
+  - name: "onvif_snapshot"
+    description: "snapshot from first ONVIF MediaProfile"
+    properties:
+      valueType: "Binary"
+      readWrite: "R"
+      mediaType: "image/jpeg"
+  - name: "OnvifUser"
+    description: "ONVIF user in escaped JSON format"
+    properties:
+      valueType: "String"
+      readWrite: "RW"
+  - name: "OnvifReboot"
+    description: "should reboot ONVIF camera"
+    properties:
+      valueType: "Bool"
+      readWrite: "RW"
+  - name: "OnvifStreamURI"
+    description: "ONVIF RTSP URI"
+    properties:
+      valueType: "String"
+      readWrite: "R"
+  - name: "OnvifHostnameFromDHCP"
+    description: "should set Hostname from DHCP"
+    properties:
+      valueType: "Bool"
+      readWrite: "RW"

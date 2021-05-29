@@ -3,6 +3,7 @@
 #GOOS=linux
 
 GO=CGO_ENABLED=0 GO111MODULE=on go
+GOCGO=CGO_ENABLED=1 GO111MODULE=on go
 
 MICROSERVICES=cmd/device-camera
 .PHONY: $(MICROSERVICES)
@@ -16,7 +17,7 @@ build: $(MICROSERVICES)
 
 cmd/device-camera:
 	go mod tidy
-	$(GO) build $(GOFLAGS) -o $@ ./cmd
+	$(GOCGO) build $(GOFLAGS) -o $@ ./cmd
 
 docker:
 	docker build . \

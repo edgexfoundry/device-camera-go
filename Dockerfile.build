@@ -17,7 +17,7 @@
 ARG BASE=golang:1.16-alpine3.12
 FROM ${BASE}
 
-ARG ALPINE_PKG_BASE="make git"
+ARG ALPINE_PKG_BASE="make git gcc libc-dev libsodium-dev zeromq-dev"
 ARG ALPINE_PKG_EXTRA=""
 
 LABEL license='SPDX-License-Identifier: Apache-2.0' \

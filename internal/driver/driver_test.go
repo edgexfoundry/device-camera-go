@@ -5,7 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
 )
 
 type testStringer struct {
@@ -30,64 +31,32 @@ func newTestStringer(str string, err error) testStringer {
 	return ts
 }
 
-type mockLogger struct {
-	debug, error, info, trace, warn int
-}
-
-func (m *mockLogger) SetLogLevel(logLevel string) error {
-	panic("implement me")
-}
-
-func (m *mockLogger) Debug(msg string, args ...interface{}) {
-	m.debug--
-}
-
-func (m *mockLogger) Error(msg string, args ...interface{}) {
-	m.error--
-}
-
-func (m *mockLogger) Info(msg string, args ...interface{}) {
-	m.info--
-}
-
-func (m *mockLogger) Trace(msg string, args ...interface{}) {
-	m.trace--
-}
-
-func (m *mockLogger) Warn(msg string, args ...interface{}) {
-	m.warn--
-}
-
-func (m mockLogger) VerifyLoggerCalls() bool {
-	return m.debug == 0 && m.error == 0 && m.info == 0 && m.trace == 0 && m.warn == 0
-}
-
 func TestDriver_addrFromProtocols(t *testing.T) {
 	tests := []struct {
 		name          string
-		protocols     map[string]contract.ProtocolProperties
-		logger        *mockLogger
+		protocols     map[string]models.ProtocolProperties
+		logger        logger.LoggingClient
 		expectedValue string
 		expectedError bool
 	}{
 		{
 			name:          "OK",
-			protocols:     map[string]contract.ProtocolProperties{"HTTP": {"Address": "someaddress"}},
-			logger:        &mockLogger{},
+			protocols:     map[string]models.ProtocolProperties{"HTTP": {"Address": "someaddress"}},
+			logger:        logger.NewMockClient(),
 			expectedValue: "someaddress",
 			expectedError: false,
 		},
 		{
 			name:          "Missing HTTP protocol",
-			protocols:     map[string]contract.ProtocolProperties{"TCP": {"Address": "address2"}},
-			logger:        &mockLogger{error: 1},
+			protocols:     map[string]models.ProtocolProperties{"TCP": {"Address": "address2"}},
+			logger:        logger.NewMockClient(),
 			expectedValue: "",
 			expectedError: true,
 		},
 		{
 			name:          "Missing address",
-			protocols:     map[string]contract.ProtocolProperties{"HTTP": {"Secure": "True"}},
-			logger:        &mockLogger{error: 1},
+			protocols:     map[string]models.ProtocolProperties{"HTTP": {"Secure": "True"}},
+			logger:        logger.NewMockClient(),
 			expectedValue: "",
 			expectedError: true,
 		},
@@ -109,11 +78,6 @@ func TestDriver_addrFromProtocols(t *testing.T) {
 			if res != test.expectedValue {
 				t.Errorf("Expected '%v', Received '%v'", test.expectedValue, res)
 			}
-
-			if !test.logger.VerifyLoggerCalls() {
-				t.Errorf("Didn't receive expected writes to logger")
-			}
-
 		})
 	}
 }
