@@ -6,8 +6,17 @@ LogLevel = 'INFO'
     [Writable.InsecureSecrets.DB]
     path = "redisdb"
       [Writable.InsecureSecrets.DB.Secrets]
+    [Writable.InsecureSecrets.Camera001]
+    path = "credentials001"
+      [Writable.InsecureSecrets.Camera001.Secrets]
       username = ""
       password = ""
+    # If having more than one camera, uncomment the following config settings
+    # [Writable.InsecureSecrets.Camera002]
+    # path = "credentials002"
+    #   [Writable.InsecureSecrets.Camera002.Secrets]
+    #   username = ""
+    #   password = ""
 
 [Service]
 HealthCheckInterval = '10s'
@@ -18,6 +27,19 @@ StartupMsg = 'Camera device service started'
 # MaxRequestSize limit the request body size in byte of put command
 MaxRequestSize = 0 # value 0 unlimit the request size.
 RequestTimeOut = '5s'
+
+# Only used when EDGEX_SECURITY_SECRET_STORE=true which is now required for secure consul
+[SecretStore]
+Type = 'vault'
+Host = 'localhost'
+Port = 8200
+Path = 'device-camera/'
+Protocol = 'http'
+RootCaCertPath = ''
+ServerName = ''
+TokenFile = '/tmp/edgex/secrets/device-camera/secrets-token.json'
+  [SecretStore.Authentication]
+  AuthType = 'X-Vault-Token'
 
 [Registry]
 Type = 'consul'
@@ -55,19 +77,6 @@ PublishTopicPrefix = 'edgex/events' # /<device-profile-name>/<device-name>/<sour
   ConnectTimeout = "5" # Seconds
   SkipCertVerify = "false" # Only used if Cert/Key file or Cert/Key PEMblock are specified
 
-# Only used when EDGEX_SECURITY_SECRET_STORE=true which is now required for secure consul
-[SecretStore]
-Type = 'vault'
-Host = 'localhost'
-Port = 8200
-Path = 'device-camera/'
-Protocol = 'http'
-RootCaCertPath = ''
-ServerName = ''
-TokenFile = '/tmp/edgex/secrets/device-camera/secrets-token.json'
-  [SecretStore.Authentication]
-  AuthType = 'X-Vault-Token'
-
 [Device]
 DataTransform = true
 InitCmd = ''
@@ -89,11 +98,5 @@ UseMessageBus = false
 
 # Driver configs
 [Driver]
-User = 'service'
-Password = 'Password!1'
-# Assign AuthMethod to 'digest' | 'basic' | 'none'
-# AuthMethod specifies the authentication method used when
-# requesting still images from the URL returned by the ONVIF
-# "GetSnapshotURI" command.  All ONVIF requests will be
-# carried out using digest auth.
-AuthMethod = 'basic'
+CredentialsRetryTime = '120' # Seconds
+CredentialsRetryWait = '1' # Seconds

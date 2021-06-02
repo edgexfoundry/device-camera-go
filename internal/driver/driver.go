@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2021 Intel Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *******************************************************************************/
+
 package driver
 
 import (
@@ -8,9 +23,15 @@ import (
 
 	sdkModel "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
 	sdk "github.com/edgexfoundry/device-sdk-go/v2/pkg/service"
+	"github.com/edgexfoundry/go-mod-bootstrap/v2/bootstrap/secret"
+	"github.com/edgexfoundry/go-mod-bootstrap/v2/bootstrap/startup"
+	"github.com/edgexfoundry/go-mod-bootstrap/v2/config"
+
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
+
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2"
 	contract "github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
+
 	"github.com/faceterteam/onvif4go/onvif"
 	"github.com/pkg/errors"
 
@@ -53,13 +74,18 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 	var err error
 	var responses = make([]*sdkModel.CommandValue, len(reqs))
 
-	addr, err := d.addrFromProtocols(protocols)
+	_, err = d.addrFromProtocols(protocols)
+	if err != nil {
+		return responses, errors.Errorf("handleReadCommands: %v", err.Error())
+	}
+
+	cameraConfig, err := CreateCameraInfo(protocols)
 	if err != nil {
 		return responses, errors.Errorf("handleReadCommands: %v", err.Error())
 	}
 
 	// check for existence of both clients
-	onvifClient, c, err := d.clientsFromAddr(addr, deviceName)
+	onvifClient, c, err := d.clientsFromCameraConfig(cameraConfig, deviceName)
 	if err != nil {
 		return responses, errors.Errorf("handleReadCommands: %v", err.Error())
 	}
@@ -203,13 +229,18 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 // Since the commands are actuation commands, params provide parameters for the individual
 // command.
 func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]contract.ProtocolProperties, reqs []sdkModel.CommandRequest, params []*sdkModel.CommandValue) error {
-	addr, err := d.addrFromProtocols(protocols)
+	_, err := d.addrFromProtocols(protocols)
 	if err != nil {
 		return errors.Errorf("handleWriteCommands: %v", err.Error())
 	}
 
+	cameraConfig, err := CreateCameraInfo(protocols)
+	if err != nil {
+		return fmt.Errorf("while write commands, failed to create cameraInfo for device %s: %v", deviceName, err)
+	}
+
 	// check for existence of both clients
-	onvifClient, c, err := d.clientsFromAddr(addr, deviceName)
+	onvifClient, c, err := d.clientsFromCameraConfig(cameraConfig, deviceName)
 	if err != nil {
 		return errors.Errorf("handleWriteCommands: %v", err.Error())
 	}
@@ -353,19 +384,34 @@ func (d *Driver) DisconnectDevice(deviceName string, protocols map[string]contra
 
 // Initialize performs protocol-specific initialization for the device
 // service.
-func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.AsyncValues, deviceCh chan<- []sdkModel.DiscoveredDevice) error {
+func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.AsyncValues,
+	deviceCh chan<- []sdkModel.DiscoveredDevice) error {
 	d.lc = lc
 	d.asynchCh = asyncCh
 
-	config, err := loadCameraConfig()
+	config, err := loadCameraConfig(sdk.DriverConfigs())
 	if err != nil {
 		panic(fmt.Errorf("load camera configuration failed: %d", err))
 	}
 	d.config = config
 
-	for _, dev := range sdk.RunningService().Devices() {
-		initializeOnvifClient(dev, config.Camera.User, config.Camera.Password, config.Camera.AuthMethod)
-		newClient(dev, config.Camera.User, config.Camera.Password)
+	deviceService := sdk.RunningService()
+
+	for _, dev := range deviceService.Devices() {
+		camInfo, err := CreateCameraInfo(dev.Protocols)
+
+		if err != nil {
+			return fmt.Errorf("failed to create cameraInfo for camera %s: %v", dev.Name, err)
+		}
+
+		// each camera can have different credentials
+		creds, err := GetCredentials(camInfo.CredentialPaths)
+		if err != nil {
+			return fmt.Errorf("failed to get credentials for camera %s: %v", dev.Name, err)
+		}
+
+		initializeOnvifClient(dev, creds.Username, creds.Password, camInfo.AuthMethod)
+		newClient(dev, creds.Username, creds.Password)
 	}
 
 	return nil
@@ -388,14 +434,19 @@ func (d *Driver) Stop(force bool) error {
 // AddDevice is a callback function that is invoked
 // when a new Device associated with this Device Service is added
 func (d *Driver) AddDevice(deviceName string, protocols map[string]contract.ProtocolProperties, adminState contract.AdminState) error {
-	addr, err := d.addrFromProtocols(protocols)
+	_, err := d.addrFromProtocols(protocols)
 	if err != nil {
 		err = errors.Errorf("error adding device: %v", err.Error())
 		d.lc.Error(err.Error())
 		return err
 	}
 
-	_, _, err = d.clientsFromAddr(addr, deviceName)
+	cameraConfig, err := CreateCameraInfo(protocols)
+	if err != nil {
+		return fmt.Errorf("while add device, failed to create cameraInfo for device %s: %v", deviceName, err)
+	}
+
+	_, _, err = d.clientsFromCameraConfig(cameraConfig, deviceName)
 	if err != nil {
 		err = errors.Errorf("error adding device: %v", err.Error())
 		d.lc.Error(err.Error())
@@ -456,7 +507,9 @@ func getClient(addr string) (client.Client, bool) {
 }
 
 func initializeOnvifClient(device contract.Device, user string, password string, authMethod string) *OnvifClient {
-	addr := device.Protocols["HTTP"]["Address"]
+	addr := device.Protocols[HTTP_PROTOCOL][ADDRESS]
+
+	// go to secretstore with credential path to get username and password
 	c := NewOnvifClient(addr, user, password, authMethod, driver.lc)
 	if c != nil {
 		// Only add the ONVIF client if it could be initialized. if it's offline then we might try again in an autoevent
@@ -468,7 +521,7 @@ func initializeOnvifClient(device contract.Device, user string, password string,
 }
 
 func initializeClient(device contract.Device, profile contract.DeviceProfile, user string, password string) client.Client {
-	addr := device.Protocols["HTTP"]["Address"]
+	addr := device.Protocols[HTTP_PROTOCOL][ADDRESS]
 
 	c := bosch.NewClient(driver.asynchCh, driver.lc)
 	c.CameraInit(device, profile, addr, user, password)
@@ -481,7 +534,7 @@ func initializeClient(device contract.Device, profile contract.DeviceProfile, us
 }
 
 func initializeAxisClient(device contract.Device, profile contract.DeviceProfile, user string, password string) client.Client {
-	addr := device.Protocols["HTTP"]["Address"]
+	addr := device.Protocols[HTTP_PROTOCOL][ADDRESS]
 
 	c := axis.NewClient(driver.asynchCh, driver.lc)
 	c.CameraInit(device, profile, addr, user, password)
@@ -524,13 +577,13 @@ func in(needle string, haystack []string) bool {
 }
 
 func (d *Driver) addrFromProtocols(protocols map[string]contract.ProtocolProperties) (string, error) {
-	if _, ok := protocols["HTTP"]; !ok {
+	if _, ok := protocols[HTTP_PROTOCOL]; !ok {
 		d.lc.Error("No HTTP address found for device. Check configuration file.")
 		return "", fmt.Errorf("no HTTP address in protocols map")
 	}
 
 	var addr string
-	addr, ok := protocols["HTTP"]["Address"]
+	addr, ok := protocols[HTTP_PROTOCOL][ADDRESS]
 	if !ok {
 		d.lc.Error("No HTTP address found for device. Check configuration file.")
 		return "", fmt.Errorf("no HTTP address in protocols map")
@@ -539,8 +592,8 @@ func (d *Driver) addrFromProtocols(protocols map[string]contract.ProtocolPropert
 
 }
 
-func (d *Driver) clientsFromAddr(addr string, deviceName string) (*OnvifClient, client.Client, error) {
-	onvifClient, ok := getOnvifClient(addr)
+func (d *Driver) clientsFromCameraConfig(cameraConfig *cameraInfo, deviceName string) (*OnvifClient, client.Client, error) {
+	onvifClient, ok := getOnvifClient(cameraConfig.Address)
 
 	if !ok {
 		dev, err := sdk.RunningService().GetDeviceByName(deviceName)
@@ -551,7 +604,12 @@ func (d *Driver) clientsFromAddr(addr string, deviceName string) (*OnvifClient, 
 			return nil, nil, err
 		}
 
-		onvifClient = initializeOnvifClient(dev, d.config.Camera.User, d.config.Camera.Password, d.config.Camera.AuthMethod)
+		creds, err := GetCredentials(cameraConfig.CredentialPaths)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get credentials for %s: %v", deviceName, err)
+		}
+
+		onvifClient = initializeOnvifClient(dev, creds.Username, creds.Password, cameraConfig.AuthMethod)
 
 		if onvifClient == nil {
 			err := fmt.Errorf("ONVIF client could not be initialized: %s", deviceName)
@@ -561,7 +619,7 @@ func (d *Driver) clientsFromAddr(addr string, deviceName string) (*OnvifClient, 
 
 	}
 
-	c, ok := getClient(addr)
+	c, ok := getClient(cameraConfig.Address)
 
 	if !ok {
 		dev, err := sdk.RunningService().GetDeviceByName(deviceName)
@@ -571,8 +629,46 @@ func (d *Driver) clientsFromAddr(addr string, deviceName string) (*OnvifClient, 
 
 			return nil, nil, err
 		}
-		newClient(dev, d.config.Camera.User, d.config.Camera.Password)
+
+		creds, err := GetCredentials(cameraConfig.CredentialPaths)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get credentials for %s: %v", deviceName, err)
+		}
+
+		newClient(dev, creds.Username, creds.Password)
 	}
 
 	return onvifClient, c, nil
+}
+
+func GetCredentials(secretPath string) (config.Credentials, error) {
+	credentials := config.Credentials{}
+	deviceService := sdk.RunningService()
+
+	timer := startup.NewTimer(driver.config.CredentialsRetryTime, driver.config.CredentialsRetryWait)
+
+	var secretData map[string]string
+	var err error
+	for timer.HasNotElapsed() {
+		secretData, err = deviceService.SecretProvider.GetSecret(secretPath, secret.UsernameKey, secret.PasswordKey)
+		if err == nil {
+			break
+		}
+
+		driver.lc.Warnf(
+			"Unable to retrieve MQTT credentials from SecretProvider at path '%s': %s. Retrying for %s",
+			secretPath,
+			err.Error(),
+			timer.RemainingAsString())
+		timer.SleepForInterval()
+	}
+
+	if err != nil {
+		return credentials, err
+	}
+
+	credentials.Username = secretData[secret.UsernameKey]
+	credentials.Password = secretData[secret.PasswordKey]
+
+	return credentials, nil
 }
