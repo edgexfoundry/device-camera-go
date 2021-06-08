@@ -22,9 +22,16 @@ confinement: strict
 # delhi: 0, edinburgh: 1, fuji: 2, geneva/hanoi: 3, ireland: 4
 epoch: 4
 
+slots:
+  edgex-secretstore-token:
+    interface: content
+    content: edgex-secretstore-token
+    source:
+      write: [$SNAP_DATA/device-camera]
+
 apps:
   device-camera:
-    adapter: none
+    adapter: full
     command: bin/device-camera $CONFIG_PRO_ARG $CONF_ARG $REGISTRY_ARG
     command-chain:
       - bin/startup-env-var.sh
@@ -34,6 +41,7 @@ apps:
       REGISTRY_ARG: "--registry"
       DEVICE_PROFILESDIR: "$SNAP_DATA/config/device-camera/res/profiles"
       DEVICE_DEVICESDIR: "$SNAP_DATA/config/device-camera/res/devices"
+      SECRETSTORE_TOKENFILE: $SNAP_DATA/device-camera/secrets-token.json
     daemon: simple
     plugs: [network, network-bind]
 
@@ -43,12 +51,8 @@ parts:
     source: snap/local
     override-pull: |
       cd $SNAPCRAFT_PROJECT_DIR
-      if [ -f VERSION ]; then
-        PROJECT_VERSION=$(cat VERSION)
-      else
-        PROJECT_VERSION="0.0.0"
-      fi
-      snapcraftctl set-version ${PROJECT_VERSION}
+      GIT_VERSION=$(git describe --tags --abbrev=0 | sed 's/v//')
+      snapcraftctl set-version ${GIT_VERSION}
 
   device-camera:
     source: .
