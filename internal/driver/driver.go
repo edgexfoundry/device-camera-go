@@ -389,11 +389,11 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 	d.lc = lc
 	d.asynchCh = asyncCh
 
-	config, err := loadCameraConfig(sdk.DriverConfigs())
+	camConfig, err := loadCameraConfig(sdk.DriverConfigs())
 	if err != nil {
 		panic(fmt.Errorf("load camera configuration failed: %d", err))
 	}
-	d.config = config
+	d.config = camConfig
 
 	deviceService := sdk.RunningService()
 
@@ -404,10 +404,15 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 			return fmt.Errorf("failed to create cameraInfo for camera %s: %v", dev.Name, err)
 		}
 
-		// each camera can have different credentials
-		creds, err := GetCredentials(camInfo.CredentialPaths)
-		if err != nil {
-			return fmt.Errorf("failed to get credentials for camera %s: %v", dev.Name, err)
+		var creds config.Credentials
+
+		// need to retrieve credentials from secret provider when auth method is either basic or digest
+		if authMethod := camInfo.AuthMethod; authMethod == BASIC_AUTH || authMethod == DIGEST_AUTH {
+			// each camera can have different credentials
+			creds, err = GetCredentials(camInfo.CredentialPaths)
+			if err != nil {
+				return fmt.Errorf("failed to get credentials for camera %s: %v", dev.Name, err)
+			}
 		}
 
 		initializeOnvifClient(dev, creds.Username, creds.Password, camInfo.AuthMethod)
@@ -604,9 +609,13 @@ func (d *Driver) clientsFromCameraConfig(cameraConfig *cameraInfo, deviceName st
 			return nil, nil, err
 		}
 
-		creds, err := GetCredentials(cameraConfig.CredentialPaths)
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to get credentials for %s: %v", deviceName, err)
+		var creds config.Credentials
+		// need to retrieve credentials from secret provider when auth method is either basic or digest
+		if authMethod := cameraConfig.AuthMethod; authMethod == BASIC_AUTH || authMethod == DIGEST_AUTH {
+			creds, err = GetCredentials(cameraConfig.CredentialPaths)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to get credentials for %s: %v", deviceName, err)
+			}
 		}
 
 		onvifClient = initializeOnvifClient(dev, creds.Username, creds.Password, cameraConfig.AuthMethod)
@@ -630,9 +639,13 @@ func (d *Driver) clientsFromCameraConfig(cameraConfig *cameraInfo, deviceName st
 			return nil, nil, err
 		}
 
-		creds, err := GetCredentials(cameraConfig.CredentialPaths)
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to get credentials for %s: %v", deviceName, err)
+		var creds config.Credentials
+		// need to retrieve credentials from secret provider when auth method is either basic or digest
+		if authMethod := cameraConfig.AuthMethod; authMethod == BASIC_AUTH || authMethod == DIGEST_AUTH {
+			creds, err = GetCredentials(cameraConfig.CredentialPaths)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to get credentials for %s: %v", deviceName, err)
+			}
 		}
 
 		newClient(dev, creds.Username, creds.Password)
@@ -656,7 +669,7 @@ func GetCredentials(secretPath string) (config.Credentials, error) {
 		}
 
 		driver.lc.Warnf(
-			"Unable to retrieve MQTT credentials from SecretProvider at path '%s': %s. Retrying for %s",
+			"Unable to retrieve camera credentials from SecretProvider at path '%s': %s. Retrying for %s",
 			secretPath,
 			err.Error(),
 			timer.RemainingAsString())

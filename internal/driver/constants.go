@@ -22,4 +22,7 @@ const (
 	CREDENTIALS_PATH       = "CredentialsPath"
 	CREDENTIALS_RETRY_TIME = "CredentialsRetryTime"
 	CREDENTIALS_RETRY_WAIT = "CredentialsRetryWait"
+	DIGEST_AUTH            = "digest"
+	BASIC_AUTH             = "usernamepassword"
+	NO_AUTH                = "none"
 )
