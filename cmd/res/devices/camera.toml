@@ -7,3 +7,26 @@ Location = 'foo'
   [DeviceList.Protocols]
     [DeviceList.Protocols.HTTP]
     Address = '192.168.2.105'
+    # Assign AuthMethod to 'digest' | 'usernamepassword' | 'none'
+    # AuthMethod specifies the authentication method used when
+    # requesting still images from the URL returned by the ONVIF
+    # "GetSnapshotURI" command.  All ONVIF requests will be
+    # carried out using digest auth.
+    AuthMethod = 'usernamepassword'
+    CredentialsPath = 'credentials001'
+# If having more than one camera, uncomment the following config settings
+#[[DeviceList]]
+#Name = 'Camera002'
+#ProfileName = 'camera-axis'
+#Description = 'My test Axis camera'
+#Location = 'bar'
+#  [DeviceList.Protocols]
+#    [DeviceList.Protocols.HTTP]
+#    Address = '192.168.2.163'
+     # Assign AuthMethod to 'digest | ''usernamepassword' | 'none'
+     # AuthMethod specifies the authentication method used when
+     # requesting still images from the URL returned by the ONVIF
+     # "GetSnapshotURI" command.  All ONVIF requests will be
+     # carried out using digest auth.
+     # AuthMethod = 'usernamepassword'
+     # CredentialsPath = 'credentials002'

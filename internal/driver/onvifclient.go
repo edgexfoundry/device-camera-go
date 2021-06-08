@@ -37,7 +37,16 @@ func NewOnvifClient(ipAddress string, user string, password string, cameraAuth s
 	}
 
 	dev := onvif4go.NewOnvifDevice(c.ipAddress)
-	dev.Auth(user, password)
+	switch cameraAuth {
+	case BASIC_AUTH, DIGEST_AUTH:
+		dev.Auth(user, password)
+	case NO_AUTH:
+		// no op
+	default:
+		// unsupported
+		lc.Errorf("unsupported AuthMethod: %s", cameraAuth)
+		return nil
+	}
 	err := dev.Initialize()
 	if err != nil {
 		lc.Error(fmt.Sprintf("Error initializing ONVIF Client: %v", err.Error()))
