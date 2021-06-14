@@ -7,13 +7,13 @@ labels:
 description: "EdgeX device profile for ONVIF-compliant IP camera."
 
 deviceResources:
-  - name: "onvif_device_information"
+  - name: "OnvifDeviceInformation"
     description: "results of ONVIF GetDeviceInformation call"
     properties:
       valueType: "String"
       readWrite: "RW"
       defaultValue: "key:value,key:value"
-  - name: "onvif_profile_information"
+  - name: "OnvifProfileInformation"
     description: "results of ONVIF GetProfiles call"
     properties:
       valueType: "String"
@@ -31,43 +31,43 @@ deviceResources:
       valueType: "String"
       readWrite: "RW"
       defaultValue: "key:value,key:value"
-  - name: "onvif_dns"
+  - name: "OnvifDns"
     description: "results of ONVIF GetDNS call"
     properties:
       valueType: "String"
       readWrite: "RW"
       defaultValue: "key:value,key:value"
-  - name: "onvif_network_interfaces"
+  - name: "OnvifNetworkInterfaces"
     description: "results of ONVIF GetNetworkInterfaces call"
     properties:
       valueType: "String"
       readWrite: "RW"
       defaultValue: "key:value,key:value"
-  - name: "onvif_network_protocols"
+  - name: "OnvifNetworkProtocols"
     description: "results of ONVIF GetNetworkProtocols call"
     properties:
       valueType: "String"
       readWrite: "RW"
       defaultValue: "key:value,key:value"
-  - name: "onvif_network_default_gateway"
+  - name: "OnvifNetworkDefaultGateway"
     description: "results of ONVIF GetNetworkDefaultGateway call"
     properties:
       valueType: "String"
       readWrite: "RW"
       defaultValue: "key:value,key:value"
-  - name: "onvif_ntp"
+  - name: "OnvifNtp"
     description: "results of ONVIF GetNTP call"
     properties:
       valueType: "String"
       readWrite: "RW"
       defaultValue: "key:value,key:value"
-  - name: "onvif_users"
+  - name: "OnvifUsers"
     description: "results of ONVIF GetUsers call"
     properties:
       valueType: "String"
       readWrite: "RW"
       defaultValue: "key:value,key:value"
-  - name: "onvif_snapshot"
+  - name: "OnvifSnapshot"
     description: "snapshot from first ONVIF MediaProfile"
     properties:
       valueType: "Binary"
