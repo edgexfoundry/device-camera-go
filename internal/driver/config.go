@@ -16,11 +16,10 @@
 package driver
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
-
-	"github.com/pkg/errors"
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
 )
