@@ -17,6 +17,7 @@ package driver
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -33,7 +34,6 @@ import (
 	contract "github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
 
 	"github.com/faceterteam/onvif4go/onvif"
-	"github.com/pkg/errors"
 
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/axis"
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/bosch"
@@ -76,18 +76,18 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 
 	_, err = d.addrFromProtocols(protocols)
 	if err != nil {
-		return responses, errors.Errorf("handleReadCommands: %v", err.Error())
+		return responses, fmt.Errorf("handleReadCommands: %w", err)
 	}
 
 	cameraConfig, err := CreateCameraInfo(protocols)
 	if err != nil {
-		return responses, errors.Errorf("handleReadCommands: %v", err.Error())
+		return responses, fmt.Errorf("handleReadCommands: %w", err)
 	}
 
 	// check for existence of both clients
 	onvifClient, c, err := d.clientsFromCameraConfig(cameraConfig, deviceName)
 	if err != nil {
-		return responses, errors.Errorf("handleReadCommands: %v", err.Error())
+		return responses, fmt.Errorf("handleReadCommands: %w", err)
 	}
 
 	var data string
@@ -231,18 +231,18 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]contract.ProtocolProperties, reqs []sdkModel.CommandRequest, params []*sdkModel.CommandValue) error {
 	_, err := d.addrFromProtocols(protocols)
 	if err != nil {
-		return errors.Errorf("handleWriteCommands: %v", err.Error())
+		return fmt.Errorf("handleWriteCommands: %w", err)
 	}
 
 	cameraConfig, err := CreateCameraInfo(protocols)
 	if err != nil {
-		return fmt.Errorf("while write commands, failed to create cameraInfo for device %s: %v", deviceName, err)
+		return fmt.Errorf("while write commands, failed to create cameraInfo for device %s: %w", deviceName, err)
 	}
 
 	// check for existence of both clients
 	onvifClient, c, err := d.clientsFromCameraConfig(cameraConfig, deviceName)
 	if err != nil {
-		return errors.Errorf("handleWriteCommands: %v", err.Error())
+		return fmt.Errorf("handleWriteCommands: %w", err)
 	}
 
 	for i, req := range reqs {
@@ -360,11 +360,11 @@ type stringer interface {
 func structFromParam(s stringer, v interface{}) error {
 	str, err := s.StringValue()
 	if err != nil {
-		return errors.Errorf("OnvifUser CommandValue missing string value")
+		return errors.New("OnvifUser CommandValue missing string value")
 	}
 	err = json.Unmarshal([]byte(str), v)
 	if err != nil {
-		return errors.Errorf("error unmarshaling string: %v", err.Error())
+		return fmt.Errorf("error unmarshaling string: %w", err)
 	}
 	return nil
 }
@@ -374,7 +374,7 @@ func structFromParam(s stringer, v interface{}) error {
 func (d *Driver) DisconnectDevice(deviceName string, protocols map[string]contract.ProtocolProperties) error {
 	addr, err := d.addrFromProtocols(protocols)
 	if err != nil {
-		return errors.Errorf("no address found for device: %v", err.Error())
+		return fmt.Errorf("no address found for device: %w", err)
 	}
 
 	shutdownClient(addr)
@@ -391,7 +391,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 
 	camConfig, err := loadCameraConfig(sdk.DriverConfigs())
 	if err != nil {
-		panic(fmt.Errorf("load camera configuration failed: %d", err))
+		panic(fmt.Errorf("load camera configuration failed: %w", err))
 	}
 	d.config = camConfig
 
@@ -401,7 +401,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 		camInfo, err := CreateCameraInfo(dev.Protocols)
 
 		if err != nil {
-			return fmt.Errorf("failed to create cameraInfo for camera %s: %v", dev.Name, err)
+			return fmt.Errorf("failed to create cameraInfo for camera %s: %w", dev.Name, err)
 		}
 
 		var creds config.Credentials
@@ -411,7 +411,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 			// each camera can have different credentials
 			creds, err = GetCredentials(camInfo.CredentialPaths)
 			if err != nil {
-				return fmt.Errorf("failed to get credentials for camera %s: %v", dev.Name, err)
+				return fmt.Errorf("failed to get credentials for camera %s: %w", dev.Name, err)
 			}
 		}
 
@@ -441,19 +441,19 @@ func (d *Driver) Stop(force bool) error {
 func (d *Driver) AddDevice(deviceName string, protocols map[string]contract.ProtocolProperties, adminState contract.AdminState) error {
 	_, err := d.addrFromProtocols(protocols)
 	if err != nil {
-		err = errors.Errorf("error adding device: %v", err.Error())
+		err = fmt.Errorf("error adding device: %w", err)
 		d.lc.Error(err.Error())
 		return err
 	}
 
 	cameraConfig, err := CreateCameraInfo(protocols)
 	if err != nil {
-		return fmt.Errorf("while add device, failed to create cameraInfo for device %s: %v", deviceName, err)
+		return fmt.Errorf("while add device, failed to create cameraInfo for device %s: %w", deviceName, err)
 	}
 
 	_, _, err = d.clientsFromCameraConfig(cameraConfig, deviceName)
 	if err != nil {
-		err = errors.Errorf("error adding device: %v", err.Error())
+		err = fmt.Errorf("error adding device: %w", err)
 		d.lc.Error(err.Error())
 		return err
 	}
@@ -471,7 +471,7 @@ func (d *Driver) UpdateDevice(deviceName string, protocols map[string]contract.P
 func (d *Driver) RemoveDevice(deviceName string, protocols map[string]contract.ProtocolProperties) error {
 	addr, err := d.addrFromProtocols(protocols)
 	if err != nil {
-		return errors.Errorf("no address found for device: %v", err.Error())
+		return fmt.Errorf("no address found for device: %w", err)
 	}
 
 	shutdownClient(addr)
@@ -584,14 +584,14 @@ func in(needle string, haystack []string) bool {
 func (d *Driver) addrFromProtocols(protocols map[string]contract.ProtocolProperties) (string, error) {
 	if _, ok := protocols[HTTP_PROTOCOL]; !ok {
 		d.lc.Error("No HTTP address found for device. Check configuration file.")
-		return "", fmt.Errorf("no HTTP address in protocols map")
+		return "", errors.New("no HTTP address in protocols map")
 	}
 
 	var addr string
 	addr, ok := protocols[HTTP_PROTOCOL][ADDRESS]
 	if !ok {
 		d.lc.Error("No HTTP address found for device. Check configuration file.")
-		return "", fmt.Errorf("no HTTP address in protocols map")
+		return "", errors.New("no HTTP address in protocols map")
 	}
 	return addr, nil
 
@@ -614,7 +614,7 @@ func (d *Driver) clientsFromCameraConfig(cameraConfig *cameraInfo, deviceName st
 		if authMethod := cameraConfig.AuthMethod; authMethod == BASIC_AUTH || authMethod == DIGEST_AUTH {
 			creds, err = GetCredentials(cameraConfig.CredentialPaths)
 			if err != nil {
-				return nil, nil, fmt.Errorf("failed to get credentials for %s: %v", deviceName, err)
+				return nil, nil, fmt.Errorf("failed to get credentials for %s: %w", deviceName, err)
 			}
 		}
 
@@ -644,7 +644,7 @@ func (d *Driver) clientsFromCameraConfig(cameraConfig *cameraInfo, deviceName st
 		if authMethod := cameraConfig.AuthMethod; authMethod == BASIC_AUTH || authMethod == DIGEST_AUTH {
 			creds, err = GetCredentials(cameraConfig.CredentialPaths)
 			if err != nil {
-				return nil, nil, fmt.Errorf("failed to get credentials for %s: %v", deviceName, err)
+				return nil, nil, fmt.Errorf("failed to get credentials for %s: %w", deviceName, err)
 			}
 		}
 
