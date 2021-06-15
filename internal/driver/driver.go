@@ -30,8 +30,8 @@ import (
 
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
 
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2"
-	contract "github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 
 	"github.com/faceterteam/onvif4go/onvif"
 
@@ -70,7 +70,7 @@ func NewProtocolDriver() *Driver {
 }
 
 // HandleReadCommands triggers a protocol Read operation for the specified device.
-func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]contract.ProtocolProperties, reqs []sdkModel.CommandRequest) ([]*sdkModel.CommandValue, error) {
+func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]models.ProtocolProperties, reqs []sdkModel.CommandRequest) ([]*sdkModel.CommandValue, error) {
 	var err error
 	var responses = make([]*sdkModel.CommandValue, len(reqs))
 
@@ -102,7 +102,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "onvif_profile_information":
 			data, err = onvifClient.GetProfileInformation()
 			if err != nil {
@@ -110,7 +110,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "OnvifDateTime":
 			data, err = onvifClient.GetSystemDateAndTime()
 			if err != nil {
@@ -118,7 +118,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "OnvifHostname":
 			data, err = onvifClient.GetHostname()
 			if err != nil {
@@ -126,7 +126,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "onvif_dns":
 			data, err = onvifClient.GetDNS()
 			if err != nil {
@@ -134,7 +134,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "onvif_network_interfaces":
 			data, err = onvifClient.GetNetworkInterfaces()
 			if err != nil {
@@ -142,7 +142,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "onvif_network_protocols":
 			data, err = onvifClient.GetNetworkProtocols()
 			if err != nil {
@@ -150,7 +150,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "onvif_network_default_gateway":
 			data, err = onvifClient.GetNetworkDefaultGateway()
 			if err != nil {
@@ -158,7 +158,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "onvif_ntp":
 			data, err = onvifClient.GetNTP()
 			if err != nil {
@@ -166,7 +166,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "onvif_system_reboot":
 			data, err = onvifClient.Reboot()
 			if err != nil {
@@ -174,7 +174,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "onvif_users":
 			data, err = onvifClient.GetUsers()
 			if err != nil {
@@ -182,7 +182,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		case "onvif_snapshot":
 			var bytes []byte
 			bytes, err = onvifClient.GetSnapshot()
@@ -191,7 +191,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeBinary, bytes)
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeBinary, bytes)
 		case "OnvifStreamURI":
 			data, err = onvifClient.GetStreamURI()
 			if err != nil {
@@ -199,7 +199,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 				return responses, err
 			}
 
-			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, v2.ValueTypeString, string(data))
+			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
 		// camera specific cases
 		default:
 			if c == nil {
@@ -228,7 +228,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]cont
 // a ResourceOperation for a specific device resource (aka DeviceObject).
 // Since the commands are actuation commands, params provide parameters for the individual
 // command.
-func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]contract.ProtocolProperties, reqs []sdkModel.CommandRequest, params []*sdkModel.CommandValue) error {
+func (d *Driver) HandleWriteCommands(deviceName string, protocols map[string]models.ProtocolProperties, reqs []sdkModel.CommandRequest, params []*sdkModel.CommandValue) error {
 	_, err := d.addrFromProtocols(protocols)
 	if err != nil {
 		return fmt.Errorf("handleWriteCommands: %w", err)
@@ -371,7 +371,7 @@ func structFromParam(s stringer, v interface{}) error {
 
 // DisconnectDevice handles protocol-specific cleanup when a device
 // is removed.
-func (d *Driver) DisconnectDevice(deviceName string, protocols map[string]contract.ProtocolProperties) error {
+func (d *Driver) DisconnectDevice(deviceName string, protocols map[string]models.ProtocolProperties) error {
 	addr, err := d.addrFromProtocols(protocols)
 	if err != nil {
 		return fmt.Errorf("no address found for device: %w", err)
@@ -438,7 +438,7 @@ func (d *Driver) Stop(force bool) error {
 
 // AddDevice is a callback function that is invoked
 // when a new Device associated with this Device Service is added
-func (d *Driver) AddDevice(deviceName string, protocols map[string]contract.ProtocolProperties, adminState contract.AdminState) error {
+func (d *Driver) AddDevice(deviceName string, protocols map[string]models.ProtocolProperties, adminState models.AdminState) error {
 	_, err := d.addrFromProtocols(protocols)
 	if err != nil {
 		err = fmt.Errorf("error adding device: %w", err)
@@ -462,13 +462,13 @@ func (d *Driver) AddDevice(deviceName string, protocols map[string]contract.Prot
 
 // UpdateDevice is a callback function that is invoked
 // when a Device associated with this Device Service is updated
-func (d *Driver) UpdateDevice(deviceName string, protocols map[string]contract.ProtocolProperties, adminState contract.AdminState) error {
+func (d *Driver) UpdateDevice(deviceName string, protocols map[string]models.ProtocolProperties, adminState models.AdminState) error {
 	return nil
 }
 
 // RemoveDevice is a callback function that is invoked
 // when a Device associated with this Device Service is removed
-func (d *Driver) RemoveDevice(deviceName string, protocols map[string]contract.ProtocolProperties) error {
+func (d *Driver) RemoveDevice(deviceName string, protocols map[string]models.ProtocolProperties) error {
 	addr, err := d.addrFromProtocols(protocols)
 	if err != nil {
 		return fmt.Errorf("no address found for device: %w", err)
@@ -479,7 +479,7 @@ func (d *Driver) RemoveDevice(deviceName string, protocols map[string]contract.P
 	return nil
 }
 
-func newClient(device contract.Device, user string, password string) client.Client {
+func newClient(device models.Device, user string, password string) client.Client {
 	profile, _ := sdk.RunningService().GetProfileByName(device.ProfileName)
 	labels := profile.Labels
 	var c client.Client
@@ -511,7 +511,7 @@ func getClient(addr string) (client.Client, bool) {
 	return c, ok
 }
 
-func initializeOnvifClient(device contract.Device, user string, password string, authMethod string) *OnvifClient {
+func initializeOnvifClient(device models.Device, user string, password string, authMethod string) *OnvifClient {
 	addr := device.Protocols[HTTP_PROTOCOL][ADDRESS]
 
 	// go to secretstore with credential path to get username and password
@@ -525,7 +525,7 @@ func initializeOnvifClient(device contract.Device, user string, password string,
 	return c
 }
 
-func initializeClient(device contract.Device, profile contract.DeviceProfile, user string, password string) client.Client {
+func initializeClient(device models.Device, profile models.DeviceProfile, user string, password string) client.Client {
 	addr := device.Protocols[HTTP_PROTOCOL][ADDRESS]
 
 	c := bosch.NewClient(driver.asynchCh, driver.lc)
@@ -538,7 +538,7 @@ func initializeClient(device contract.Device, profile contract.DeviceProfile, us
 	return c
 }
 
-func initializeAxisClient(device contract.Device, profile contract.DeviceProfile, user string, password string) client.Client {
+func initializeAxisClient(device models.Device, profile models.DeviceProfile, user string, password string) client.Client {
 	addr := device.Protocols[HTTP_PROTOCOL][ADDRESS]
 
 	c := axis.NewClient(driver.asynchCh, driver.lc)
@@ -581,7 +581,7 @@ func in(needle string, haystack []string) bool {
 	return false
 }
 
-func (d *Driver) addrFromProtocols(protocols map[string]contract.ProtocolProperties) (string, error) {
+func (d *Driver) addrFromProtocols(protocols map[string]models.ProtocolProperties) (string, error) {
 	if _, ok := protocols[HTTP_PROTOCOL]; !ok {
 		d.lc.Error("No HTTP address found for device. Check configuration file.")
 		return "", errors.New("no HTTP address in protocols map")

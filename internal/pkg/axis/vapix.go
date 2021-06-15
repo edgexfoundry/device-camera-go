@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	ds_models "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
+	sdkModels "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2"
-	e_models "github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/client"
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/digest"
@@ -34,9 +34,9 @@ type trigger struct {
 // It uses some deprecated APIs/methods and might not work with all Axis cameras out of the box.
 type VapixClient struct {
 	lc        logger.LoggingClient
-	asyncChan chan<- *ds_models.AsyncValues
+	asyncChan chan<- *sdkModels.AsyncValues
 
-	alarms      map[string]e_models.DeviceResource
+	alarms      map[string]models.DeviceResource
 	alarmStates map[string]bool
 
 	stop    chan bool
@@ -75,7 +75,7 @@ func (c *VapixClient) parseTriggers(bytes []byte) trigger {
 	return trigger{}
 }
 
-func (c *VapixClient) listenForTriggers(edgexDevice e_models.Device, address string, username string, password string) error {
+func (c *VapixClient) listenForTriggers(edgexDevice models.Device, address string, username string, password string) error {
 	dclient := digest.NewDClient(&http.Client{}, username, password)
 	url := fmt.Sprintf(vapixFmtURL, address)
 
@@ -117,14 +117,14 @@ func (c *VapixClient) listenForTriggers(edgexDevice e_models.Device, address str
 }
 
 // NewClient returns a new Vapix Client
-func NewClient(asyncCh chan<- *ds_models.AsyncValues, lc logger.LoggingClient) client.Client {
+func NewClient(asyncCh chan<- *sdkModels.AsyncValues, lc logger.LoggingClient) client.Client {
 	return &VapixClient{asyncChan: asyncCh, lc: lc}
 }
 
 // CameraInit initializes the Vapix listener for the camera
-func (c *VapixClient) CameraInit(edgexDevice e_models.Device, edgexProfile e_models.DeviceProfile, ipAddress string, username string, password string) {
+func (c *VapixClient) CameraInit(edgexDevice models.Device, edgexProfile models.DeviceProfile, ipAddress string, username string, password string) {
 	if c.alarms == nil {
-		c.alarms = make(map[string]e_models.DeviceResource)
+		c.alarms = make(map[string]models.DeviceResource)
 	}
 
 	if c.alarmStates == nil {
@@ -150,12 +150,12 @@ func (c *VapixClient) CameraInit(edgexDevice e_models.Device, edgexProfile e_mod
 }
 
 // HandleReadCommand is not implemented for Vapix--all commands that reach here are unexpected.
-func (c *VapixClient) HandleReadCommand(req ds_models.CommandRequest) (*ds_models.CommandValue, error) {
+func (c *VapixClient) HandleReadCommand(req sdkModels.CommandRequest) (*sdkModels.CommandValue, error) {
 	return nil, fmt.Errorf("vapix: unrecognized read command")
 }
 
 // HandleWriteCommand is not implemented for Vapix--all commands that reach here are unexpected.
-func (c *VapixClient) HandleWriteCommand(req ds_models.CommandRequest, param *ds_models.CommandValue) error {
+func (c *VapixClient) HandleWriteCommand(req sdkModels.CommandRequest, param *sdkModels.CommandValue) error {
 	return fmt.Errorf("vapix: unrecognized write command")
 }
 
@@ -180,19 +180,19 @@ func retryLoop(fn func() error, client logger.LoggingClient) {
 	}
 }
 
-func (c *VapixClient) getCommandValue(edgexDevice e_models.Device, trigger string, val bool) ([]*ds_models.CommandValue, error) {
-	cv, err := ds_models.NewCommandValue(trigger, v2.ValueTypeBool, val)
+func (c *VapixClient) getCommandValue(edgexDevice models.Device, trigger string, val bool) ([]*sdkModels.CommandValue, error) {
+	cv, err := sdkModels.NewCommandValue(trigger, common.ValueTypeBool, val)
 	if err != nil {
 		c.lc.Error("failed getting new bool CommandValue")
-		return []*ds_models.CommandValue{}, fmt.Errorf("failed getting new bool CommandValue")
+		return []*sdkModels.CommandValue{}, fmt.Errorf("failed getting new bool CommandValue")
 	}
 	cv.Origin = time.Now().UnixNano()/int64(time.Millisecond)
-	cvs := []*ds_models.CommandValue{cv}
+	cvs := []*sdkModels.CommandValue{cv}
 	return cvs, nil
 }
 
-func (c *VapixClient) sendEvent(edgexDevice e_models.Device, cvs []*ds_models.CommandValue) {
-	var av ds_models.AsyncValues
+func (c *VapixClient) sendEvent(edgexDevice models.Device, cvs []*sdkModels.CommandValue) {
+	var av sdkModels.AsyncValues
 	av.DeviceName = edgexDevice.Name
 
 	for _, cv := range cvs {

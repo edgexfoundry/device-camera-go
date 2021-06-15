@@ -79,12 +79,8 @@ PublishTopicPrefix = 'edgex/events/device' # /<device-profile-name>/<device-name
 
 [Device]
 DataTransform = true
-InitCmd = ''
-InitCmdArgs = ''
 MaxCmdOps = 128
 MaxCmdValueLen = 256
-RemoveCmd = ''
-RemoveCmdArgs = ''
 ProfilesDir = './res/profiles'
 DevicesDir = './res/devices'
 UpdateLastConnected = false

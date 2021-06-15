@@ -19,10 +19,10 @@ import (
 	"time"
 	"unicode/utf16"
 
-	ds_models "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
+	sdkModels "github.com/edgexfoundry/device-sdk-go/v2/pkg/models"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
-	"github.com/edgexfoundry/go-mod-core-contracts/v2/v2"
-	e_models "github.com/edgexfoundry/go-mod-core-contracts/v2/v2/models"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
+	"github.com/edgexfoundry/go-mod-core-contracts/v2/models"
 
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/client"
 	"github.com/edgexfoundry/device-camera-go/internal/pkg/digest"
@@ -197,11 +197,11 @@ func parseCounters(bytes []byte) (counters []counterData) {
 // It is assumed that the analytics events are already configured on the device.
 type RcpClient struct {
 	client    digest.Client
-	asyncChan chan<- *ds_models.AsyncValues
+	asyncChan chan<- *sdkModels.AsyncValues
 	lc        logger.LoggingClient
 
-	alarms   map[int]e_models.DeviceResource
-	counters map[string]e_models.DeviceResource
+	alarms   map[int]models.DeviceResource
+	counters map[string]models.DeviceResource
 
 	alarmStates   map[int]bool
 	counterStates map[string]int
@@ -211,7 +211,7 @@ type RcpClient struct {
 }
 
 // NewClient creates a new RcpClient
-func NewClient(asyncCh chan<- *ds_models.AsyncValues, lc logger.LoggingClient) client.Client {
+func NewClient(asyncCh chan<- *sdkModels.AsyncValues, lc logger.LoggingClient) client.Client {
 	return &RcpClient{asyncChan: asyncCh, lc: lc}
 }
 
@@ -224,17 +224,17 @@ func (rc *RcpClient) CameraRelease(force bool) {
 }
 
 // CameraInit initializes the RCP listener routine
-func (rc *RcpClient) CameraInit(edgexDevice e_models.Device, edgexProfile e_models.DeviceProfile, ipAddress string, username string, password string) {
+func (rc *RcpClient) CameraInit(edgexDevice models.Device, edgexProfile models.DeviceProfile, ipAddress string, username string, password string) {
 	if rc.client == nil {
 		rc.initializeDClient(username, password)
 	}
 
 	if rc.alarms == nil {
-		rc.alarms = make(map[int]e_models.DeviceResource)
+		rc.alarms = make(map[int]models.DeviceResource)
 	}
 
 	if rc.counters == nil {
-		rc.counters = make(map[string]e_models.DeviceResource)
+		rc.counters = make(map[string]models.DeviceResource)
 	}
 
 	if rc.alarmStates == nil {
@@ -319,8 +319,8 @@ func (rc *RcpClient) getCounterState(counter string) int {
 }
 
 // HandleReadCommand handles requests to read data from the device via the RCP api
-func (rc *RcpClient) HandleReadCommand(req ds_models.CommandRequest) (*ds_models.CommandValue, error) {
-	var cv *ds_models.CommandValue
+func (rc *RcpClient) HandleReadCommand(req sdkModels.CommandRequest) (*sdkModels.CommandValue, error) {
+	var cv *sdkModels.CommandValue
 	var err error
 
 	if alarmType, ok := req.Attributes["alarm_type"].(string); ok {
@@ -330,14 +330,14 @@ func (rc *RcpClient) HandleReadCommand(req ds_models.CommandRequest) (*ds_models
 		}
 		data := rc.getAlarmState(alarmType)
 
-		cv, err = ds_models.NewCommandValue(req.DeviceResourceName, v2.ValueTypeBool, data)
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeBool, data)
 		if err != nil {
 			return nil, err
 		}
 	} else if counterType, ok := req.Attributes["counter_name"].(string); ok {
 		data := rc.getCounterState(counterType)
 
-		cv, err = ds_models.NewCommandValue(req.DeviceResourceName, v2.ValueTypeUint32, uint32(data))
+		cv, err = sdkModels.NewCommandValue(req.DeviceResourceName, common.ValueTypeUint32, uint32(data))
 		if err != nil {
 			return nil, err
 		}
@@ -349,12 +349,12 @@ func (rc *RcpClient) HandleReadCommand(req ds_models.CommandRequest) (*ds_models
 }
 
 // HandleWriteCommand is unimplemented--any requests to it are unexpected
-func (rc *RcpClient) HandleWriteCommand(req ds_models.CommandRequest, param *ds_models.CommandValue) error {
+func (rc *RcpClient) HandleWriteCommand(req sdkModels.CommandRequest, param *sdkModels.CommandValue) error {
 	return fmt.Errorf("rcp: unrecognized write command")
 }
 
-func (rc *RcpClient) commandValuesFromAlarms(alarms []alarm, edgexDevice e_models.Device) ([]*ds_models.CommandValue, error) {
-	cvs := make([]*ds_models.CommandValue, 0)
+func (rc *RcpClient) commandValuesFromAlarms(alarms []alarm, edgexDevice models.Device) ([]*sdkModels.CommandValue, error) {
+	cvs := make([]*sdkModels.CommandValue, 0)
 	var err error
 	for _, alarm := range alarms {
 		deviceResource, ok := rc.alarms[int(alarm.AlarmType)]
@@ -367,11 +367,11 @@ func (rc *RcpClient) commandValuesFromAlarms(alarms []alarm, edgexDevice e_model
 
 		rc.setAlarmState(int(alarm.AlarmType), alarmValue)
 
-		var cv *ds_models.CommandValue
-		cv, err = ds_models.NewCommandValue(deviceResource.Name, v2.ValueTypeBool, alarm)
+		var cv *sdkModels.CommandValue
+		cv, err = sdkModels.NewCommandValue(deviceResource.Name, common.ValueTypeBool, alarm)
 		if err != nil {
 			rc.lc.Error("sendEvent: unable to get new bool value")
-			return []*ds_models.CommandValue{}, fmt.Errorf("unable to create CommandValue")
+			return []*sdkModels.CommandValue{}, fmt.Errorf("unable to create CommandValue")
 		}
 		cv.Origin = time.Now().UnixNano()/int64(time.Millisecond)
 		cvs = append(cvs, cv)
@@ -380,8 +380,8 @@ func (rc *RcpClient) commandValuesFromAlarms(alarms []alarm, edgexDevice e_model
 	return cvs, nil
 }
 
-func (rc *RcpClient) commandValuesFromCounters(counters []counterData, edgexDevice e_models.Device) ([]*ds_models.CommandValue, error) {
-	cvs := make([]*ds_models.CommandValue, 0)
+func (rc *RcpClient) commandValuesFromCounters(counters []counterData, edgexDevice models.Device) ([]*sdkModels.CommandValue, error) {
+	cvs := make([]*sdkModels.CommandValue, 0)
 	var err error
 	for _, counter := range counters {
 		dr, ok := rc.counters[counter.Name]
@@ -391,11 +391,11 @@ func (rc *RcpClient) commandValuesFromCounters(counters []counterData, edgexDevi
 
 		rc.setCounterState(dr.Name, int(counter.Value))
 
-		var cv *ds_models.CommandValue
-		cv, err = ds_models.NewCommandValue(dr.Name, v2.ValueTypeUint32, counter.Value)
+		var cv *sdkModels.CommandValue
+		cv, err = sdkModels.NewCommandValue(dr.Name, common.ValueTypeUint32, counter.Value)
 		if err != nil {
 			rc.lc.Error("sendEvent: unable to get new uint32 value")
-			return []*ds_models.CommandValue{}, fmt.Errorf("unable to create CommandValue")
+			return []*sdkModels.CommandValue{}, fmt.Errorf("unable to create CommandValue")
 		}
 		cv.Origin = time.Now().UnixNano()/int64(time.Millisecond)
 		cvs = append(cvs, cv)
@@ -404,7 +404,7 @@ func (rc *RcpClient) commandValuesFromCounters(counters []counterData, edgexDevi
 	return cvs, nil
 }
 
-func (rc *RcpClient) requestEvents(device e_models.Device, ipAddress string, stopchan chan bool) error {
+func (rc *RcpClient) requestEvents(device models.Device, ipAddress string, stopchan chan bool) error {
 	url, err := getRcpURL(ipAddress, "message", confAlarmOverview+"$"+confIvaCounterValues, map[string]string{"collectms": "5000"})
 	if err != nil {
 		rc.lc.Error("Error creating event polling url")
@@ -432,7 +432,7 @@ func (rc *RcpClient) requestEvents(device e_models.Device, ipAddress string, sto
 			continue
 		}
 
-		var cvs []*ds_models.CommandValue
+		var cvs []*sdkModels.CommandValue
 		switch msg.Command {
 		case confAlarmOverview:
 			alarms := parseAlarms(decoded)
@@ -471,8 +471,8 @@ func getRcpURL(ip string, action string, command string, params map[string]strin
 	return formattedString + paramString, nil
 }
 
-func (rc *RcpClient) sendEvent(edgexDevice e_models.Device, cvs []*ds_models.CommandValue) {
-	var av ds_models.AsyncValues
+func (rc *RcpClient) sendEvent(edgexDevice models.Device, cvs []*sdkModels.CommandValue) {
+	var av sdkModels.AsyncValues
 	av.DeviceName = edgexDevice.Name
 
 	for _, cv := range cvs {
