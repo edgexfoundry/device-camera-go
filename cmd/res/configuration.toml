@@ -87,7 +87,7 @@ UpdateLastConnected = false
 EnableAsyncReadings = true
 AsyncBufferSize = 16
 Labels = []
-UseMessageBus = false
+UseMessageBus = true
   [Device.Discovery]
   Enabled = false
   Interval = '30s'
