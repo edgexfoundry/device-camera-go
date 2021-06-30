@@ -26,7 +26,7 @@ ServerBindAddr = ''  # blank value defaults to Service.Host value
 StartupMsg = 'Camera device service started'
 # MaxRequestSize limit the request body size in byte of put command
 MaxRequestSize = 0 # value 0 unlimit the request size.
-RequestTimeOut = '5s'
+RequestTimeout = '5s'
 
 # Only used when EDGEX_SECURITY_SECRET_STORE=true which is now required for secure consul
 [SecretStore]
