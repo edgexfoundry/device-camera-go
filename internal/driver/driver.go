@@ -409,7 +409,7 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 		// need to retrieve credentials from secret provider when auth method is either basic or digest
 		if authMethod := camInfo.AuthMethod; authMethod == BASIC_AUTH || authMethod == DIGEST_AUTH {
 			// each camera can have different credentials
-			creds, err = GetCredentials(camInfo.CredentialPaths)
+			creds, err = GetCredentials(camInfo.CredentialsPath)
 			if err != nil {
 				return fmt.Errorf("failed to get credentials for camera %s: %w", dev.Name, err)
 			}
@@ -612,7 +612,7 @@ func (d *Driver) clientsFromCameraConfig(cameraConfig *cameraInfo, deviceName st
 		var creds config.Credentials
 		// need to retrieve credentials from secret provider when auth method is either basic or digest
 		if authMethod := cameraConfig.AuthMethod; authMethod == BASIC_AUTH || authMethod == DIGEST_AUTH {
-			creds, err = GetCredentials(cameraConfig.CredentialPaths)
+			creds, err = GetCredentials(cameraConfig.CredentialsPath)
 			if err != nil {
 				return nil, nil, fmt.Errorf("failed to get credentials for %s: %w", deviceName, err)
 			}
@@ -642,7 +642,7 @@ func (d *Driver) clientsFromCameraConfig(cameraConfig *cameraInfo, deviceName st
 		var creds config.Credentials
 		// need to retrieve credentials from secret provider when auth method is either basic or digest
 		if authMethod := cameraConfig.AuthMethod; authMethod == BASIC_AUTH || authMethod == DIGEST_AUTH {
-			creds, err = GetCredentials(cameraConfig.CredentialPaths)
+			creds, err = GetCredentials(cameraConfig.CredentialsPath)
 			if err != nil {
 				return nil, nil, fmt.Errorf("failed to get credentials for %s: %w", deviceName, err)
 			}

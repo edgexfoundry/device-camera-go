@@ -32,7 +32,7 @@ type configuration struct {
 type cameraInfo struct {
 	Address         string
 	AuthMethod      string
-	CredentialPaths string
+	CredentialsPath string
 }
 
 // loadCameraConfig loads the camera configuration
