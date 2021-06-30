@@ -397,7 +397,10 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 
 	deviceService := sdk.RunningService()
 
+	d.lc.Info("Initializing cameras...")
 	for _, dev := range deviceService.Devices() {
+		d.lc.Infof("Initializing '%s' camera", dev.Name)
+
 		camInfo, err := CreateCameraInfo(dev.Protocols)
 
 		if err != nil {
@@ -415,7 +418,12 @@ func (d *Driver) Initialize(lc logger.LoggingClient, asyncCh chan<- *sdkModel.As
 			}
 		}
 
-		initializeOnvifClient(dev, creds.Username, creds.Password, camInfo.AuthMethod)
+		onvifClient := initializeOnvifClient(dev, creds.Username, creds.Password, camInfo.AuthMethod)
+		if onvifClient == nil {
+			d.lc.Errorf("ONVIF Client initialization for device '%s' failed: Skipping this device.", dev.Name)
+			continue
+		}
+
 		newClient(dev, creds.Username, creds.Password)
 	}
 
