@@ -13,7 +13,19 @@ should be compatible.
 * Bosch NBN-832V-IP
 * Hikvision DS-2CD2342WD-I
 
+Tested ONVIF-noncompliant cameras list:
+* TP-Link Tapo C110
+## Running EdgeX Device Camera with Snap package
 
+EdgeX Device Camera is also available as a Snap package. The easy and secure way to install Device Camera on Linux is using Snap:
+
+```
+$ sudo snap install edgex-device-camera
+```
+
+For more details on the Device Camera Snap, including installation, configuration, please refer to [EdgeX Camera Device Service Snap](https://github.com/edgexfoundry/device-camera-go/tree/main/snap)
+
+For more details on Snap, including EdgeX Snap, viewing logs, security services, please check [Getting Started with Snap](https://docs.edgexfoundry.org/2.0/getting-started/Ch-GettingStartedSnapUsers/)
 ## Dependencies
 
 This device service is built using the [onvif4go](https://github.com/faceterteam/onvif4go) library.
