@@ -95,7 +95,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 	for i, req := range reqs {
 		switch req.DeviceResourceName {
 		// ONVIF cases
-		case "onvif_device_information":
+		case "OnvifDeviceInformation":
 			data, err = onvifClient.GetDeviceInformation()
 			if err != nil {
 				d.lc.Error(err.Error())
@@ -103,7 +103,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 
 			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
-		case "onvif_profile_information":
+		case "OnvifProfileInformation":
 			data, err = onvifClient.GetProfileInformation()
 			if err != nil {
 				d.lc.Error(err.Error())
@@ -127,7 +127,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 
 			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
-		case "onvif_dns":
+		case "OnvifDns":
 			data, err = onvifClient.GetDNS()
 			if err != nil {
 				d.lc.Error(err.Error())
@@ -135,7 +135,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 
 			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
-		case "onvif_network_interfaces":
+		case "OnvifNetworkInterfaces":
 			data, err = onvifClient.GetNetworkInterfaces()
 			if err != nil {
 				d.lc.Error(err.Error())
@@ -143,7 +143,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 
 			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
-		case "onvif_network_protocols":
+		case "OnvifNetworkProtocols":
 			data, err = onvifClient.GetNetworkProtocols()
 			if err != nil {
 				d.lc.Error(err.Error())
@@ -151,7 +151,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 
 			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
-		case "onvif_network_default_gateway":
+		case "OnvifNetworkDefaultGateway":
 			data, err = onvifClient.GetNetworkDefaultGateway()
 			if err != nil {
 				d.lc.Error(err.Error())
@@ -159,7 +159,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 
 			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
-		case "onvif_ntp":
+		case "OnvifNtp":
 			data, err = onvifClient.GetNTP()
 			if err != nil {
 				d.lc.Error(err.Error())
@@ -167,7 +167,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 
 			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
-		case "onvif_system_reboot":
+		case "OnvifSystemReboot":
 			data, err = onvifClient.Reboot()
 			if err != nil {
 				d.lc.Error(err.Error())
@@ -175,7 +175,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 
 			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
-		case "onvif_users":
+		case "OnvifUsers":
 			data, err = onvifClient.GetUsers()
 			if err != nil {
 				d.lc.Error(err.Error())
@@ -183,7 +183,7 @@ func (d *Driver) HandleReadCommands(deviceName string, protocols map[string]mode
 			}
 
 			cv, err = sdkModel.NewCommandValue(reqs[i].DeviceResourceName, common.ValueTypeString, string(data))
-		case "onvif_snapshot":
+		case "OnvifSnapshot":
 			var bytes []byte
 			bytes, err = onvifClient.GetSnapshot()
 			if err != nil {

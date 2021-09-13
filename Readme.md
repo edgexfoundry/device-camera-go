@@ -113,7 +113,7 @@ There are many ways to interact with this device service. This example shows how
     [[DeviceList.AutoEvents]]
         Interval   = "30s"
         OnChange   = false
-        SourceName = "onvif_snapshot"
+        SourceName = "OnvifSnapshot"
     ```
 
 2. Build docker image named *edgexfoundry/device-camera-go:0.0.0-dev*.
