@@ -6,13 +6,30 @@
 The EdgeX Camera Device Service is developed to control/communicate ONVIF-compliant cameras accessible via http in an EdgeX deployment
 
 ## Tested Devices
-The following devices have been tested in a development environment, but ONVIF-compliant cameras
-should be compatible.
+The following devices have been tested in a development environment with EdgeX. Only those ONVIF-compliant cameras which support the "onvif_snapshot" method are fully compliant with the EdgeX Camera device service:
 
 * Wisenet XND-6080RV
 * Bosch NBN-832V-IP
 * Hikvision DS-2CD2342WD-I
+* SV3C Wireless WiFi Security Camera
 
+The following cameras are non-compliant:
+
+* TP-Link Tapo C110
+
+## Running the device-camera Service as a Snap
+
+The device service is also available as a snap. Install the snap with the following command:
+
+```
+$ sudo snap install edgex-device-camera
+```
+
+For more details on the Device Camera Snap, including installation, configuration, please refer to [EdgeX Camera Device Service Snap](https://github.com/edgexfoundry/device-camera-go/tree/main/snap)
+
+For more details on Snap, including EdgeX Snap, viewing logs, security services, please check [Getting Started with Snap](https://docs.edgexfoundry.org/2.0/getting-started/Ch-GettingStartedSnapUsers/)
+
+## 
 
 ## Dependencies
 
