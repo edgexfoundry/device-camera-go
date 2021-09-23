@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-ARG BASE=golang:1.16-alpine3.12
+ARG BASE=golang:1.16-alpine3.14
 FROM ${BASE} AS builder
 
 ARG MAKE="make build"
@@ -40,7 +40,7 @@ RUN make update
 COPY . .
 RUN ${MAKE}
 
-FROM alpine:3.12
+FROM alpine:3.14
 
 # dumb-init needed for injected secure bootstrapping entrypoint script when run in secure mode.
 RUN apk add --update --no-cache zeromq dumb-init
