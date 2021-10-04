@@ -142,9 +142,9 @@ func (c *OnvifClient) GetSnapshot() ([]byte, error) {
 
 	var resp *http.Response
 
-	if c.cameraAuth == "digest" {
+	if c.cameraAuth == DIGEST_AUTH {
 		resp, err = c.digestClient.Do(req)
-	} else if c.cameraAuth == "basic" {
+	} else if c.cameraAuth == BASIC_AUTH {
 		req.SetBasicAuth(c.user, c.password)
 		httpClient := http.Client{}
 		resp, err = httpClient.Do(req)
