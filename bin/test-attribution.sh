@@ -14,17 +14,16 @@ if [ -d vendor.bk ]; then
     exit 1
 fi
 
-trap cleanup 1 2 3 6
+trap cleanup 0 1 2 3 6
 
 cleanup()
 {
     cd "$GIT_ROOT"
     # restore the vendor dir
-    rm -r vendor
+    rm -rf vendor
     if [ -d vendor.bk ]; then
         mv vendor.bk vendor
     fi
-    rm cmd/Attribution.txt
     exit $EXIT_CODE
 }
 
@@ -40,22 +39,18 @@ GO111MODULE=on go mod vendor
 # anything in this loop
 shopt -s nullglob
 
-cp Attribution.txt cmd
-cd cmd
-    if [ ! -f Attribution.txt ]; then
-        echo "An Attribution.txt file for $cmd is missing, please add"
-        EXIT_CODE=1
-    else
-        # loop over every library in the modules.txt file in vendor
-        while IFS= read -r lib; do
-            if ! grep -q "$lib" Attribution.txt && [ "$lib" != "explicit" ]; then
-                echo "An attribution for $lib is missing from in $cmd Attribution.txt, please add"
-                # need to do this in a bash subshell, see SC2031
-                (( EXIT_CODE=1 ))
-            fi
-        done < <(grep '#' < "$GIT_ROOT/vendor/modules.txt" | awk '{print $2}')
-    fi
+if [ ! -f Attribution.txt ]; then
+    echo "An Attribution.txt file is missing, please add"
+    EXIT_CODE=1
+else
+    # loop over every library in the modules.txt file in vendor
+    while IFS= read -r lib; do
+        if ! grep -q "$lib" Attribution.txt && [ "$lib" != "explicit" ]; then
+            echo "An attribution for $lib is missing from in Attribution.txt, please add"
+            # need to do this in a bash subshell, see SC2031
+            (( EXIT_CODE=1 ))
+        fi
+    done < <(grep '#' < "$GIT_ROOT/vendor/modules.txt" | awk '{print $2}')
+fi
+
 cd "$GIT_ROOT"
-
-
-cleanup

@@ -16,7 +16,6 @@ GOFLAGS=-ldflags "-X github.com/edgexfoundry/device-camera-go.Version=$(VERSION)
 build: $(MICROSERVICES)
 
 cmd/device-camera:
-	go mod tidy
 	$(GOCGO) build $(GOFLAGS) -o $@ ./cmd
 
 docker:
@@ -27,10 +26,14 @@ docker:
 		-t edgexfoundry/device-camera:$(GIT_SHA) \
 		-t edgexfoundry/device-camera:$(VERSION)-dev
 
-test:
+tidy:
 	go mod tidy
+
+test:
 	go test -coverprofile=coverage.out ./...
 	go vet ./...
+	gofmt -l $$(find . -type f -name '*.go'| grep -v "/vendor/")
+	[ "`gofmt -l $$(find . -type f -name '*.go'| grep -v "/vendor/")`" = "" ]
 	./bin/test-attribution.sh
 
 check-lint:
@@ -43,11 +46,14 @@ coveragehtml:
 	go tool cover -html=coverage.out -o coverage.html
 
 format:
-	gofmt -l .
-	[ "`gofmt -l .`" = "" ]
+	gofmt -l $$(find . -type f -name '*.go'| grep -v "/vendor/")
+	[ "`gofmt -l $$(find . -type f -name '*.go'| grep -v "/vendor/")`" = "" ]
 
 update:
 	$(GO) mod download
 
 clean:
 	rm -f $(MICROSERVICES)
+
+vendor:
+	$(GO) mod vendor
