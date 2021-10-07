@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	
+
 	hooks "github.com/canonical/edgex-snap-hooks/v2"
 )
 

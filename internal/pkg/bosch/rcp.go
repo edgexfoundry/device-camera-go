@@ -373,7 +373,7 @@ func (rc *RcpClient) commandValuesFromAlarms(alarms []alarm, edgexDevice models.
 			rc.lc.Error("sendEvent: unable to get new bool value")
 			return []*sdkModels.CommandValue{}, fmt.Errorf("unable to create CommandValue")
 		}
-		cv.Origin = time.Now().UnixNano()/int64(time.Millisecond)
+		cv.Origin = time.Now().UnixNano() / int64(time.Millisecond)
 		cvs = append(cvs, cv)
 	}
 
@@ -397,7 +397,7 @@ func (rc *RcpClient) commandValuesFromCounters(counters []counterData, edgexDevi
 			rc.lc.Error("sendEvent: unable to get new uint32 value")
 			return []*sdkModels.CommandValue{}, fmt.Errorf("unable to create CommandValue")
 		}
-		cv.Origin = time.Now().UnixNano()/int64(time.Millisecond)
+		cv.Origin = time.Now().UnixNano() / int64(time.Millisecond)
 		cvs = append(cvs, cv)
 	}
 

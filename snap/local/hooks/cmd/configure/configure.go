@@ -23,8 +23,8 @@ import (
 	"os"
 	"strings"
 
+	hooks "github.com/canonical/edgex-snap-hooks/v2"
 	local "github.com/edgexfoundry/device-camera-go/hooks"
-	hooks "github.com/canonical/edgex-snap-hooks/v2"	
 )
 
 var cli *hooks.CtlCli = hooks.NewSnapCtl()
@@ -92,9 +92,9 @@ func main() {
 			os.Exit(1)
 		}
 	case "false":
-	     // no action necessary
+		// no action necessary
 	case "no":
-	     // no action necessary
+		// no action necessary
 	default:
 		hooks.Error(fmt.Sprintf("Invalid value for 'autostart' : %s", autostart))
 		os.Exit(1)

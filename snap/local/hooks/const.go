@@ -28,6 +28,6 @@ package hooks
 //
 var ConfToEnv = map[string]string{
 	// [Device]
-	"device.update-last-connected":        "DEVICE_UPDATELASTCONNECTED",
-	"device.use-message-bus":              "DEVICE_USEMESSAGEBUS",
+	"device.update-last-connected": "DEVICE_UPDATELASTCONNECTED",
+	"device.use-message-bus":       "DEVICE_USEMESSAGEBUS",
 }

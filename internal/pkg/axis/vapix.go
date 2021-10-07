@@ -186,7 +186,7 @@ func (c *VapixClient) getCommandValue(edgexDevice models.Device, trigger string,
 		c.lc.Error("failed getting new bool CommandValue")
 		return []*sdkModels.CommandValue{}, fmt.Errorf("failed getting new bool CommandValue")
 	}
-	cv.Origin = time.Now().UnixNano()/int64(time.Millisecond)
+	cv.Origin = time.Now().UnixNano() / int64(time.Millisecond)
 	cvs := []*sdkModels.CommandValue{cv}
 	return cvs, nil
 }

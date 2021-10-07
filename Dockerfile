@@ -31,13 +31,9 @@ RUN apk add --no-cache ${ALPINE_PKG_BASE} ${ALPINE_PKG_EXTRA}
 
 WORKDIR /device-camera-go
 
-COPY go.mod .
-COPY Makefile .
-
-RUN go mod tidy
-RUN make update
-
 COPY . .
+RUN [ ! -d "vendor" ] && go mod download all || echo "skipping..."
+
 RUN ${MAKE}
 
 FROM alpine:3.14
