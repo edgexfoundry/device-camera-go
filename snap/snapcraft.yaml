@@ -60,6 +60,9 @@ parts:
     override-pull: |
       cd $SNAPCRAFT_PROJECT_DIR
       GIT_VERSION=$(git describe --tags --abbrev=0 | sed 's/v//')
+      if [ -z "$GIT_VERSION" ]; then
+        GIT_VERSION="0.0.0"
+      fi
       snapcraftctl set-version ${GIT_VERSION}
       
   hooks:
@@ -82,6 +85,15 @@ parts:
       - go/1.16/stable
     override-build: |
       cd $SNAPCRAFT_PART_SRC
+
+      # The makefile uses a VERSION file to set the Version string. 
+      # This file needs to be generated here
+      GIT_VERSION=$(git describe --tags --abbrev=0 | sed 's/v//')
+      if [ -z "$GIT_VERSION" ]; then
+        GIT_VERSION="0.0.0"
+      fi
+      echo $GIT_VERSION > ./VERSION
+
       go mod tidy
       make build
 
