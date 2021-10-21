@@ -48,10 +48,11 @@ apps:
     plugs: [network, network-bind]
 
 plugs:
-  device-config:
-    interface: content 
-    content: device-config
-    target: $SNAP_DATA/config/device-camera/res
+  config:
+    interface: content
+    # The provider may mount one or more items inside the target
+    #   to supply config files such as server config, profiles, and secrets.
+    target: $SNAP_DATA
 
 parts:
   version:

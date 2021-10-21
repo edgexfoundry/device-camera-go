@@ -69,32 +69,55 @@ ensures that as well as starting the service now, it will be automatically start
 $ sudo snap start --enable edgex-device-camera.device-camera
 ```
 
-### Using a content interface to set device configuration
+### Provide configurations via another snap
 
-The `device-config` content interface allows another snap to seed this device
-snap with both a configuration file and one or more device profiles. 
+The `config` content interface allows a snap to seed this device
+snap with configurations files. 
 
+To use, create a new provider snap with a directory containing the configuration files. Your snapcraft file then needs to define a slot with read access to the directory you are sharing. The directory will be mounted inside the device snap's plug target path.
 
-To use, create a new snap with a directory containing the configuration and device profile files. Your snapcraft.yaml file then needs to define a slot with read access to the directory you are sharing.
-
+For example, the following snippet can be used inside the `snap/snapcraft.yaml` file of the snap that intends to provide configurations files:
 ```
 slots:
-  device-config:
-    interface: content  
-    content: device-config
-    write: 
-      - $SNAP/config
+  device-camera:
+    interface: content
+    source:
+      read: 
+        - $SNAP/config/device-camera
+
+parts:  
+  device-camera:
+    plugin: dump
+    source: device-camera
+    override-build: |
+      TARGET=$SNAPCRAFT_PART_INSTALL/config/device-camera
+      mkdir -p $TARGET
+      cp -vr res $TARGET/
+      cp -v  secrets-token.json $TARGET/
 ```
 
-where `$SNAP/config` is configuration directory your snap is providing to the device snap.
+Where configuration files are located at:
+```
+$ tree device-camera/
+device-camera/
+├── res
+│   ├── configuration.toml
+│   ├── devices
+│   │   └── camera.toml
+│   └── profiles
+│       ├── camera-axis.yaml
+│       ├── camera-bosch.yaml
+│       └── camera.yaml
+└── secrets-token.json
+```
 
-Then connect the plug in the device snap to the slot in your snap, which will replace the configuration in the device snap. Do this with:
+Then connect the plug in the device snap to the slot in your provider snap, which will replace the configuration in the device snap:
 
 ```bash
-$ sudo snap connect edgex-device-camera:device-config your-snap:device-config
+$ sudo snap connect edgex-device-camera:config provider-snap:device-camera
 ```
 
-This needs to be done before the device service is started for the first time. Once you have set the configuration the device service can be started and it will then be configurated using the settings you provided:
+This needs to be done before the device service is started for the first time. Once you have set the configuration the device service can be started and it will then be configured using the settings you provided:
 
 ```bash
 $ sudo snap start edgex-device-camera.device-camera
