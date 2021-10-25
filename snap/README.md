@@ -72,58 +72,8 @@ $ sudo snap start --enable edgex-device-camera.device-camera
 ### Provide configurations via another snap
 
 The `config` content interface allows a snap to seed this device
-snap with configurations files. 
-
-To use, create a new provider snap with a directory containing the configuration files. Your snapcraft file then needs to define a slot with read access to the directory you are sharing. The directory will be mounted inside the device snap's plug target path.
-
-For example, the following snippet can be used inside the `snap/snapcraft.yaml` file of the snap that intends to provide configurations files:
-```
-slots:
-  device-camera:
-    interface: content
-    source:
-      read: 
-        - $SNAP/config/device-camera
-
-parts:  
-  device-camera:
-    plugin: dump
-    source: device-camera
-    override-build: |
-      TARGET=$SNAPCRAFT_PART_INSTALL/config/device-camera
-      mkdir -p $TARGET
-      cp -vr res $TARGET/
-      cp -v  secrets-token.json $TARGET/
-```
-
-Where configuration files are located at:
-```
-$ tree device-camera/
-device-camera/
-├── res
-│   ├── configuration.toml
-│   ├── devices
-│   │   └── camera.toml
-│   └── profiles
-│       ├── camera-axis.yaml
-│       ├── camera-bosch.yaml
-│       └── camera.yaml
-└── secrets-token.json
-```
-
-Then connect the plug in the device snap to the slot in your provider snap, which will replace the configuration in the device snap:
-
-```bash
-$ sudo snap connect edgex-device-camera:config provider-snap:device-camera
-```
-
-This needs to be done before the device service is started for the first time. Once you have set the configuration the device service can be started and it will then be configured using the settings you provided:
-
-```bash
-$ sudo snap start edgex-device-camera.device-camera
-```
-
-**Note** - content interfaces from snaps installed from the Snap Store that have the same publisher connect automatically. For more information on snap content interfaces please refer to the snapcraft.io [Content Interface](https://snapcraft.io/docs/content-interface) documentation.
+snap with configurations files. For more information on the `config` interface
+and examples, refer to [edgex-config-provider](https://github.com/canonical/edgex-config-provider).
 
 ### Autostart
 By default, the edgex-device-camera disables its service on install, as the expectation is that the default profile configuration files will be customized, and thus this behavior allows the profile ```configuration.toml``` files in $SNAP_DATA to be modified before the service is first started.
