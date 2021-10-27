@@ -12,7 +12,7 @@ Location = "foo"
     # requesting still images from the URL returned by the ONVIF
     # "GetSnapshotURI" command.  All ONVIF requests will be
     # carried out using digest auth.
-    AuthMethod = "usernamepassword"
+    AuthMethod = "none"
     CredentialsPath = "credentials001"
 # If having more than one camera, uncomment the following config settings
 #[[DeviceList]]
