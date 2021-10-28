@@ -105,9 +105,9 @@ $ sudo snap start edgex-device-camera.device-camera
 **Note** - content interfaces from snaps installed from the Snap Store that have the same publisher connect automatically. For more information on snap content interfaces please refer to the snapcraft.io [Content Interface](https://snapcraft.io/docs/content-interface) documentation.
 
 ### Autostart
-By default, the edgex-device-camera disables its service on install, as the expectation is that the default profile configuration files will be customized, and thus this behavior allows the profile ```configuration.toml``` files in $SNAP_DATA to be modified before the service is first started.
+By default, the edgex-device-camera disables its service on install, as the expectation is that the default profile configuration files will be customized, and thus this behavior allows the profile `configuration.toml` files in $SNAP_DATA to be modified before the service is first started.
 
-This behavior can be overridden by setting the ```autostart``` configuration setting to "true". This is useful when configuration and/or device profiles are being provided via configuration or gadget snap content interface.
+This behavior can be overridden by setting the `autostart` configuration setting to "true". This is useful when configuration and/or device profiles are being provided via configuration or gadget snap content interface.
 
 **Note** - this option is typically set from a gadget snap.
 
@@ -125,11 +125,18 @@ the overrides will be picked up when the services are first started.
 The following syntax is used to specify service-specific configuration overrides:
 
 
-```env.<stanza>.<config option>```
+```
+env.<stanza>.<config option>
+```
 For instance, to setup an override of the service's Port use:
-```$ sudo snap set edgex-device-camera env.service.port=2112```
+```
+$ sudo snap set edgex-device-camera env.service.port=2112
+```
 And restart the service:
-```$ sudo snap restart edgex-device-camera.device-camera```
+```
+$ sudo snap restart edgex-device-camera.device-camera
+```
+
 **Note** - at this time changes to configuration values in the [Writable] section are not supported.
 For details on the mapping of configuration options to Config options, please refer to "Service Environment Configuration Overrides".
 
