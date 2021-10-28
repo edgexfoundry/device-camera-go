@@ -72,17 +72,19 @@ $ sudo snap start --enable edgex-device-camera.device-camera
 ### Using a content interface to set device configuration
 
 The `device-config` content interface allows another snap to seed this device
-snap with both a configuration file and one or more device profiles. 
+snap with configuration files under the `$SNAP_DATA/config/device-camera/res` directory.
 
+Note that the `device-config` content interface does NOT support seeding of the Secret Store Token because that file is expected at a different path.
 
-To use, create a new snap with a directory containing the configuration and device profile files. Your snapcraft.yaml file then needs to define a slot with read access to the directory you are sharing.
+To use, create a new snap with a directory containing the configuration files.
+Your `snapcraft.yaml` file then needs to define a slot with read access to the directory you are sharing.
 
 ```
 slots:
   device-config:
     interface: content  
     content: device-config
-    write: 
+    read: 
       - $SNAP/config
 ```
 
@@ -94,7 +96,7 @@ Then connect the plug in the device snap to the slot in your snap, which will re
 $ sudo snap connect edgex-device-camera:device-config your-snap:device-config
 ```
 
-This needs to be done before the device service is started for the first time. Once you have set the configuration the device service can be started and it will then be configurated using the settings you provided:
+This needs to be done before the device service is started for the first time. Once you have set the configuration the device service can be started and it will then be configured using the settings you provided:
 
 ```bash
 $ sudo snap start edgex-device-camera.device-camera
@@ -103,9 +105,9 @@ $ sudo snap start edgex-device-camera.device-camera
 **Note** - content interfaces from snaps installed from the Snap Store that have the same publisher connect automatically. For more information on snap content interfaces please refer to the snapcraft.io [Content Interface](https://snapcraft.io/docs/content-interface) documentation.
 
 ### Autostart
-By default, the edgex-device-camera disables its service on install, as the expectation is that the default profile configuration files will be customized, and thus this behavior allows the profile ```configuration.toml``` files in $SNAP_DATA to be modified before the service is first started.
+By default, the edgex-device-camera disables its service on install, as the expectation is that the default profile configuration files will be customized, and thus this behavior allows the profile `configuration.toml` files in $SNAP_DATA to be modified before the service is first started.
 
-This behavior can be overridden by setting the ```autostart``` configuration setting to "true". This is useful when configuration and/or device profiles are being provided via configuration or gadget snap content interface.
+This behavior can be overridden by setting the `autostart` configuration setting to "true". This is useful when configuration and/or device profiles are being provided via configuration or gadget snap content interface.
 
 **Note** - this option is typically set from a gadget snap.
 
@@ -123,11 +125,18 @@ the overrides will be picked up when the services are first started.
 The following syntax is used to specify service-specific configuration overrides:
 
 
-```env.<stanza>.<config option>```
+```
+env.<stanza>.<config option>
+```
 For instance, to setup an override of the service's Port use:
-```$ sudo snap set edgex-device-camera env.service.port=2112```
+```
+$ sudo snap set edgex-device-camera env.service.port=2112
+```
 And restart the service:
-```$ sudo snap restart edgex-device-camera.device-camera```
+```
+$ sudo snap restart edgex-device-camera.device-camera
+```
+
 **Note** - at this time changes to configuration values in the [Writable] section are not supported.
 For details on the mapping of configuration options to Config options, please refer to "Service Environment Configuration Overrides".
 
@@ -146,6 +155,10 @@ service.max-result-count        // Service.MaxResultCount
 service.max-request-size        // Service.MaxRequestSize
 service.startup-msg             // Service.StartupMsg
 service.request-timeout         // Service.RequestTimeout
+
+[SecretStore]
+secret-store.secrets-file               // SecretStore.SecretsFile
+secret-store.disable-scrub-secrets-file // SecretStore.DisableScrubSecretsFile
 
 [Clients.core-data]
 clients.core-data.port          // Clients.core-data.Port
