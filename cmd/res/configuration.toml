@@ -37,6 +37,9 @@ Path = "device-camera/"
 Protocol = "http"
 RootCaCertPath = ""
 ServerName = ""
+# Uncomment to seed service secrets file
+# SecretsFile = "/tmp/edgex/secrets/device-camera/secrets.json"
+DisableScrubSecretsFile = false
 TokenFile = "/tmp/edgex/secrets/device-camera/secrets-token.json"
   [SecretStore.Authentication]
   AuthType = "X-Vault-Token"
