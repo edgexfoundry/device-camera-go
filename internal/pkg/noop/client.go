@@ -27,12 +27,10 @@ func (n Client) HandleWriteCommand(req sdkModels.CommandRequest, param *sdkModel
 
 // CameraRelease immediately returns control to the caller
 func (n Client) CameraRelease(force bool) {
-	return
 }
 
 // CameraInit immediately returns control to the caller
 func (n Client) CameraInit(edgexDevice models.Device, edgexProfile models.DeviceProfile, ipAddress string, username string, password string) {
-	return
 }
 
 // NewClient returns a new noop Client

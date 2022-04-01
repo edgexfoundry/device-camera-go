@@ -195,15 +195,16 @@ func (c *VapixClient) sendEvent(edgexDevice models.Device, cvs []*sdkModels.Comm
 	var av sdkModels.AsyncValues
 	av.DeviceName = edgexDevice.Name
 
-	for _, cv := range cvs {
-		av.CommandValues = append(av.CommandValues, cv)
-	}
+	av.CommandValues = append(av.CommandValues, cvs...)
 
 	c.asyncChan <- &av
 }
 
 func getMultipartReader(client digest.Client, url string) (*multipart.Reader, error) {
 	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("New request GET Error: %v", err.Error())
+	}
 	req.Header.Set("Accept", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
