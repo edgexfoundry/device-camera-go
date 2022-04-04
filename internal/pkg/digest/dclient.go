@@ -1,7 +1,7 @@
 package digest
 
 import (
-	"crypto/md5"
+	"crypto/md5" //nolint:gosec
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -44,7 +44,11 @@ func (dc *DClient) Do(req *http.Request) (*http.Response, error) {
 
 func (dc *DClient) doDigestAuth(req *http.Request) (*http.Response, error) {
 	if dc.snonce != "" {
-		req.Header.Set("Authorization", dc.getDigestAuth(req.Method, req.URL.String()))
+		digestAuth, err := dc.getDigestAuth(req.Method, req.URL.String())
+		if err != nil {
+			return &http.Response{}, err
+		}
+		req.Header.Set("Authorization", digestAuth)
 	}
 
 	// Attempt the request using the underlying client
@@ -68,7 +72,11 @@ func (dc *DClient) doDigestAuth(req *http.Request) (*http.Response, error) {
 	}
 
 	authedReq.Header = req.Header
-	authedReq.Header.Set("Authorization", dc.getDigestAuth(authedReq.Method, authedReq.URL.String()))
+	digestAuth, err := dc.getDigestAuth(authedReq.Method, authedReq.URL.String())
+	if err != nil {
+		return &http.Response{}, err
+	}
+	authedReq.Header.Set("Authorization", digestAuth)
 
 	resp, err = dc.client.Do(authedReq)
 	if err != nil {
@@ -82,9 +90,10 @@ func (dc *DClient) doDigestAuth(req *http.Request) (*http.Response, error) {
 
 func (dc *DClient) getDigestParts(resp *http.Response) {
 	result := map[string]string{}
-	if len(resp.Header["WWW-Authenticate"]) > 0 {
+	wwwAuth := http.CanonicalHeaderKey("WWW-Authenticate")
+	if len(resp.Header.Get(wwwAuth)) > 0 {
 		wantedHeaders := []string{"nonce", "realm", "qop"}
-		responseHeaders := strings.Split(resp.Header["WWW-Authenticate"][0], ",")
+		responseHeaders := strings.Split(resp.Header[wwwAuth][0], ",")
 		for _, r := range responseHeaders {
 			for _, w := range wantedHeaders {
 				if strings.Contains(r, w) {
@@ -99,24 +108,30 @@ func (dc *DClient) getDigestParts(resp *http.Response) {
 }
 
 func getMD5(text string) string {
-	hasher := md5.New()
+	hasher := md5.New() //nolint:gosec
 	hasher.Write([]byte(text))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func getCnonce() string {
+func getCnonce() (string, error) {
 	b := make([]byte, 8)
-	io.ReadFull(rand.Reader, b)
-	return fmt.Sprintf("%x", b)[:16]
+	_, err := io.ReadFull(rand.Reader, b)
+	if err != nil {
+		return "", fmt.Errorf("Nonce Error: %v", err.Error())
+	}
+	return fmt.Sprintf("%x", b)[:16], nil
 }
 
-func (dc *DClient) getDigestAuth(method string, uri string) string {
+func (dc *DClient) getDigestAuth(method string, uri string) (string, error) {
 	ha1 := getMD5(dc.username + ":" + dc.realm + ":" + dc.password)
 	ha2 := getMD5(method + ":" + uri)
-	cnonce := getCnonce()
+	cnonce, err := getCnonce()
+	if err != nil {
+		return "nil", err
+	}
 	dc.nonceCount++
 	response := getMD5(fmt.Sprintf("%s:%s:%v:%s:%s:%s", ha1, dc.snonce, dc.nonceCount, cnonce, dc.qop, ha2))
 	authorization := fmt.Sprintf(`Digest username="%s", realm="%s", nonce="%s", uri="%s", cnonce="%s", nc="%v", qop="%s", response="%s"`,
 		dc.username, dc.realm, dc.snonce, uri, cnonce, dc.nonceCount, dc.qop, response)
-	return authorization
+	return authorization, nil
 }

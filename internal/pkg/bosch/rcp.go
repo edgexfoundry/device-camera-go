@@ -33,40 +33,6 @@ const (
 	confAlarmOverview    = "0x0c38"
 	confIvaCounterValues = "0x0b4a"
 
-	alarmTypeUnknown                   = 0
-	alarmTypeVca                       = 1
-	alarmTypeRelais                    = 2
-	alarmTypeDigitalIntput             = 3
-	alarmTypeAudio                     = 4
-	alarmTypeVirtualInput              = 5
-	alarmTypeDefaultTask               = 16
-	alarmTypeGlobalChange              = 17
-	alarmTypeSignalTooBright           = 18
-	alarmTypeSignalTooDark             = 19
-	alarmTypeReferenceImageCheckFailed = 23
-	alarmTypeInvalidConfiguration      = 24
-	alarmTypeFlameDetected             = 25
-	alarmTypeSmokeDetected             = 26
-	alarmTypeObjectInField             = 32
-	alarmTypeCrossingLine              = 33
-	alarmTypeLoitering                 = 34
-	alarmTypeConditionChange           = 35
-	alarmTypeFollowingRoute            = 36
-	alarmTypeTampering                 = 37
-	alarmTypeRemovedObject             = 38
-	alarmTypeIdleObject                = 39
-	alarmTypeEnteringField             = 40
-	alarmTypeLeavingField              = 41
-	alarmTypeSimilaritySearch          = 42
-	alarmTypeCrowdDetection            = 43
-	alarmTypeFlowInField               = 44
-	alarmTypeCounterFlowInField        = 45
-	alarmTypeMotionInField             = 46
-	alarmTypeManOverboard              = 47
-	alarmTypeCounter                   = 48
-	alarmTypeBevPeopleCounter          = 49
-	alarmTypeOccupancy                 = 50
-
 	alarmAddFlag      = 0x80
 	alarmDeleteFlag   = 0x40
 	alarmStateFlag    = 0x20
@@ -108,6 +74,9 @@ type msg struct {
 
 func getXML(dc digest.Client, url string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("New request GET Error: %v", err.Error())
+	}
 	resp, err := dc.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("GET Error: %v", err.Error())
@@ -274,7 +243,7 @@ func (rc *RcpClient) CameraInit(edgexDevice models.Device, edgexProfile models.D
 	}
 
 	go func() {
-		ticks := time.Tick(time.Second * 5)
+		ticks := time.Tick(time.Second * 5) //nolint:staticcheck
 
 		var maxErrors = 60
 		for maxErrors > 0 {
@@ -436,10 +405,10 @@ func (rc *RcpClient) requestEvents(device models.Device, ipAddress string, stopc
 		switch msg.Command {
 		case confAlarmOverview:
 			alarms := parseAlarms(decoded)
-			cvs, err = rc.commandValuesFromAlarms(alarms, device)
+			cvs, _ = rc.commandValuesFromAlarms(alarms, device)
 		case confIvaCounterValues:
 			counters := parseCounters(decoded)
-			cvs, err = rc.commandValuesFromCounters(counters, device)
+			cvs, _ = rc.commandValuesFromCounters(counters, device)
 		default:
 			rc.lc.Warn("Unknown Command type in RCP Message")
 		}
@@ -475,9 +444,7 @@ func (rc *RcpClient) sendEvent(edgexDevice models.Device, cvs []*sdkModels.Comma
 	var av sdkModels.AsyncValues
 	av.DeviceName = edgexDevice.Name
 
-	for _, cv := range cvs {
-		av.CommandValues = append(av.CommandValues, cv)
-	}
+	av.CommandValues = append(av.CommandValues, cvs...)
 
 	rc.asyncChan <- &av
 }
