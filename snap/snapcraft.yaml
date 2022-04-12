@@ -122,4 +122,4 @@ parts:
       echo $VERSION > ./VERSION
       # set the version of this snap
       snapcraftctl set-version $VERSION
-    parse-info: [edgex-device-camera.metainfo.xml]  
+    parse-info: [edgex-device-camera.metainfo.xml]
