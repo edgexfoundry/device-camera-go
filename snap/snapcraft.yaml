@@ -42,18 +42,7 @@ plugs:
     interface: content 
     target: $SNAP_DATA/config/device-camera
 
-parts:
-  version:
-    plugin: nil
-    source: snap/local
-    override-pull: |
-      cd $SNAPCRAFT_PROJECT_DIR
-      GIT_VERSION=$(git describe --tags --abbrev=0 | sed 's/v//')
-      if [ -z "$GIT_VERSION" ]; then
-        GIT_VERSION="0.0.0"
-      fi
-      snapcraftctl set-version ${GIT_VERSION}
-      
+parts:      
   hooks:
     source: snap/local/hooks
     plugin: make
