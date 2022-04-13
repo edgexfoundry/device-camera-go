@@ -27,3 +27,13 @@ device-camera
 run
 
 VERSION
+
+# snap files
+*.snap
+*.assert
+prime/
+stage/
+parts/
+squashfs-root/
+coverage.out
+VERSION
