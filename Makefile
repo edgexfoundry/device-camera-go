@@ -38,7 +38,7 @@ docker:
 		-t edgexfoundry/device-camera:$(VERSION)-dev
 
 tidy:
-	go mod tidy
+	go mod tidy -compat=1.17
 
 unittest:
 	$(GOCGO) test ./... -coverprofile=coverage.out ./...
