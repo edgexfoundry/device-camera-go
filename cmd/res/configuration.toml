@@ -1,3 +1,5 @@
+MaxEventSize = 0 # value 0 unlimit the maximum event size that can be sent to message bus or core-data
+
 [Writable]
 LogLevel = "INFO"
   # Example InsecureSecrets configuration that simulates SecretStore for when EDGEX_SECURITY_SECRET_STORE=false
@@ -17,6 +19,8 @@ LogLevel = "INFO"
     #   [Writable.InsecureSecrets.Camera002.Secrets]
     #   username = ""
     #   password = ""
+  [Writable.Reading]
+  ReadingUnits = true
 
 [Service]
 HealthCheckInterval = "10s"
@@ -43,7 +47,15 @@ DisableScrubSecretsFile = false
 TokenFile = "/tmp/edgex/secrets/device-camera/secrets-token.json"
   [SecretStore.Authentication]
   AuthType = "X-Vault-Token"
-
+  [SecretStore.RuntimeTokenProvider]
+  Enabled = false
+  Protocol = "https"
+  Host = "localhost"
+  Port = 59841
+  TrustDomain = "edgexfoundry.org"
+  EndpointSocket = "/tmp/edgex/secrets/spiffe/public/api.sock"
+  RequiredSecrets = "redisdb"
+  
 [Registry]
 Type = "consul"
 Host = "localhost"
