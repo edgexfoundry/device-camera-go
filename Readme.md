@@ -17,19 +17,13 @@ The following cameras are non-compliant:
 
 * TP-Link Tapo C110
 
-## Running the device-camera Service as a Snap
+## Packaging
 
-The device service is also available as a snap. Install the snap with the following command:
+This component is packaged as docker image and snap.
 
-```
-$ sudo snap install edgex-device-camera
-```
+For docker, please refer to the [Dockerfile](Dockerfile) and [Docker Compose Builder] scripts.
 
-For more details on the Device Camera Snap, including installation, configuration, please refer to [EdgeX Camera Device Service Snap](https://github.com/edgexfoundry/device-camera-go/tree/main/snap)
-
-For more details on Snap, including EdgeX Snap, viewing logs, security services, please check [Getting Started with Snap](https://docs.edgexfoundry.org/2.0/getting-started/Ch-GettingStartedSnapUsers/)
-
-## 
+For the snap, refer to the [snap](snap) directory.
 
 ## Dependencies
 
@@ -163,3 +157,4 @@ update the `ValueDescriptors` in `res/configuration.toml` and run the example:
 [ApplicationSettings]
 ValueDescriptors = "onvif_snapshot"
 ```
+[Docker Compose Builder]: https://github.com/edgexfoundry/edgex-compose/tree/main/compose-builder
