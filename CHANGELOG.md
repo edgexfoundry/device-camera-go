@@ -3,11 +3,37 @@
 ## EdgeX Camera Device Service
 [Github repository](https://github.com/edgexfoundry/device-camera-go)
 
-## [v2.0.0] Ireland - 2021-06-30  (Not Compatible with 1.x releases)
 ### Change Logs for EdgeX Dependencies
-- [device-sdk-go](https://github.com/edgexfoundry/device-sdk-go/blob/v2.0.0/CHANGELOG.md)
-- [go-mod-bootstrap](https://github.com/edgexfoundry/go-mod-bootstrap/blob/v2.0.0/CHANGELOG.md)
-- [go-mod-core-contracts](https://github.com/edgexfoundry/go-mod-core-contracts/blob/v2.0.0/CHANGELOG.md)
+- [device-sdk-go](https://github.com/edgexfoundry/device-sdk-go/blob/main/CHANGELOG.md)
+- [go-mod-core-contracts](https://github.com/edgexfoundry/go-mod-core-contracts/blob/main/CHANGELOG.md)
+- [go-mod-bootstrap](https://github.com/edgexfoundry/go-mod-bootstrap/blob/main/CHANGELOG.md)
+- [go-mod-messaging](https://github.com/edgexfoundry/go-mod-messaging/blob/main/CHANGELOG.md) (indirect dependency)
+- [go-mod-registry](https://github.com/edgexfoundry/go-mod-registry/blob/main/CHANGELOG.md)  (indirect dependency)
+- [go-mod-secrets](https://github.com/edgexfoundry/go-mod-secrets/blob/main/CHANGELOG.md) (indirect dependency)
+- [go-mod-configuration](https://github.com/edgexfoundry/go-mod-configuration/blob/main/CHANGELOG.md) (indirect dependency)
+
+## [v2.2.0] Kamakura - 2022-05-11  (Not Compatible with 1.x releases)
+
+### Features ✨
+- Enable security hardening ([#583c54f](https://github.com/edgexfoundry/device-camera-go/commits/583c54f))
+
+### Bug Fixes 🐛
+- **snap:** expose parent directory in device-config plug ([#f6f2141](https://github.com/edgexfoundry/device-camera-go/commits/f6f2141))
+
+### Code Refactoring ♻
+- **snap:** remove redundant content indentifier ([#a81407d](https://github.com/edgexfoundry/device-camera-go/commits/a81407d))
+
+## [v2.1.0] Jakarta - 2021-11-18  (Not Compatible with 1.x releases)
+
+### Features ✨
+- Update config files to include secretsfile ([#94ad87a](https://github.com/edgexfoundry/device-camera-go/commits/94ad87a))
+
+## [v2.0.1] Ireland - 2021-10-08  (Not Compatible with 1.x releases)
+- Use correct constants for authentication ([#4e5edb8](https://github.com/edgexfoundry/device-camera-go/commits/4e5edb8))
+- Update PascalCase for device resource names ([#138](https://github.com/edgexfoundry/device-camera-go/issues/138)) - Aligns code with device profile changes made in PR 111 ([#8e9dd4c](https://github.com/edgexfoundry/device-camera-go/commits/8e9dd4c))
+- Update all TOML to use quote and not single-quote ([#d3b9f4b](https://github.com/edgexfoundry/device-camera-go/commits/d3b9f4b))
+
+## [v2.0.0] Ireland - 2021-06-30  (Not Compatible with 1.x releases)
 
 ### Features ✨
 - Enable using MessageBus as the default ([#9d8893d](https://github.com/edgexfoundry/device-camera-go/commits/9d8893d))
