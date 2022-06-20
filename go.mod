@@ -1,7 +1,7 @@
 module github.com/edgexfoundry/device-camera-go
 
 require (
-	github.com/edgexfoundry/device-sdk-go/v2 v2.2.1-dev.5
+	github.com/edgexfoundry/device-sdk-go/v2 v2.2.1-dev.6
 	github.com/edgexfoundry/go-mod-bootstrap/v2 v2.2.0
 	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.2.0
 	github.com/faceterteam/onvif4go v0.4.0
