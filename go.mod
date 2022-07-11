@@ -1,7 +1,7 @@
 module github.com/edgexfoundry/device-camera-go
 
 require (
-	github.com/edgexfoundry/device-sdk-go/v2 v2.2.1-dev.10
+	github.com/edgexfoundry/device-sdk-go/v2 v2.2.1-dev.11
 	github.com/edgexfoundry/go-mod-bootstrap/v2 v2.2.0
 	github.com/edgexfoundry/go-mod-core-contracts/v2 v2.2.0
 	github.com/faceterteam/onvif4go v0.4.0
@@ -14,7 +14,7 @@ require (
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/eclipse/paho.mqtt.golang v1.4.1 // indirect
 	github.com/edgexfoundry/go-mod-configuration/v2 v2.2.0 // indirect
-	github.com/edgexfoundry/go-mod-messaging/v2 v2.2.1-dev.5 // indirect
+	github.com/edgexfoundry/go-mod-messaging/v2 v2.2.1-dev.8 // indirect
 	github.com/edgexfoundry/go-mod-registry/v2 v2.2.0 // indirect
 	github.com/edgexfoundry/go-mod-secrets/v2 v2.2.0 // indirect
 	github.com/fatih/color v1.9.0 // indirect
