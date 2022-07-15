@@ -25,7 +25,7 @@ apps:
     adapter: full
     command: bin/device-camera $CONFIG_PRO_ARG $CONF_ARG $REGISTRY_ARG
     command-chain:
-      - bin/startup-env-var.sh
+      - bin/source-env-file.sh
     environment:
       CONFIG_PRO_ARG: "--cp=consul.http://localhost:8500"
       CONF_ARG: "--confdir=$SNAP_DATA/config/device-camera/res"
@@ -43,16 +43,15 @@ plugs:
     target: $SNAP_DATA/config/device-camera
 
 parts:      
-  hooks:
-    source: snap/local/hooks
+  helper-go:
+    source: snap/local/helper-go
     plugin: make
     build-snaps:
       - go/1.18/stable
     override-build: |
       cd $SNAPCRAFT_PART_SRC
       make build
-      install -DT ./cmd/configure/configure "$SNAPCRAFT_PART_INSTALL/snap/hooks/configure"
-      install -DT ./cmd/install/install "$SNAPCRAFT_PART_INSTALL/snap/hooks/install"
+      install -DT ./helper-go $SNAPCRAFT_PART_INSTALL/bin/helper-go
 
   device-camera:
     after: [metadata]
@@ -73,32 +72,22 @@ parts:
 
       install -DT "./cmd/device-camera" "$SNAPCRAFT_PART_INSTALL/bin/device-camera"
 
-      install -d "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/"
-      install -DT "./cmd/res/configuration.toml" \
-        "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/configuration.toml"
+      RES=$SNAPCRAFT_PART_INSTALL/config/device-camera/res/
+      mkdir -p $RES
+      cp    cmd/res/configuration.toml $RES
 
-      install -d "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/profiles/"
-      for fpath in ./cmd/res/profiles/*.yaml; do
-          fname=$(basename "$fpath")
-          install -DT "./cmd/res/profiles/${fname}" \
-            "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/profiles/${fname}"
-      done
+      cp -r cmd/res/profiles $RES
+      
+      DOC=$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera
+      mkdir -p $DOC
+      cp Attribution.txt $DOC/Attribution.txt
+      cp LICENSE $DOC/LICENSE
 
-      install -d "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/devices/"
-      for fpath in ./cmd/res/devices/*.toml; do
-          fname=$(basename "$fpath")
-          install -DT "./cmd/res/devices/${fname}" \
-            "$SNAPCRAFT_PART_INSTALL/config/device-camera/res/devices/${fname}"
-      done
-
-      install -DT "./Attribution.txt" \
-         "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera/Attribution.txt"
-      install -DT "./LICENSE" \
-         "$SNAPCRAFT_PART_INSTALL/usr/share/doc/device-camera/LICENSE"
-
-  config-common:
+  local-bin:
     plugin: dump
-    source: snap/local/runtime-helpers
+    source: snap/local/bin
+    organize:
+      source-env-file.sh: bin/source-env-file.sh
 
   metadata:
     plugin: nil
